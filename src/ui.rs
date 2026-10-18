@@ -8,6 +8,7 @@ use eframe::egui::{
     Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Sense, Stroke, TextEdit,
     vec2,
 };
+
 use std::collections::HashMap;
 
 use image::ImageReader;
@@ -56,7 +57,9 @@ impl GramApp {
 impl eframe::App for GramApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         // блокировка закрития окна
-        let close_requested = ui.ctx().input(|i| {
+        let ctx = ui.ctx();
+
+        let close_requested = ctx.input(|i| {
             i.viewport()
                 .events
                 .iter()
@@ -64,7 +67,8 @@ impl eframe::App for GramApp {
         });
 
         if close_requested {
-            ui.ctx().send_viewport_cmd(ViewportCommand::Visible(false));
+            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+            ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
         }
 
         //Тут получаем сообщения
@@ -147,10 +151,38 @@ impl eframe::App for GramApp {
                     FontId::proportional(16.0),
                     title_color,
                 );
+                // Так короче тут ми получаем останне сообщение от юзера
+                // Короче винести треба в отдельну функцию
+                let curr_chat = self
+                    .chats
+                    .iter()
+                    .find(|c| c.chat_id == ChatId(chat_id))
+                    .map(|c| &c.messages);
+
+                let default_msg = MessagePacket {
+                    username: Some(String::new()),
+                    text: String::from("Поки нема повідомлень!"),
+                    time: String::new(),
+                    is_bot: false,
+                    is_read: true,
+                    msgtype: TEXT,
+                    chat_id: ChatId(-1),
+                };
+                let last_msg_p = curr_chat
+                    .and_then(|messages| messages.last())
+                    .unwrap_or(&default_msg);
+
+                let last_msg = match last_msg_p.msgtype {
+                    TEXT => last_msg_p.text.clone(),
+                    IMAGE => String::from("Фото"),
+                    STICKER => String::from("Стикер"),
+                    _ => String::from("Невідомий формат"),
+                };
+
                 ui.painter().text(
                     egui::pos2(text_x, rect.top() + 36.0),
                     Align2::LEFT_TOP,
-                    "Останнє повідомлення...",
+                    last_msg,
                     FontId::proportional(13.0),
                     sub_color,
                 );
@@ -237,7 +269,7 @@ impl eframe::App for GramApp {
                     ui.painter().text(
                         rect.center(),
                         Align2::CENTER_CENTER,
-                        "➤",
+                        ">",
                         FontId::proportional(18.0),
                         if has_text {
                             Color32::WHITE
@@ -260,7 +292,7 @@ impl eframe::App for GramApp {
                             .tx
                             .try_send(MessagePacket {
                                 time: Local::now().format("%H:%M").to_string(),
-                                username: None,
+                                username: Some(String::from("You")),
                                 text: msg.clone(),
                                 chat_id: self.current_chat.clone(),
                                 msgtype: TEXT,
@@ -271,7 +303,7 @@ impl eframe::App for GramApp {
                         {
                             let current_chat = self.current_chat.clone();
                             let chat = self.get_or_create_chat(current_chat.clone());
-                            chat.messages.push(MessagePacket {
+                            let msg = MessagePacket {
                                 username: Some(String::from("You")),
                                 text: msg,
                                 is_bot: true,
@@ -279,7 +311,9 @@ impl eframe::App for GramApp {
                                 is_read: true,
                                 msgtype: MsgType::TEXT,
                                 chat_id: current_chat,
-                            });
+                            };
+                            chat.messages.push(msg.clone());
+
                             self.input_text.clear();
                         }
 

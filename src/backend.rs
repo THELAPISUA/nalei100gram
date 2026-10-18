@@ -42,22 +42,31 @@ impl Backend {
 
         let bot_for_gui = bot.clone();
         let player = self.player.clone();
+        let db_for_gui = self.database.clone();
+        let mut rx_bot = self.rx_bot;
 
         tokio::spawn(async move {
-            while let Some(packet) = self.rx_bot.recv().await {
-                let r = bot_for_gui.send_message(packet.chat_id, packet.text).await;
+            while let Some(packet) = rx_bot.recv().await {
+                info!("Received packet for chat {}", packet.chat_id);
+                let r = bot_for_gui
+                    .send_message(packet.chat_id, packet.text.clone())
+                    .await;
+
                 self.player.play(Send);
+
+                db_for_gui.clone().add_message(&packet).await;
+
                 match r {
                     Ok(m) => {
                         let chat_id = m.chat.id.0 as i64;
                         info!(
-                            "Seccesful send msg! chad_id:{}, msg:{}",
+                            "Successful send msg! chat_id:{}, msg:{}",
                             chat_id,
-                            m.text().unwrap_or("occured message")
+                            m.text().unwrap_or("occurred message")
                         );
                     }
                     Err(e) => {
-                        error!("Failed send message, err: {}", e);
+                        error!("Failed to send message, err: {}", e);
                     }
                 }
             }
