@@ -1,0 +1,844 @@
+
+[2026-09-10T15:48:16Z INFO  nalei100gram] App started!
+[2026-09-10T15:48:16Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-10T15:48:16Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-10T15:48:16Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-10T15:48:16Z INFO  nalei100gram::db] Successfully loaded 11 messages, structured into 1 chat objects.
+[2026-09-10T15:48:16Z INFO  nalei100gram] Seccesful send paket to ui!
+[2026-09-10T15:48:16Z INFO  nalei100gram] Seccesful send paket to ui!
+[2026-09-11T08:52:29Z INFO  nalei100gram] App started!
+[2026-09-11T08:52:29Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T08:52:29Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T08:52:29Z ERROR nalei100gram::db] Failed to create 'messages' table: error returned from database: (code: 1) near "is_read": syntax error
+[2026-09-11T08:52:53Z INFO  nalei100gram] App started!
+[2026-09-11T08:52:53Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T08:52:53Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T08:52:53Z ERROR nalei100gram::db] Failed to create 'messages' table: error returned from database: (code: 1) near "is_read": syntax error
+[2026-09-11T08:53:42Z INFO  nalei100gram] App started!
+[2026-09-11T08:53:42Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T08:53:42Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T08:53:42Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T08:53:42Z INFO  nalei100gram::db] Successfully loaded 0 messages, structured into 0 chat objects.
+[2026-09-11T08:54:28Z INFO  nalei100gram] App started!
+[2026-09-11T08:54:28Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T08:54:28Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T08:54:28Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T08:54:28Z INFO  nalei100gram::db] Successfully loaded 0 messages, structured into 0 chat objects.
+[2026-09-11T08:56:06Z INFO  nalei100gram] App started!
+[2026-09-11T08:56:06Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T08:56:06Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T08:56:06Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T08:56:06Z INFO  nalei100gram::db] Successfully loaded 0 messages, structured into 0 chat objects.
+[2026-09-11T08:56:22Z INFO  nalei100gram] Seccesful send paket to ui!
+[2026-09-11T08:56:27Z INFO  nalei100gram] Seccesful send paket to ui!
+[2026-09-11T08:57:18Z INFO  nalei100gram] App started!
+[2026-09-11T08:57:18Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T08:57:18Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T08:57:18Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T08:57:18Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-09-11T08:58:20Z INFO  nalei100gram] App started!
+[2026-09-11T08:58:20Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T08:58:20Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T08:58:20Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T08:58:20Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-09-11T08:59:04Z INFO  nalei100gram] App started!
+[2026-09-11T08:59:04Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T08:59:04Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T08:59:04Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T08:59:04Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-09-11T09:03:07Z INFO  nalei100gram] App started!
+[2026-09-11T09:03:07Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T09:03:07Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T09:03:07Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T09:03:07Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-09-11T09:11:39Z INFO  nalei100gram] App started!
+[2026-09-11T09:11:39Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T09:11:39Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T09:11:39Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T09:11:39Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-09-11T09:11:47Z INFO  nalei100gram] App started!
+[2026-09-11T09:11:47Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T09:11:47Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T09:11:47Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T09:11:47Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-09-11T10:03:59Z INFO  nalei100gram] App started!
+[2026-09-11T10:03:59Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T10:03:59Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T10:03:59Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T10:03:59Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-09-11T10:04:11Z INFO  nalei100gram] App started!
+[2026-09-11T10:04:11Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T10:04:11Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T10:04:11Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T10:04:11Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-09-11T10:04:30Z INFO  nalei100gram] App started!
+[2026-09-11T10:04:30Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T10:04:30Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T10:04:30Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T10:04:30Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-09-11T10:04:39Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:прив
+[2026-09-11T10:04:46Z INFO  nalei100gram] Seccesful send paket to ui!
+[2026-09-11T10:05:14Z INFO  nalei100gram] Seccesful send paket to ui!
+[2026-09-11T10:06:29Z INFO  nalei100gram] App started!
+[2026-09-11T10:06:29Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T10:06:29Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T10:06:29Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T10:06:29Z INFO  nalei100gram::db] Successfully loaded 5 messages, structured into 1 chat objects.
+[2026-09-11T10:06:55Z INFO  nalei100gram] Seccesful send paket to ui!
+[2026-09-11T10:07:00Z INFO  nalei100gram] Seccesful send paket to ui!
+[2026-09-11T10:07:07Z INFO  nalei100gram] Seccesful send paket to ui!
+[2026-09-11T10:09:11Z INFO  nalei100gram] App started!
+[2026-09-11T10:09:11Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T10:09:11Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T10:09:11Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T10:09:11Z INFO  nalei100gram::db] Successfully loaded 8 messages, structured into 1 chat objects.
+[2026-09-11T10:09:13Z INFO  nalei100gram] Seccesful send paket to ui!
+[2026-09-11T10:09:49Z INFO  nalei100gram] App started!
+[2026-09-11T10:09:49Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T10:09:49Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T10:09:49Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T10:09:49Z INFO  nalei100gram::db] Successfully loaded 9 messages, structured into 1 chat objects.
+[2026-09-11T10:09:51Z INFO  nalei100gram] Seccesful send paket to ui!
+[2026-09-11T10:09:57Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:lf
+[2026-09-11T10:10:03Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:харош
+[2026-09-11T10:11:50Z INFO  nalei100gram] App started!
+[2026-09-11T10:11:50Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-11T10:11:50Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-11T10:11:50Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-11T10:11:50Z INFO  nalei100gram::db] Successfully loaded 12 messages, structured into 1 chat objects.
+[2026-09-19T12:45:56Z INFO  nalei100gram] App started!
+[2026-09-19T12:45:56Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-19T12:45:56Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-19T12:45:56Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-19T12:45:56Z INFO  nalei100gram::db] Successfully loaded 12 messages, structured into 1 chat objects.
+[2026-09-19T12:46:01Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-09-19T12:46:06Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:123
+[2026-09-19T12:46:07Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-09-19T12:46:07Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:123
+[2026-09-19T12:46:08Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:123
+[2026-09-19T12:46:10Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:213
+[2026-09-19T12:46:11Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:123
+[2026-09-19T12:46:12Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:123
+[2026-09-19T12:46:13Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-09-19T12:46:13Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:123
+[2026-09-19T12:46:14Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:123
+[2026-09-19T12:46:15Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:123
+[2026-09-19T12:46:17Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:123
+[2026-09-19T12:46:18Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:123
+[2026-09-19T12:46:19Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:123
+[2026-09-19T12:46:20Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:123
+[2026-09-19T12:46:25Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-09-19T12:46:49Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-09-19T14:28:57Z INFO  nalei100gram] App started!
+[2026-09-19T14:28:57Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-19T14:28:57Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-19T14:28:57Z ERROR nalei100gram::db] Failed to create 'messages' table: error returned from database: (code: 1) near ")": syntax error
+[2026-09-19T14:29:33Z INFO  nalei100gram] App started!
+[2026-09-19T14:29:33Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-19T14:29:33Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-19T14:29:34Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-19T14:29:34Z INFO  nalei100gram::db] Successfully loaded 0 messages, structured into 0 chat objects.
+[2026-09-19T14:29:38Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-09-19T14:29:44Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-09-19T14:29:50Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-09-19T14:30:00Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-09-19T14:31:25Z INFO  nalei100gram] App started!
+[2026-09-19T14:31:25Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-19T14:31:25Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-19T14:31:25Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-19T14:31:25Z INFO  nalei100gram::db] Successfully loaded 0 messages, structured into 0 chat objects.
+[2026-09-19T14:31:30Z INFO  nalei100gram] Seccesful send paket to ui!
+[2026-09-19T14:31:31Z ERROR nalei100gram::db] Failed to save message to DB for chat 1714925468: error returned from database: (code: 1) 6 values for 7 columns
+[2026-09-19T14:31:46Z ERROR nalei100gram::db] Failed to save message to DB for chat 1714925468: error returned from database: (code: 1) 6 values for 7 columns
+[2026-09-19T14:31:46Z ERROR nalei100gram::db] Failed to save message to DB for chat 1714925468: error returned from database: (code: 1) 6 values for 7 columns
+[2026-09-19T14:34:20Z INFO  nalei100gram] App started!
+[2026-09-19T14:34:20Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-19T14:34:20Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-19T14:34:20Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-19T14:34:20Z INFO  nalei100gram::db] Successfully loaded 0 messages, structured into 0 chat objects.
+[2026-09-19T14:34:35Z ERROR nalei100gram::db] Failed to save message to DB for chat 1714925468: error returned from database: (code: 1) 6 values for 7 columns
+[2026-09-19T14:34:35Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:прив
+[2026-09-19T14:34:56Z ERROR nalei100gram::db] Failed to save message to DB for chat 1714925468: error returned from database: (code: 1) 6 values for 7 columns
+[2026-09-19T14:34:56Z ERROR nalei100gram::db] Failed to save message to DB for chat 1714925468: error returned from database: (code: 1) 6 values for 7 columns
+[2026-09-19T14:37:44Z INFO  nalei100gram] App started!
+[2026-09-19T14:37:44Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-19T14:37:44Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-19T14:37:44Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-19T14:37:44Z INFO  nalei100gram::db] Successfully loaded 0 messages, structured into 0 chat objects.
+[2026-09-19T14:43:35Z INFO  nalei100gram] App started!
+[2026-09-19T14:43:35Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-19T14:43:35Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-19T14:43:35Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-19T14:43:35Z INFO  nalei100gram::db] Successfully loaded 0 messages, structured into 0 chat objects.
+[2026-09-19T14:43:59Z INFO  nalei100gram] App started!
+[2026-09-19T14:43:59Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-19T14:43:59Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-19T14:43:59Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-19T14:43:59Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-09-19T14:44:11Z INFO  nalei100gram] App started!
+[2026-09-19T14:44:11Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-19T14:44:12Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-19T14:44:12Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-19T14:44:12Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-09-19T14:45:18Z INFO  nalei100gram] App started!
+[2026-09-19T14:45:18Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-19T14:45:18Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-19T14:45:18Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-19T14:45:18Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-09-19T14:50:38Z INFO  nalei100gram] App started!
+[2026-09-19T14:50:38Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-19T14:50:38Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-19T14:50:38Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-19T14:50:38Z INFO  nalei100gram::db] Successfully loaded 0 messages, structured into 0 chat objects.
+[2026-09-19T14:51:00Z INFO  nalei100gram] Успішно знайдено file_id: AgACAgIAAxkBAAPcaq6dj-LR_Zg52driPN4LZ1LwuEEAAuUfaxvI03hJqI5xHdYUF78BAAMCAANtAAM9BA
+[2026-09-19T14:51:11Z INFO  nalei100gram] Seccesful send paket to ui!
+[2026-09-19T14:51:20Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:прив
+[2026-09-19T14:52:17Z INFO  nalei100gram] Seccesful send paket to ui!
+[2026-09-19T14:56:40Z INFO  nalei100gram] App started!
+[2026-09-19T14:56:40Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-19T14:56:40Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-19T14:56:40Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-19T14:56:40Z INFO  nalei100gram::db] Successfully loaded 4 messages, structured into 1 chat objects.
+[2026-09-19T15:06:54Z INFO  nalei100gram] App started!
+[2026-09-19T15:06:54Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-19T15:06:54Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-19T15:06:54Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-19T15:06:54Z INFO  nalei100gram::db] Successfully loaded 4 messages, structured into 1 chat objects.
+[2026-09-21T15:16:11Z INFO  nalei100gram] App started!
+[2026-09-21T15:16:11Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-21T15:16:11Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-21T15:16:11Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-21T15:16:11Z INFO  nalei100gram::db] Successfully loaded 4 messages, structured into 1 chat objects.
+[2026-09-21T15:16:13Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-21T15:16:13Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55f4242ed700, name: ?)
+[2026-09-21T15:16:41Z INFO  nalei100gram] Seccesful send msg! chad_id:1714925468, msg:прив
+[2026-09-21T15:22:58Z INFO  nalei100gram] Успішно знайдено file_id: AgACAgIAAxkBAAPnarFL0nmipAAB4LCweqEfra1L60YsAAKzJGsbUrmISWYkyLES81HSAQADAgADeAADPQQ
+[2026-09-22T12:54:50Z INFO  nalei100gram] App started!
+[2026-09-22T12:54:50Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T12:54:50Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T12:54:50Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T12:54:50Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T12:54:53Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T12:54:53Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55f7166b5f50, name: ?)
+[2026-09-22T12:55:01Z INFO  nalei100gram::backend] Seccesful send msg! chad_id:1714925468, msg:прив
+[2026-09-22T13:06:45Z INFO  nalei100gram] App started!
+[2026-09-22T13:08:32Z INFO  nalei100gram] App started!
+[2026-09-22T13:08:32Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:08:32Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:08:32Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:08:32Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:08:35Z ERROR wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	/usr/lib/libGLX_nvidia.so.0: помилковий клас ELF: ELFCLASS32
+[2026-09-22T13:08:35Z ERROR wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x555dc3556bd0, name: ?)
+[2026-09-22T13:08:35Z ERROR wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib/libGLX_nvidia.so.0. Ignoring this JSON
+[2026-09-22T13:08:35Z ERROR wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x555dc3556bd0, name: ?)
+[2026-09-22T13:08:35Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:08:35Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x555dc3556bd0, name: ?)
+[2026-09-22T13:09:37Z INFO  nalei100gram] App started!
+[2026-09-22T13:09:37Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:09:37Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:09:37Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:09:37Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:09:39Z ERROR wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	/usr/lib/libGLX_nvidia.so.0: помилковий клас ELF: ELFCLASS32
+[2026-09-22T13:09:39Z ERROR wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x56134c5dcff0, name: ?)
+[2026-09-22T13:09:39Z ERROR wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib/libGLX_nvidia.so.0. Ignoring this JSON
+[2026-09-22T13:09:39Z ERROR wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x56134c5dcff0, name: ?)
+[2026-09-22T13:09:39Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:09:39Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x56134c5dcff0, name: ?)
+[2026-09-22T13:12:24Z INFO  nalei100gram] App started!
+[2026-09-22T13:12:24Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:12:24Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:12:24Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:12:24Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:12:24Z ERROR wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	/usr/lib/libGLX_nvidia.so.0: помилковий клас ELF: ELFCLASS32
+[2026-09-22T13:12:24Z ERROR wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55f143b515e0, name: ?)
+[2026-09-22T13:12:24Z ERROR wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib/libGLX_nvidia.so.0. Ignoring this JSON
+[2026-09-22T13:12:24Z ERROR wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55f143b515e0, name: ?)
+[2026-09-22T13:12:24Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:12:24Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55f143b515e0, name: ?)
+[2026-09-22T13:16:37Z INFO  nalei100gram] App started!
+[2026-09-22T13:16:37Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:16:37Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:16:37Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:16:37Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:16:39Z ERROR wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	/usr/lib/libGLX_nvidia.so.0: помилковий клас ELF: ELFCLASS32
+[2026-09-22T13:16:39Z ERROR wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x556bfb813f80, name: ?)
+[2026-09-22T13:16:39Z ERROR wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib/libGLX_nvidia.so.0. Ignoring this JSON
+[2026-09-22T13:16:39Z ERROR wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x556bfb813f80, name: ?)
+[2026-09-22T13:16:39Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:16:39Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x556bfb813f80, name: ?)
+[2026-09-22T13:18:01Z INFO  nalei100gram] App started!
+[2026-09-22T13:18:01Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:18:01Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:18:01Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:18:01Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:18:03Z ERROR wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	/usr/lib/libGLX_nvidia.so.0: помилковий клас ELF: ELFCLASS32
+[2026-09-22T13:18:03Z ERROR wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55cc9055ff60, name: ?)
+[2026-09-22T13:18:03Z ERROR wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib/libGLX_nvidia.so.0. Ignoring this JSON
+[2026-09-22T13:18:03Z ERROR wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55cc9055ff60, name: ?)
+[2026-09-22T13:18:03Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:18:03Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55cc9055ff60, name: ?)
+[2026-09-22T13:20:23Z INFO  nalei100gram] App started!
+[2026-09-22T13:20:23Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:20:23Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:20:23Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:20:23Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:20:23Z ERROR wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	/usr/lib/libGLX_nvidia.so.0: помилковий клас ELF: ELFCLASS32
+[2026-09-22T13:20:23Z ERROR wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55b1995fad80, name: ?)
+[2026-09-22T13:20:23Z ERROR wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib/libGLX_nvidia.so.0. Ignoring this JSON
+[2026-09-22T13:20:23Z ERROR wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55b1995fad80, name: ?)
+[2026-09-22T13:20:23Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:20:23Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55b1995fad80, name: ?)
+[2026-09-22T13:21:54Z INFO  nalei100gram] App started!
+[2026-09-22T13:21:54Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:21:54Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:21:54Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:21:54Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:21:54Z ERROR wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	/usr/lib/libGLX_nvidia.so.0: помилковий клас ELF: ELFCLASS32
+[2026-09-22T13:21:54Z ERROR wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x5630c564d320, name: ?)
+[2026-09-22T13:21:54Z ERROR wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	loader_icd_scan: Failed loading library associated with ICD JSON /usr/lib/libGLX_nvidia.so.0. Ignoring this JSON
+[2026-09-22T13:21:54Z ERROR wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x5630c564d320, name: ?)
+[2026-09-22T13:21:54Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:21:54Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x5630c564d320, name: ?)
+[2026-09-22T13:24:14Z INFO  nalei100gram] App started!
+[2026-09-22T13:24:14Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:24:14Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:24:14Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:24:14Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:24:16Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:24:16Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55bae4ce0920, name: ?)
+[2026-09-22T13:29:49Z INFO  nalei100gram] App started!
+[2026-09-22T13:29:49Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:29:49Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:29:49Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:29:49Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:29:51Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:29:51Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x5569e180c9b0, name: ?)
+[2026-09-22T13:33:33Z INFO  nalei100gram] App started!
+[2026-09-22T13:33:33Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:33:33Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:33:33Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:33:33Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:33:33Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:33:33Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x5625c5d38930, name: ?)
+[2026-09-22T13:35:19Z INFO  nalei100gram] App started!
+[2026-09-22T13:35:20Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:35:20Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:35:20Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:35:20Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:35:20Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:35:20Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55a768d71b80, name: ?)
+[2026-09-22T13:36:58Z INFO  nalei100gram] App started!
+[2026-09-22T13:36:58Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:36:58Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:36:58Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:36:58Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:36:58Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:36:58Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x5571869e8c70, name: ?)
+[2026-09-22T13:38:29Z INFO  nalei100gram] App started!
+[2026-09-22T13:38:29Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:38:29Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:38:29Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:38:29Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:38:29Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:38:29Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55aa8c4ad9e0, name: ?)
+[2026-09-22T13:39:26Z INFO  nalei100gram] App started!
+[2026-09-22T13:39:26Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:39:26Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:39:26Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:39:26Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:39:26Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:39:26Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55916626c940, name: ?)
+[2026-09-22T13:40:44Z INFO  nalei100gram] App started!
+[2026-09-22T13:40:44Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:40:44Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:40:44Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:40:44Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:40:44Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:40:44Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55aebf44dd60, name: ?)
+[2026-09-22T13:43:12Z INFO  nalei100gram] App started!
+[2026-09-22T13:43:12Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:43:12Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:43:12Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:43:12Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:43:13Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:43:13Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x56529bef9f30, name: ?)
+[2026-09-22T13:43:51Z INFO  nalei100gram] App started!
+[2026-09-22T13:43:52Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-22T13:43:52Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-22T13:43:52Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-22T13:43:52Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-22T13:43:52Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-22T13:43:52Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x556c4a21cbd0, name: ?)
+[2026-09-23T14:29:56Z INFO  nalei100gram] App started!
+[2026-09-23T14:29:56Z INFO  nalei100gram] TRAY CREATED!
+[2026-09-23T14:29:56Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-23T14:29:56Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-23T14:29:56Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-23T14:29:56Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-23T14:29:59Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-23T14:29:59Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55f8ba95c9a0, name: ?)
+[2026-09-23T14:38:28Z INFO  nalei100gram::backend] Seccesful send msg! chad_id:1714925468, msg:123
+[2026-09-23T14:38:44Z INFO  nalei100gram::tray] MENU EVENT: MenuId("2")
+[2026-09-23T14:38:44Z INFO  nalei100gram::ui] TRAY COMMAND: Hide
+[2026-09-23T14:39:01Z INFO  nalei100gram::tray] MENU EVENT: MenuId("1")
+[2026-09-23T14:39:03Z INFO  nalei100gram::tray] MENU EVENT: MenuId("2")
+[2026-09-23T14:39:05Z INFO  nalei100gram::ui] TRAY COMMAND: Show
+[2026-09-23T14:39:05Z INFO  nalei100gram::ui] TRAY COMMAND: Hide
+[2026-09-23T14:39:07Z INFO  nalei100gram::tray] MENU EVENT: MenuId("2")
+[2026-09-23T14:39:07Z INFO  nalei100gram::ui] TRAY COMMAND: Hide
+[2026-09-23T14:39:16Z INFO  nalei100gram::tray] MENU EVENT: MenuId("3")
+[2026-09-23T14:39:19Z INFO  nalei100gram::ui] TRAY COMMAND: Exit
+[2026-09-23T14:43:52Z INFO  nalei100gram] App started!
+[2026-09-23T14:43:52Z INFO  nalei100gram] TRAY CREATED!
+[2026-09-23T14:43:53Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-23T14:43:53Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-23T14:43:53Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-23T14:43:53Z INFO  nalei100gram::db] Successfully loaded 6 messages, structured into 1 chat objects.
+[2026-09-23T14:43:55Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-23T14:43:55Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x5569a8a0f740, name: ?)
+[2026-09-23T14:44:04Z INFO  nalei100gram::backend] Seccesful send paket to ui!
+[2026-09-23T14:44:19Z INFO  nalei100gram::tray] MENU EVENT: MenuId("3")
+[2026-09-23T14:44:19Z INFO  nalei100gram::ui] TRAY COMMAND: Exit
+[2026-09-23T15:25:59Z INFO  nalei100gram] App started!
+[2026-09-23T15:25:59Z INFO  nalei100gram] TRAY CREATED!
+[2026-09-23T15:25:59Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-23T15:25:59Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-23T15:25:59Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-23T15:25:59Z INFO  nalei100gram::db] Successfully loaded 7 messages, structured into 1 chat objects.
+[2026-09-23T15:26:01Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-23T15:26:01Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x561469374610, name: ?)
+[2026-09-23T15:26:08Z INFO  nalei100gram::backend] Seccesful send msg! chad_id:1714925468, msg:прив
+[2026-09-23T15:26:24Z INFO  nalei100gram::tray] MENU EVENT: MenuId("3")
+[2026-09-23T15:26:27Z INFO  nalei100gram::tray] MENU EVENT: MenuId("3")
+[2026-09-23T15:26:29Z INFO  nalei100gram::tray] MENU EVENT: MenuId("3")
+[2026-09-23T15:26:30Z INFO  nalei100gram::tray] MENU EVENT: MenuId("3")
+[2026-09-23T15:26:33Z INFO  nalei100gram::ui] TRAY COMMAND: Exit
+[2026-09-23T15:26:33Z INFO  nalei100gram::ui] TRAY COMMAND: Exit
+[2026-09-23T15:26:33Z INFO  nalei100gram::ui] TRAY COMMAND: Exit
+[2026-09-23T15:26:33Z INFO  nalei100gram::ui] TRAY COMMAND: Exit
+[2026-09-23T15:26:45Z INFO  nalei100gram] App started!
+[2026-09-23T15:26:45Z INFO  nalei100gram] TRAY CREATED!
+[2026-09-23T15:26:45Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-23T15:26:45Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-23T15:26:45Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-23T15:26:45Z INFO  nalei100gram::db] Successfully loaded 7 messages, structured into 1 chat objects.
+[2026-09-23T15:26:48Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-23T15:26:48Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x557ad5104f80, name: ?)
+[2026-09-23T15:26:50Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-09-23T15:26:55Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-09-23T15:26:55Z INFO  nalei100gram::backend] Seccesful send msg! chad_id:1714925468, msg:rt
+[2026-09-23T15:27:02Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-09-23T15:27:03Z INFO  nalei100gram::tray] MENU EVENT: MenuId("3")
+[2026-09-23T15:27:03Z INFO  nalei100gram::ui] TRAY COMMAND: Exit
+[2026-09-23T15:35:35Z INFO  nalei100gram] App started!
+[2026-09-23T15:35:35Z INFO  nalei100gram] TRAY CREATED!
+[2026-09-23T15:37:35Z INFO  nalei100gram] App started!
+[2026-09-23T15:37:35Z INFO  nalei100gram] TRAY CREATED!
+[2026-09-23T15:37:35Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-09-23T15:37:35Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-09-23T15:37:35Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-09-23T15:37:35Z INFO  nalei100gram::db] Successfully loaded 7 messages, structured into 1 chat objects.
+[2026-09-23T15:37:38Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-09-23T15:37:38Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55ac085ce730, name: ?)
+[2026-09-23T15:37:45Z INFO  nalei100gram::tray] MENU EVENT: MenuId("3")
+[2026-09-23T15:37:53Z INFO  nalei100gram::tray] MENU EVENT: MenuId("3")
+[2026-09-23T15:37:53Z INFO  nalei100gram::ui] TRAY COMMAND: Exit
+[2026-09-23T15:37:53Z INFO  nalei100gram::ui] TRAY COMMAND: Exit
+[2026-10-03T10:36:10Z INFO  nalei100gram] App started!
+[2026-10-03T10:36:10Z INFO  nalei100gram] TRAY CREATED!
+[2026-10-03T10:36:10Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-03T10:36:10Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-03T10:36:10Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-03T10:36:10Z INFO  nalei100gram::db] Successfully loaded 7 messages, structured into 1 chat objects.
+[2026-10-03T10:36:12Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-03T10:36:12Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x562b2e042cc0, name: ?)
+[2026-10-03T10:36:27Z INFO  nalei100gram::tray] MENU EVENT: MenuId("3")
+[2026-10-03T10:36:27Z INFO  nalei100gram::ui] TRAY COMMAND: Exit
+[2026-10-04T11:36:23Z INFO  nalei100gram] App started!
+[2026-10-04T11:36:23Z INFO  nalei100gram] TRAY CREATED!
+[2026-10-04T11:36:24Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-04T11:36:24Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-04T11:36:24Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-04T11:36:31Z INFO  nalei100gram::tray] MENU EVENT: MenuId("1")
+[2026-10-04T11:36:31Z INFO  nalei100gram::db] Successfully loaded 7 messages, structured into 1 chat objects.
+[2026-10-04T11:37:49Z INFO  nalei100gram] App started!
+[2026-10-04T11:37:49Z INFO  nalei100gram] TRAY CREATED!
+[2026-10-04T11:37:49Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-04T11:37:49Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-04T11:37:49Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-04T11:37:53Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-10-04T11:37:59Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-10-04T11:52:48Z INFO  nalei100gram] App started!
+[2026-10-04T11:52:48Z INFO  nalei100gram] TRAY CREATED!
+[2026-10-04T11:52:48Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-04T11:52:48Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-04T11:52:48Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-04T11:52:53Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-10-04T11:52:59Z ERROR teloxide::error_handlers] An error from the update listener: Api(TerminatedByOtherGetUpdates)
+[2026-10-14T13:38:54Z INFO  nalei100gram] App started!
+[2026-10-14T13:38:54Z INFO  nalei100gram] TRAY CREATED!
+[2026-10-14T13:38:54Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-14T13:38:54Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-14T13:38:54Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-14T13:39:03Z INFO  nalei100gram::tray] MENU EVENT: MenuId("1")
+[2026-10-14T13:39:03Z INFO  nalei100gram::db] Successfully loaded 7 messages, structured into 1 chat objects.
+[2026-10-14T13:39:03Z INFO  nalei100gram] Chats loaded
+[2026-10-14T13:39:03Z ERROR nalei100gram] PANIC: panicked at /home/lapis/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/winit-0.30.13/src/platform_impl/linux/mod.rs:725:13:
+    Initializing the event loop outside of the main thread is a significant cross-platform compatibility hazard. If you absolutely need to create an EventLoop on a different thread, you can use the `EventLoopBuilderExtX11::any_thread` or `EventLoopBuilderExtWayland::any_thread` functions.
+[2026-10-14T16:13:33Z INFO  nalei100gram] App started!
+[2026-10-14T16:13:33Z INFO  nalei100gram] TRAY CREATED!
+[2026-10-14T16:13:33Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-14T16:13:33Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-14T16:13:33Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-14T16:13:39Z INFO  nalei100gram::tray] MENU EVENT: MenuId("3")
+[2026-10-14T16:15:26Z INFO  nalei100gram] App started!
+[2026-10-14T16:15:26Z INFO  nalei100gram] TRAY CREATED!
+[2026-10-14T16:15:26Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-14T16:15:26Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-14T16:15:26Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-17T13:43:05Z INFO  nalei100gram] App started!
+[2026-10-17T13:43:05Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-17T13:43:05Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-17T13:43:05Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-17T13:43:05Z INFO  nalei100gram::db] Successfully loaded 7 messages, structured into 1 chat objects.
+[2026-10-17T13:43:05Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-17T13:43:08Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-17T13:43:08Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x562d472cea40, name: ?)
+[2026-10-17T13:43:08Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-17T13:43:08Z INFO  nalei100gram] Tray initialized
+[2026-10-17T13:43:13Z INFO  nalei100gram::tray] MENU EVENT: MenuId("2")
+[2026-10-17T13:43:13Z INFO  nalei100gram::tray] Hiding window
+[2026-10-17T13:43:14Z INFO  nalei100gram::tray] MENU EVENT: MenuId("3")
+[2026-10-17T13:43:14Z INFO  nalei100gram::tray] Exiting application
+[2026-10-17T13:43:14Z INFO  nalei100gram] App stopped
+[2026-10-18T10:52:31Z INFO  nalei100gram] App started!
+[2026-10-18T10:52:31Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T10:52:31Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T10:52:31Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T10:52:31Z INFO  nalei100gram::db] Successfully loaded 7 messages, structured into 1 chat objects.
+[2026-10-18T10:52:31Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T10:52:34Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T10:52:34Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x556cf53cb9b0, name: ?)
+[2026-10-18T10:52:34Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T10:52:34Z INFO  nalei100gram] Tray initialized
+[2026-10-18T10:52:40Z INFO  nalei100gram::backend] Seccesful send msg! chad_id:1714925468, msg:прив
+[2026-10-18T10:52:46Z INFO  nalei100gram::backend] Seccesful send paket to ui!
+[2026-10-18T10:52:49Z INFO  nalei100gram::backend] Seccesful send paket to ui!
+[2026-10-18T10:52:55Z INFO  nalei100gram::tray] MENU EVENT: MenuId("2")
+[2026-10-18T10:52:55Z INFO  nalei100gram::tray] Hiding window
+[2026-10-18T10:52:56Z INFO  nalei100gram::tray] MENU EVENT: MenuId("3")
+[2026-10-18T10:52:56Z INFO  nalei100gram::tray] Exiting application
+[2026-10-18T10:52:58Z INFO  nalei100gram::tray] MENU EVENT: MenuId("1")
+[2026-10-18T10:52:58Z INFO  nalei100gram::tray] Showing window
+[2026-10-18T10:52:59Z INFO  nalei100gram] App stopped
+[2026-10-18T10:53:00Z INFO  nalei100gram] App started!
+[2026-10-18T10:53:00Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T10:53:00Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T10:53:00Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T10:53:00Z INFO  nalei100gram::db] Successfully loaded 9 messages, structured into 1 chat objects.
+[2026-10-18T10:53:00Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T10:53:00Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T10:53:00Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x5611069af100, name: ?)
+[2026-10-18T10:53:01Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T10:53:01Z INFO  nalei100gram] Tray initialized
+[2026-10-18T10:53:31Z INFO  nalei100gram] App stopped
+[2026-10-18T10:53:33Z INFO  nalei100gram] App started!
+[2026-10-18T10:53:33Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T10:53:33Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T10:53:33Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T10:53:33Z INFO  nalei100gram::db] Successfully loaded 10 messages, structured into 1 chat objects.
+[2026-10-18T10:53:33Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T10:53:33Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T10:53:33Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55b005c56640, name: ?)
+[2026-10-18T10:53:34Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T10:53:34Z INFO  nalei100gram] Tray initialized
+[2026-10-18T10:53:41Z INFO  nalei100gram] App stopped
+[2026-10-18T10:54:35Z INFO  nalei100gram] App started!
+[2026-10-18T10:54:35Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T10:54:35Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T10:54:35Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T10:54:35Z INFO  nalei100gram::db] Successfully loaded 10 messages, structured into 1 chat objects.
+[2026-10-18T10:54:35Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T10:54:37Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T10:54:37Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55e3a7556ec0, name: ?)
+[2026-10-18T10:54:37Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T10:54:37Z INFO  nalei100gram] Tray initialized
+[2026-10-18T10:54:43Z INFO  nalei100gram] App stopped
+[2026-10-18T10:55:44Z INFO  nalei100gram] App started!
+[2026-10-18T10:55:44Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T10:55:44Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T10:55:44Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T10:55:44Z INFO  nalei100gram::db] Successfully loaded 10 messages, structured into 1 chat objects.
+[2026-10-18T10:55:44Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T10:55:46Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T10:55:46Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x562c8cc40ac0, name: ?)
+[2026-10-18T10:55:47Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T10:55:47Z INFO  nalei100gram] Tray initialized
+[2026-10-18T10:55:52Z INFO  nalei100gram] App stopped
+[2026-10-18T10:55:53Z INFO  nalei100gram] App started!
+[2026-10-18T10:55:53Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T10:55:53Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T10:55:53Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T10:55:53Z INFO  nalei100gram::db] Successfully loaded 11 messages, structured into 1 chat objects.
+[2026-10-18T10:55:53Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T10:55:53Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T10:55:53Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x556d04df1490, name: ?)
+[2026-10-18T10:55:53Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T10:55:53Z INFO  nalei100gram] Tray initialized
+[2026-10-18T10:55:55Z ERROR nalei100gram] PANIC: panicked at src/ui.rs:208:49:
+    called `Result::unwrap()` on an `Err` value: Unsupported(UnsupportedError { format: Exact(WebP), kind: Format(Exact(WebP)) })
+[2026-10-18T10:55:58Z INFO  nalei100gram] App started!
+[2026-10-18T10:55:58Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T10:55:58Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T10:55:58Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T10:55:58Z INFO  nalei100gram::db] Successfully loaded 11 messages, structured into 1 chat objects.
+[2026-10-18T10:55:58Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T10:55:58Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T10:55:58Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x5555c2deddc0, name: ?)
+[2026-10-18T10:55:59Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T10:55:59Z INFO  nalei100gram] Tray initialized
+[2026-10-18T10:56:00Z ERROR nalei100gram] PANIC: panicked at src/ui.rs:208:49:
+    called `Result::unwrap()` on an `Err` value: Unsupported(UnsupportedError { format: Exact(WebP), kind: Format(Exact(WebP)) })
+[2026-10-18T10:56:14Z INFO  nalei100gram] App started!
+[2026-10-18T10:56:14Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T10:56:14Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T10:56:14Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T10:56:14Z INFO  nalei100gram::db] Successfully loaded 11 messages, structured into 1 chat objects.
+[2026-10-18T10:56:14Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T10:56:16Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T10:56:16Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55d41a1bf940, name: ?)
+[2026-10-18T10:56:17Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T10:56:17Z INFO  nalei100gram] Tray initialized
+[2026-10-18T10:56:20Z ERROR nalei100gram] PANIC: panicked at src/ui.rs:208:49:
+    called `Result::unwrap()` on an `Err` value: Unsupported(UnsupportedError { format: Exact(WebP), kind: Format(Exact(WebP)) })
+[2026-10-18T10:56:49Z INFO  nalei100gram] App started!
+[2026-10-18T10:56:49Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T10:56:49Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T10:56:49Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T10:56:49Z INFO  nalei100gram::db] Successfully loaded 0 messages, structured into 0 chat objects.
+[2026-10-18T10:56:49Z INFO  nalei100gram] Chats loaded: 0
+[2026-10-18T10:56:51Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T10:56:51Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55cdc867d9a0, name: ?)
+[2026-10-18T10:56:51Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T10:56:51Z INFO  nalei100gram] Tray initialized
+[2026-10-18T10:57:00Z INFO  nalei100gram] App stopped
+[2026-10-18T10:57:01Z INFO  nalei100gram] App started!
+[2026-10-18T10:57:01Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T10:57:01Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T10:57:01Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T10:57:01Z INFO  nalei100gram::db] Successfully loaded 1 messages, structured into 1 chat objects.
+[2026-10-18T10:57:01Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T10:57:01Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T10:57:01Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x564abdec4120, name: ?)
+[2026-10-18T10:57:02Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T10:57:02Z INFO  nalei100gram] Tray initialized
+[2026-10-18T10:57:03Z ERROR nalei100gram] PANIC: panicked at src/ui.rs:208:49:
+    called `Result::unwrap()` on an `Err` value: Unsupported(UnsupportedError { format: Exact(WebP), kind: Format(Exact(WebP)) })
+[2026-10-18T10:59:16Z INFO  nalei100gram] App started!
+[2026-10-18T10:59:16Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T10:59:16Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T10:59:16Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T10:59:16Z INFO  nalei100gram::db] Successfully loaded 1 messages, structured into 1 chat objects.
+[2026-10-18T10:59:16Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T10:59:19Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T10:59:19Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x561d3700df20, name: ?)
+[2026-10-18T10:59:19Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T10:59:19Z INFO  nalei100gram] Tray initialized
+[2026-10-18T10:59:21Z ERROR nalei100gram] PANIC: panicked at src/ui.rs:208:49:
+    called `Result::unwrap()` on an `Err` value: Unsupported(UnsupportedError { format: Exact(WebP), kind: Format(Exact(WebP)) })
+[2026-10-18T11:00:30Z INFO  nalei100gram] App started!
+[2026-10-18T11:00:30Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T11:00:30Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T11:00:30Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T11:00:30Z INFO  nalei100gram::db] Successfully loaded 0 messages, structured into 0 chat objects.
+[2026-10-18T11:00:30Z INFO  nalei100gram] Chats loaded: 0
+[2026-10-18T11:00:32Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T11:00:32Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55cc3675a1f0, name: ?)
+[2026-10-18T11:00:33Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T11:00:33Z INFO  nalei100gram] Tray initialized
+[2026-10-18T11:01:03Z INFO  nalei100gram] App stopped
+[2026-10-18T11:01:07Z INFO  nalei100gram] App started!
+[2026-10-18T11:01:07Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T11:01:07Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T11:01:07Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T11:01:07Z INFO  nalei100gram::db] Successfully loaded 1 messages, structured into 1 chat objects.
+[2026-10-18T11:01:07Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T11:01:07Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T11:01:07Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x555f48f04d70, name: ?)
+[2026-10-18T11:01:07Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T11:01:07Z INFO  nalei100gram] Tray initialized
+[2026-10-18T11:01:08Z ERROR nalei100gram] PANIC: panicked at src/ui.rs:208:49:
+    called `Result::unwrap()` on an `Err` value: Unsupported(UnsupportedError { format: Exact(WebP), kind: Format(Exact(WebP)) })
+[2026-10-18T11:01:38Z INFO  nalei100gram] App started!
+[2026-10-18T11:01:38Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T11:01:38Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T11:01:38Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T11:01:38Z INFO  nalei100gram::db] Successfully loaded 1 messages, structured into 1 chat objects.
+[2026-10-18T11:01:38Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T11:01:40Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T11:01:40Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55972994da10, name: ?)
+[2026-10-18T11:01:41Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T11:01:41Z INFO  nalei100gram] Tray initialized
+[2026-10-18T11:01:53Z INFO  nalei100gram] App stopped
+[2026-10-18T11:06:57Z INFO  nalei100gram] App started!
+[2026-10-18T11:06:57Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T11:06:57Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T11:06:57Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T11:06:57Z INFO  nalei100gram::db] Successfully loaded 1 messages, structured into 1 chat objects.
+[2026-10-18T11:06:57Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T11:07:00Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T11:07:00Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x560c52c38140, name: ?)
+[2026-10-18T11:07:00Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T11:07:00Z INFO  nalei100gram] Tray initialized
+[2026-10-18T11:07:18Z INFO  nalei100gram] App stopped
+[2026-10-18T11:09:22Z INFO  nalei100gram] App started!
+[2026-10-18T11:09:22Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T11:09:22Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T11:09:22Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T11:09:22Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-10-18T11:09:22Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T11:09:25Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T11:09:25Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x5617312260f0, name: ?)
+[2026-10-18T11:09:25Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T11:09:25Z INFO  nalei100gram] Tray initialized
+[2026-10-18T11:12:58Z INFO  nalei100gram] App stopped
+[2026-10-18T11:13:07Z INFO  nalei100gram] App started!
+[2026-10-18T11:13:07Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T11:13:07Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T11:13:07Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T11:13:07Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-10-18T11:13:07Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T11:13:09Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T11:13:09Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x56028c882e80, name: ?)
+[2026-10-18T11:13:10Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T11:13:10Z INFO  nalei100gram] Tray initialized
+[2026-10-18T11:13:19Z INFO  nalei100gram] App stopped
+[2026-10-18T11:14:36Z INFO  nalei100gram] App started!
+[2026-10-18T11:14:36Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T11:14:36Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T11:14:36Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T11:14:36Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-10-18T11:14:36Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T11:14:39Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T11:14:39Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x558e96575970, name: ?)
+[2026-10-18T11:14:39Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T11:14:39Z INFO  nalei100gram] Tray initialized
+[2026-10-18T11:16:13Z INFO  nalei100gram] App stopped
+[2026-10-18T11:16:17Z INFO  nalei100gram] App started!
+[2026-10-18T11:16:17Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T11:16:17Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T11:16:17Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T11:16:17Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-10-18T11:16:17Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T11:16:18Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T11:16:18Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x562fa63451c0, name: ?)
+[2026-10-18T11:16:18Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T11:16:18Z INFO  nalei100gram] Tray initialized
+[2026-10-18T11:16:22Z INFO  nalei100gram] App stopped
+[2026-10-18T11:17:37Z INFO  nalei100gram] App started!
+[2026-10-18T11:17:37Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T11:17:37Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T11:17:37Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T11:17:37Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-10-18T11:17:37Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T11:17:40Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T11:17:40Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55b6db3841f0, name: ?)
+[2026-10-18T11:17:40Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T11:17:40Z INFO  nalei100gram] Tray initialized
+[2026-10-18T11:18:36Z INFO  nalei100gram] App stopped
+[2026-10-18T11:18:39Z INFO  nalei100gram] App started!
+[2026-10-18T11:18:39Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T11:18:39Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T11:18:39Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T11:18:39Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-10-18T11:18:39Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T11:18:39Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T11:18:39Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x558c17dfc280, name: ?)
+[2026-10-18T11:18:40Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T11:18:40Z INFO  nalei100gram] Tray initialized
+[2026-10-18T11:19:41Z INFO  nalei100gram] App stopped
+[2026-10-18T11:19:55Z INFO  nalei100gram] App started!
+[2026-10-18T11:19:55Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T11:19:55Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T11:19:55Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T11:19:55Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-10-18T11:19:55Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T11:19:57Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T11:19:57Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x55b2f6f09590, name: ?)
+[2026-10-18T11:19:58Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T11:19:58Z INFO  nalei100gram] Tray initialized
+[2026-10-18T11:20:05Z INFO  nalei100gram] App stopped
+[2026-10-18T11:23:12Z INFO  nalei100gram] App started!
+[2026-10-18T11:23:12Z INFO  nalei100gram::db] Connecting to database at path: data/save.db
+[2026-10-18T11:23:12Z INFO  nalei100gram::db] Successfully connected to SQLite database.
+[2026-10-18T11:23:12Z INFO  nalei100gram::db] Database successfully initialized and optimized.
+[2026-10-18T11:23:12Z INFO  nalei100gram::db] Successfully loaded 2 messages, structured into 1 chat objects.
+[2026-10-18T11:23:12Z INFO  nalei100gram] Chats loaded: 1
+[2026-10-18T11:23:14Z WARN  wgpu_hal::vulkan::instance] GENERAL [Loader Message (0x0)]
+    	terminator_CreateInstance: Received return code -9 from call to vkCreateInstance in ICD /usr/lib64/libvulkan_dzn.so. Skipping this driver.
+[2026-10-18T11:23:14Z WARN  wgpu_hal::vulkan::instance] 	objects: (type: INSTANCE, hndl: 0x560f08663f40, name: ?)
+[2026-10-18T11:23:14Z INFO  nalei100gram::tray] Tray icon created
+[2026-10-18T11:23:14Z INFO  nalei100gram] Tray initialized
+[2026-10-18T11:23:17Z INFO  nalei100gram] App stopped
