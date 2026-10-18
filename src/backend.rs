@@ -93,9 +93,7 @@ impl Backend {
                             log::error!("Failed send packet to ui, err: {}", e);
                         }
                     }
-                }
-
-                if let Some(imgs) = msg.photo() {
+                } else if let Some(imgs) = msg.photo() {
                     if let Err(e) = fs::create_dir_all("data/temp") {
                         error!("Failed to create 'data' directory: {}", e);
                         panic!("{}", e);
@@ -128,8 +126,7 @@ impl Backend {
                     } else {
                         warn!("Список PhotoSize порожній!");
                     }
-                }
-                if let Some(stiker) = msg.sticker() {
+                } else if let Some(stiker) = msg.sticker() {
                     if let Err(e) = fs::create_dir_all("data/temp") {
                         error!("Failed to create 'data' directory: {}", e);
                         panic!("{}", e);
@@ -156,7 +153,11 @@ impl Backend {
                         let _ = tx.send(p.clone()).await;
                         database.clone().add_message(&p).await;
                         player.play(SoundType::Message);
+                    } else {
+                        bot.delete_message(msg.chat.id, msg.id).await?;
                     }
+                } else {
+                    bot.delete_message(msg.chat.id, msg.id).await?;
                 }
                 respond(())
             }
