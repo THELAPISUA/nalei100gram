@@ -8,7 +8,6 @@ use crate::types::MsgType::{IMAGE, TEXT};
 use chrono::Local;
 use log::{error, info, warn};
 
-use std::fmt::Debug;
 use std::fs;
 use std::sync::Arc;
 use teloxide::net::Download;
