@@ -118,7 +118,7 @@ impl Db {
             msg.chat_id,
             msg.username.clone().unwrap_or(String::from("You"))
         );
-        let msgtype = match msg.msgtype {
+        let msgtype = match msg.msg_type {
             TEXT => 0,
             IMAGE => 1,
             STICKER => 2,
@@ -220,7 +220,7 @@ impl Db {
                 time: r.date,
                 is_bot: r.is_bot,
                 is_read: r.is_read,
-                msgtype: msgtype,
+                msg_type: msgtype,
                 chat_id: ChatId(r.chat_id),
                 msg_name: Some(r.msg_name),
             });

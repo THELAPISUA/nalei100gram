@@ -1,5 +1,5 @@
 use crate::types::MsgType::{FILE, IMAGE, STICKER, TEXT};
-use crate::types::{Chat, MessagePacket, MsgType};
+use crate::types::{Chat, MessagePacket, MsgType, PendingFile};
 use crate::widgets::{FileWidget, MessageWidget, PhotoWidget};
 use chrono::Local;
 use eframe::egui;
@@ -8,6 +8,7 @@ use eframe::egui::{
     Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Sense, Stroke, TextEdit,
     vec2,
 };
+use log::info;
 
 use std::collections::HashMap;
 
@@ -26,6 +27,7 @@ pub struct GramApp {
     input_text: String,
     current_chat: ChatId,
     photos: HashMap<String, egui::TextureHandle>,
+    pending_files: Vec<PendingFile>,
 }
 
 impl GramApp {
@@ -37,6 +39,7 @@ impl GramApp {
             input_text: String::new(),
             current_chat: ChatId(0),
             photos: HashMap::new(),
+            pending_files: Vec::new(),
         }
     }
     fn get_or_create_chat(&mut self, chat_id: ChatId) -> &mut Chat {
@@ -58,6 +61,26 @@ impl eframe::App for GramApp {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         // блокировка закрития окна
         let ctx = ui.ctx();
+        // днд
+        collect_dropped_files(ctx, &mut self.pending_files);
+        while let Some(file) = self.pending_files.pop() {
+            let msg = MessagePacket {
+                time: Local::now().format("%H:%M").to_string(),
+                username: Some(String::from("You")),
+                text: file.path.to_string_lossy().to_string(),
+                chat_id: self.current_chat.clone(),
+                msg_type: FILE,
+                is_bot: true,
+                is_read: true,
+                msg_name: Some(file.name),
+            };
+            let is_ok = self.tx.try_send(msg.clone()).is_ok();
+            if is_ok {
+                let current_chat = self.current_chat.clone();
+                let chat = self.get_or_create_chat(current_chat.clone());
+                chat.messages.push(msg);
+            }
+        }
 
         let close_requested = ctx.input(|i| {
             i.viewport()
@@ -169,7 +192,7 @@ impl eframe::App for GramApp {
                     time: String::new(),
                     is_bot: false,
                     is_read: true,
-                    msgtype: TEXT,
+                    msg_type: TEXT,
                     chat_id: ChatId(-1),
                     msg_name: None,
                 };
@@ -177,7 +200,7 @@ impl eframe::App for GramApp {
                     .and_then(|messages| messages.last())
                     .unwrap_or(&default_msg);
 
-                let last_msg = match last_msg_p.msgtype {
+                let last_msg = match last_msg_p.msg_type {
                     TEXT => last_msg_p.text.clone(),
                     IMAGE => String::from("Фото"),
                     STICKER => String::from("Стикер"),
@@ -300,7 +323,7 @@ impl eframe::App for GramApp {
                                 username: Some(String::from("You")),
                                 text: msg.clone(),
                                 chat_id: self.current_chat.clone(),
-                                msgtype: TEXT,
+                                msg_type: TEXT,
                                 is_bot: true,
                                 is_read: true,
                                 msg_name: None,
@@ -315,7 +338,7 @@ impl eframe::App for GramApp {
                                 is_bot: true,
                                 time: Local::now().format("%H:%M").to_string(),
                                 is_read: true,
-                                msgtype: MsgType::TEXT,
+                                msg_type: TEXT,
                                 chat_id: current_chat,
                                 msg_name: None,
                             };
@@ -336,7 +359,7 @@ impl eframe::App for GramApp {
                     for chat in &mut self.chats {
                         if chat.chat_id == self.current_chat {
                             for msg in &chat.messages {
-                                match msg.msgtype {
+                                match msg.msg_type {
                                     TEXT => {
                                         let widget = MessageWidget {
                                             username: msg
@@ -415,6 +438,7 @@ impl eframe::App for GramApp {
                         }
                     }
                 });
+            preview_files_being_dropped(ui.ctx());
         });
     }
 }
@@ -451,4 +475,59 @@ pub fn load_texture(
     let color_image = egui::ColorImage::from_rgba_unmultiplied(size, pixels.as_slice());
 
     Ok(ctx.load_texture(name, color_image, egui::TextureOptions::LINEAR))
+}
+
+pub fn collect_dropped_files(ctx: &egui::Context, out: &mut Vec<PendingFile>) {
+    let dropped = ctx.input(|i| i.raw.dropped_files.clone());
+
+    for file in dropped {
+        let path = file.path().to_path_buf();
+
+        let size = std::fs::metadata(&path).map(|m| m.len()).unwrap_or(0);
+
+        let name = path
+            .file_name()
+            .map(|n| n.to_string_lossy().to_string())
+            .unwrap_or_else(|| path.display().to_string());
+
+        info!("collected file: {}", name);
+
+        out.push(PendingFile { name, path, size });
+    }
+}
+
+/// Затемнення з підказкою, поки файли тягнуть над вікном.
+pub fn preview_files_being_dropped(ctx: &egui::Context) {
+    use egui::{Align2, Color32, Id, LayerId, Order, TextStyle};
+    use std::fmt::Write as _;
+
+    if ctx.input(|i| i.raw.hovered_files.is_empty()) {
+        return;
+    }
+
+    let text = ctx.input(|i| {
+        let mut text = "Відпусти файли, щоб надіслати:\n".to_owned();
+        for file in &i.raw.hovered_files {
+            if let Some(path) = &file.path {
+                write!(text, "\n{}", path.display()).unwrap();
+            } else if !file.mime.is_empty() {
+                write!(text, "\n{}", file.mime).unwrap();
+            } else {
+                text += "\n???";
+            }
+        }
+        text
+    });
+
+    let painter = ctx.layer_painter(LayerId::new(Order::Foreground, Id::new("file_drop_target")));
+    let rect = ctx.content_rect();
+
+    painter.rect_filled(rect, 0.0, Color32::from_black_alpha(192));
+    painter.text(
+        rect.center(),
+        Align2::CENTER_CENTER,
+        text,
+        egui::FontId::proportional(24.0),
+        Color32::WHITE,
+    );
 }

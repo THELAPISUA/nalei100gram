@@ -9,6 +9,7 @@ use crate::types::MsgType::{IMAGE, TEXT};
 use chrono::Local;
 use eframe::egui::Shape::Path;
 use log::{error, info, warn};
+use teloxide::types::InputFile;
 
 use std::fmt::format;
 use std::fs;
@@ -51,26 +52,54 @@ impl Backend {
         tokio::spawn(async move {
             while let Some(packet) = rx_bot.recv().await {
                 info!("Received packet for chat {}", packet.chat_id);
-                let r = bot_for_gui
-                    .send_message(packet.chat_id, packet.text.clone())
-                    .await;
+                match packet.msg_type {
+                    TEXT => {
+                        let r = bot_for_gui
+                            .send_message(packet.chat_id, packet.text.clone())
+                            .await;
 
-                self.player.play(Send);
+                        self.player.play(Send);
 
-                db_for_gui.clone().add_message(&packet).await;
+                        db_for_gui.clone().add_message(&packet).await;
 
-                match r {
-                    Ok(m) => {
-                        let chat_id = m.chat.id.0 as i64;
-                        info!(
-                            "Successful send msg! chat_id:{}, msg:{}",
-                            chat_id,
-                            m.text().unwrap_or("occurred message")
-                        );
+                        match r {
+                            Ok(m) => {
+                                let chat_id = m.chat.id.0 as i64;
+                                info!(
+                                    "Successful send msg! chat_id:{}, msg:{}",
+                                    chat_id,
+                                    m.text().unwrap_or("occurred message")
+                                );
+                            }
+                            Err(e) => {
+                                error!("Failed to send message, err: {}", e);
+                            }
+                        }
                     }
-                    Err(e) => {
-                        error!("Failed to send message, err: {}", e);
+                    FILE => {
+                        let r = bot_for_gui
+                            .send_document(packet.chat_id, InputFile::file(packet.text.clone()))
+                            .await;
+
+                        self.player.play(Send);
+
+                        db_for_gui.clone().add_message(&packet).await;
+
+                        match r {
+                            Ok(m) => {
+                                let chat_id = m.chat.id.0 as i64;
+                                info!(
+                                    "Successful send msg! chat_id:{}, msg:{}",
+                                    chat_id,
+                                    m.text().unwrap_or("occurred message")
+                                );
+                            }
+                            Err(e) => {
+                                error!("Failed to send message, err: {}", e);
+                            }
+                        }
                     }
+                    _ => {}
                 }
             }
         });
@@ -88,7 +117,7 @@ impl Backend {
                         text: text.to_string(),
                         chat_id: msg.chat_id().unwrap_or(ChatId(1)),
                         time: Local::now().format("%H:%M").to_string(),
-                        msgtype: TEXT,
+                        msg_type: TEXT,
                         is_bot: false,
                         is_read: true,
                         msg_name: None,
@@ -129,7 +158,7 @@ impl Backend {
                             text: path,
                             chat_id: msg.chat_id().unwrap_or(ChatId(1)),
                             time: Local::now().format("%H:%M").to_string(),
-                            msgtype: IMAGE,
+                            msg_type: IMAGE,
                             is_bot: false,
                             is_read: true,
                             msg_name: None,
@@ -160,7 +189,7 @@ impl Backend {
                             text: path,
                             chat_id: msg.chat_id().unwrap_or(ChatId(1)),
                             time: Local::now().format("%H:%M").to_string(),
-                            msgtype: STICKER,
+                            msg_type: STICKER,
                             is_bot: false,
                             is_read: true,
                             msg_name: None,
@@ -192,7 +221,7 @@ impl Backend {
                         text: path,
                         chat_id: msg.chat_id().unwrap_or(ChatId(1)),
                         time: Local::now().format("%H:%M").to_string(),
-                        msgtype: FILE,
+                        msg_type: FILE,
                         is_bot: false,
                         is_read: true,
                         msg_name: Some(file_name),

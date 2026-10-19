@@ -77,7 +77,9 @@ fn main() {
     setup.instance_descriptor.backends = eframe::wgpu::Backends::VULKAN;
 
     let options = eframe::NativeOptions {
-        viewport: eframe::egui::ViewportBuilder::default().with_icon(icon),
+        viewport: eframe::egui::ViewportBuilder::default()
+            .with_icon(icon)
+            .with_drag_and_drop(true),
 
         renderer: eframe::Renderer::Wgpu,
 

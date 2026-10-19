@@ -1,5 +1,10 @@
+use std::path::PathBuf;
 use teloxide::types::ChatId;
-
+pub struct PendingFile {
+    pub name: String,
+    pub path: PathBuf,
+    pub size: u64,
+}
 pub struct Chat {
     pub chat_id: ChatId,
     pub messages: Vec<MessagePacket>,
@@ -24,6 +29,6 @@ pub struct MessagePacket {
     pub time: String,
     pub is_bot: bool,
     pub is_read: bool,
-    pub msgtype: MsgType,
+    pub msg_type: MsgType,
     pub chat_id: ChatId,
 }
