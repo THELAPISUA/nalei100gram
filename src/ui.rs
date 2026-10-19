@@ -1,9 +1,9 @@
-use crate::types::MsgType::{IMAGE, STICKER, TEXT};
+use crate::types::MsgType::{FILE, IMAGE, STICKER, TEXT};
 use crate::types::{Chat, MessagePacket, MsgType};
-use crate::widgets::{MessageWidget, PhotoWidget};
+use crate::widgets::{FileWidget, MessageWidget, PhotoWidget};
 use chrono::Local;
 use eframe::egui;
-use eframe::egui::ViewportCommand;
+
 use eframe::egui::{
     Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Sense, Stroke, TextEdit,
     vec2,
@@ -67,8 +67,11 @@ impl eframe::App for GramApp {
         });
 
         if close_requested {
-            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
-            ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
+            #[cfg(target_os = "windows")]
+            {
+                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+                ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
+            }
         }
 
         //Тут получаем сообщения
@@ -79,6 +82,7 @@ impl eframe::App for GramApp {
             chat.unreaded_count += 1;
             chat.messages.push(packet.clone());
         }
+
         //Панель вибора чата
         ui.heading("Nalei100Gram");
         egui::Panel::left("my_left_panel").show(ui, |ui| {
@@ -167,6 +171,7 @@ impl eframe::App for GramApp {
                     is_read: true,
                     msgtype: TEXT,
                     chat_id: ChatId(-1),
+                    msg_name: None,
                 };
                 let last_msg_p = curr_chat
                     .and_then(|messages| messages.last())
@@ -176,6 +181,7 @@ impl eframe::App for GramApp {
                     TEXT => last_msg_p.text.clone(),
                     IMAGE => String::from("Фото"),
                     STICKER => String::from("Стикер"),
+                    FILE => String::from("ФАЙЛ"),
                     _ => String::from("Невідомий формат"),
                 };
 
@@ -224,7 +230,6 @@ impl eframe::App for GramApp {
                 }
             }
         });
-
         //ввод сообщений
         egui::Panel::bottom("input_panel")
             .frame(
@@ -298,6 +303,7 @@ impl eframe::App for GramApp {
                                 msgtype: TEXT,
                                 is_bot: true,
                                 is_read: true,
+                                msg_name: None,
                             })
                             .is_ok()
                         {
@@ -311,6 +317,7 @@ impl eframe::App for GramApp {
                                 is_read: true,
                                 msgtype: MsgType::TEXT,
                                 chat_id: current_chat,
+                                msg_name: None,
                             };
                             chat.messages.push(msg.clone());
 
@@ -323,70 +330,91 @@ impl eframe::App for GramApp {
             });
         //рендер откритого чата
         egui::CentralPanel::default().show(ui, |ui| {
-            egui::ScrollArea::vertical().show(ui, |ui| {
-                for chat in &mut self.chats {
-                    if chat.chat_id == self.current_chat {
-                        for msg in &chat.messages {
-                            match msg.msgtype {
-                                TEXT => {
-                                    let widget = MessageWidget {
-                                        username: msg
-                                            .username
-                                            .clone()
-                                            .unwrap_or(String::from("You")),
-                                        text: msg.text.clone(),
-                                        time: msg.time.clone(),
-                                        outgoing: msg.is_bot,
-                                    };
-                                    widget.show(ui);
-                                }
-                                IMAGE => {
-                                    let widget = PhotoWidget {
-                                        username: msg
-                                            .username
-                                            .clone()
-                                            .unwrap_or(String::from("You")),
-                                        texture: get_img(ui.ctx(), &msg.text, &mut self.photos),
-                                        time: msg.time.clone(),
-                                        outgoing: msg.is_bot,
-                                    };
-                                    widget.show(ui);
-                                }
-                                STICKER => {
-                                    let widget = PhotoWidget {
-                                        username: msg
-                                            .username
-                                            .clone()
-                                            .unwrap_or(String::from("You")),
-                                        texture: get_img(ui.ctx(), &msg.text, &mut self.photos),
-                                        time: msg.time.clone(),
-                                        outgoing: msg.is_bot,
-                                    };
-                                    widget.show(ui);
-                                }
-                                _ => {
-                                    let widget = MessageWidget {
-                                        username: msg
-                                            .username
-                                            .clone()
-                                            .unwrap_or(String::from("You")),
-                                        text: format!("Ошибка рендера неизвестний тип"),
-                                        time: msg.time.clone(),
-                                        outgoing: msg.is_bot,
-                                    };
-                                    widget.show(ui);
+            egui::ScrollArea::vertical()
+                .stick_to_bottom(true)
+                .show(ui, |ui| {
+                    for chat in &mut self.chats {
+                        if chat.chat_id == self.current_chat {
+                            for msg in &chat.messages {
+                                match msg.msgtype {
+                                    TEXT => {
+                                        let widget = MessageWidget {
+                                            username: msg
+                                                .username
+                                                .clone()
+                                                .unwrap_or(String::from("You")),
+                                            text: msg.text.clone(),
+                                            time: msg.time.clone(),
+                                            outgoing: msg.is_bot,
+                                        };
+                                        widget.show(ui);
+                                    }
+                                    IMAGE => {
+                                        let widget = PhotoWidget {
+                                            username: msg
+                                                .username
+                                                .clone()
+                                                .unwrap_or(String::from("You")),
+                                            texture: get_img(ui.ctx(), &msg.text, &mut self.photos),
+                                            time: msg.time.clone(),
+                                            outgoing: msg.is_bot,
+                                        };
+                                        widget.show(ui);
+                                    }
+                                    STICKER => {
+                                        let widget = PhotoWidget {
+                                            username: msg
+                                                .username
+                                                .clone()
+                                                .unwrap_or(String::from("You")),
+                                            texture: get_img(ui.ctx(), &msg.text, &mut self.photos),
+                                            time: msg.time.clone(),
+                                            outgoing: msg.is_bot,
+                                        };
+                                        widget.show(ui);
+                                    }
+                                    FILE => {
+                                        let path = msg.text.clone();
+                                        let widget = FileWidget {
+                                            username: msg
+                                                .username
+                                                .clone()
+                                                .unwrap_or(String::from("You")),
+                                            file_path: path.clone(),
+                                            time: msg.time.clone(),
+                                            outgoing: msg.is_bot,
+                                            file_name: msg
+                                                .msg_name
+                                                .clone()
+                                                .unwrap_or("FILE".to_string()),
+                                        };
+                                        if widget.show(ui) {
+                                            let _ = open::that(path);
+                                        }
+                                    }
+                                    _ => {
+                                        let widget = MessageWidget {
+                                            username: msg
+                                                .username
+                                                .clone()
+                                                .unwrap_or(String::from("You")),
+                                            text: format!("Ошибка рендера неизвестний тип"),
+                                            time: msg.time.clone(),
+                                            outgoing: msg.is_bot,
+                                        };
+                                        widget.show(ui);
+                                    }
                                 }
                             }
-                        }
-                        chat.unreaded_count = 0;
-                        for msg in &mut chat.messages {
-                            msg.is_read = true;
-                        }
+                            chat.unreaded_count = 0;
+                            for msg in &mut chat.messages {
+                                msg.is_read = true;
+                            }
 
-                        break;
+                            break;
+                        }
                     }
-                }
-            });
+                });
         });
     }
 }

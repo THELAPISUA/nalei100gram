@@ -3,11 +3,14 @@ use crate::audio::SoundType;
 use crate::audio::SoundType::Send;
 use crate::db::Db;
 use crate::types::MessagePacket;
+use crate::types::MsgType::FILE;
 use crate::types::MsgType::STICKER;
 use crate::types::MsgType::{IMAGE, TEXT};
 use chrono::Local;
+use eframe::egui::Shape::Path;
 use log::{error, info, warn};
 
+use std::fmt::format;
 use std::fs;
 use std::sync::Arc;
 use teloxide::net::Download;
@@ -88,6 +91,7 @@ impl Backend {
                         msgtype: TEXT,
                         is_bot: false,
                         is_read: true,
+                        msg_name: None,
                     };
                     let t = tx.send(m.clone()).await;
 
@@ -128,6 +132,7 @@ impl Backend {
                             msgtype: IMAGE,
                             is_bot: false,
                             is_read: true,
+                            msg_name: None,
                         };
                         let _ = tx.send(p.clone()).await;
                         database.clone().add_message(&p).await;
@@ -158,6 +163,7 @@ impl Backend {
                             msgtype: STICKER,
                             is_bot: false,
                             is_read: true,
+                            msg_name: None,
                         };
                         let _ = tx.send(p.clone()).await;
                         database.clone().add_message(&p).await;
@@ -165,6 +171,35 @@ impl Backend {
                     } else {
                         bot.delete_message(msg.chat.id, msg.id).await?;
                     }
+                } else if let Some(doc) = msg.document() {
+                    if let Err(e) = fs::create_dir_all("data/temp") {
+                        error!("Failed to create 'data' directory: {}", e);
+                        panic!("{}", e);
+                    }
+                    let file_id = &doc.file.id;
+
+                    let file_info = bot.get_file(file_id.clone()).await?;
+                    let file_format = format!("{}.dat", file_id);
+                    let file_name = doc.file_name.clone().unwrap_or(file_format);
+                    let path = format!("data/temp/{}", file_name);
+
+                    let mut destination_file = TokioFile::create(path.clone()).await?;
+                    bot.download_file(&file_info.path, &mut destination_file)
+                        .await?;
+
+                    let p = MessagePacket {
+                        username: msg.chat.first_name().map(String::from),
+                        text: path,
+                        chat_id: msg.chat_id().unwrap_or(ChatId(1)),
+                        time: Local::now().format("%H:%M").to_string(),
+                        msgtype: FILE,
+                        is_bot: false,
+                        is_read: true,
+                        msg_name: Some(file_name),
+                    };
+                    let _ = tx.send(p.clone()).await;
+                    database.clone().add_message(&p).await;
+                    player.play(SoundType::Message);
                 } else {
                     bot.delete_message(msg.chat.id, msg.id).await?;
                 }

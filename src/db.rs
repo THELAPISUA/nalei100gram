@@ -1,7 +1,8 @@
 use crate::types::{
     Chat, MessagePacket,
-    MsgType::{IMAGE, STICKER, TEXT},
+    MsgType::{FILE, IMAGE, STICKER, TEXT},
 };
+use eframe::wgpu::naga::compact::KeepUnused::No;
 use log::{debug, error, info, trace, warn};
 use sqlx::{
     Pool, Sqlite,
@@ -75,7 +76,8 @@ impl Db {
                 date TEXT NOT NULL,
                 is_bot INTEGER NOT NULL DEFAULT 0,
                 is_read INTEGER NOT NULL DEFAULT 0,
-                msg_type INTEGER NOT NULL 
+                msg_type INTEGER NOT NULL,
+                msg_name TEXT
             );
             "#,
         )
@@ -120,12 +122,13 @@ impl Db {
             TEXT => 0,
             IMAGE => 1,
             STICKER => 2,
+            FILE => 3,
             _ => -1,
         };
 
         match sqlx::query(
-            "INSERT INTO messages (chat_id, username, text, date, is_bot, is_read, msg_type)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7)",
+            "INSERT INTO messages (chat_id, username, text, date, is_bot, is_read, msg_type, msg_name)
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
         )
         .bind(&msg.chat_id.0)
         .bind(&msg.username)
@@ -134,6 +137,7 @@ impl Db {
         .bind(msg.is_bot as i64)
         .bind(msg.is_read as i64)
         .bind(msgtype as i64)
+        .bind(msg.msg_name.clone().unwrap_or(String::new()))
         .execute(&self.pool)
         .await
         {
@@ -180,7 +184,7 @@ impl Db {
         debug!("Loading all chat histories from database...");
 
         let rows: Vec<MessageRow> = match sqlx::query_as(
-            "SELECT chat_id, username, text, date, is_bot, is_read, msg_type
+            "SELECT chat_id, username, text, date, is_bot, is_read, msg_type, msg_name
          FROM messages
          ORDER BY chat_id ASC, id ASC",
         )
@@ -206,7 +210,7 @@ impl Db {
                 0 => TEXT,
                 1 => IMAGE,
                 2 => STICKER,
-
+                3 => FILE,
                 _ => TEXT,
             };
 
@@ -218,6 +222,7 @@ impl Db {
                 is_read: r.is_read,
                 msgtype: msgtype,
                 chat_id: ChatId(r.chat_id),
+                msg_name: Some(r.msg_name),
             });
         }
 
@@ -249,4 +254,5 @@ struct MessageRow {
     is_bot: bool,
     is_read: bool,
     msg_type: i64,
+    msg_name: String,
 }
