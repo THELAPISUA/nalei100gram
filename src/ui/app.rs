@@ -1,5 +1,5 @@
 use crate::ui::ui_components::{draw_send_button, preview_files_being_dropped};
-use crate::utils::types::{Chat, MessagePacket, PendingFile};
+use crate::utils::types::{ActionPacket, Chat, MessagePacket, PendingFile};
 use eframe::egui;
 use eframe::egui::{
     Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Sense, Stroke, TextEdit,
@@ -11,8 +11,8 @@ use teloxide::types::ChatId;
 use tokio::sync::mpsc::{Receiver, Sender};
 
 pub struct GramApp {
-    pub(crate) tx: Sender<MessagePacket>,
-    pub(crate) rx: Receiver<MessagePacket>,
+    pub(crate) tx: Sender<ActionPacket>,
+    pub(crate) rx: Receiver<ActionPacket>,
     pub(crate) chats: Vec<Chat>,
     pub(crate) input_text: String,
     pub(crate) current_chat: ChatId,
@@ -21,7 +21,7 @@ pub struct GramApp {
 }
 
 impl GramApp {
-    pub fn new(tx: Sender<MessagePacket>, rx: Receiver<MessagePacket>, chats: Vec<Chat>) -> Self {
+    pub fn new(tx: Sender<ActionPacket>, rx: Receiver<ActionPacket>, chats: Vec<Chat>) -> Self {
         Self {
             tx,
             rx,

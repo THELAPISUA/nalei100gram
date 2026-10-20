@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use teloxide::types::ChatId;
+use teloxide::types::{ChatId, MessageId};
 
 use crate::utils::types::MsgType::TEXT;
 pub struct PendingFile {
@@ -24,28 +24,42 @@ pub enum MsgType {
     _VIDEO,
 }
 
+pub enum ActionPacket {
+    Send(MessagePacket),
+    Edit(Message),
+    Delete(i64),
+}
+#[derive(Clone)]
+pub struct Message {
+    pub id: MessageId,
+    pub chat_id: ChatId,
+    pub new_text: Option<String>,
+}
+
 #[derive(Clone)]
 pub struct MessagePacket {
     pub username: Option<String>,
     pub text: String,
-    pub msg_name: Option<String>,
+    pub message_name: Option<String>,
     pub time: String,
     pub is_bot: bool,
     pub is_read: bool,
     pub msg_type: MsgType,
     pub chat_id: ChatId,
+    pub message_id: Option<MessageId>,
 }
 impl Default for MessagePacket {
     fn default() -> Self {
         Self {
             username: Some(String::new()),
             text: String::new(),
-            msg_name: Some(String::new()),
+            message_name: Some(String::new()),
             time: String::new(),
             is_bot: true,
             is_read: true,
             msg_type: TEXT,
             chat_id: ChatId(-1),
+            message_id: Some(MessageId(1)),
         }
     }
 }

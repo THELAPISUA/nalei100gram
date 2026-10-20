@@ -1,11 +1,12 @@
 use crate::ui::app::GramApp;
+use crate::utils::types::ActionPacket::Send;
 use crate::utils::types::MsgType::{FILE, IMAGE, STICKER, TEXT};
 use crate::utils::types::{Chat, MessagePacket, PendingFile};
 use chrono::Local;
 use eframe::egui;
 use log::info;
 use std::ffi::OsStr;
-use teloxide::types::ChatId;
+use teloxide::types::{ChatId, MessageId};
 
 impl GramApp {
     pub(crate) fn get_or_create_chat(&mut self, chat_id: ChatId) -> &mut Chat {
@@ -23,11 +24,16 @@ impl GramApp {
     }
     pub(crate) fn recv_messages(&mut self) {
         while let Ok(packet) = self.rx.try_recv() {
-            let chat_id = packet.chat_id;
-            let chat = self.get_or_create_chat(chat_id);
+            match packet {
+                Send(m) => {
+                    let chat_id = m.chat_id;
+                    let chat = self.get_or_create_chat(chat_id);
 
-            chat.unreaded_count += 1;
-            chat.messages.push(packet.clone());
+                    chat.unreaded_count += 1;
+                    chat.messages.push(m.clone());
+                }
+                _ => {}
+            }
         }
     }
     pub(crate) fn sender_docs_messages(&mut self) {
@@ -46,9 +52,10 @@ impl GramApp {
                     msg_type: message_type,
                     is_bot: true,
                     is_read: true,
-                    msg_name: Some(file.name),
+                    message_name: Some(file.name),
+                    message_id: None,
                 };
-                let is_ok = self.tx.try_send(msg.clone()).is_ok();
+                let is_ok = self.tx.try_send(Send(msg.clone())).is_ok();
                 if is_ok {
                     let current_chat = self.current_chat.clone();
                     let chat = self.get_or_create_chat(current_chat.clone());
@@ -136,9 +143,10 @@ impl GramApp {
             msg_type: TEXT,
             is_bot: true,
             is_read: true,
-            msg_name: None,
+            message_name: None,
+            message_id: None,
         };
-        if self.tx.try_send(packet.clone()).is_ok() {
+        if self.tx.try_send(Send(packet.clone())).is_ok() {
             let current_chat = self.current_chat.clone();
             let chat = self.get_or_create_chat(current_chat.clone());
 
@@ -147,4 +155,8 @@ impl GramApp {
             self.input_text.clear();
         }
     }
+}
+
+pub(crate) fn delete_msg(msg_id: MessageId, chat: &mut Chat) {
+    chat.messages.retain(|m| m.message_id.unwrap() == msg_id);
 }

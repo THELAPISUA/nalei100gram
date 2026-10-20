@@ -1,5 +1,11 @@
-use eframe::egui;
+use eframe::egui::{self, Sense};
+use egui::Response;
 
+pub enum MessageAction {
+    Edit,
+    Copy,
+    Delete,
+}
 pub struct MessageWidget {
     pub username: String,
     pub text: String,
@@ -8,34 +14,37 @@ pub struct MessageWidget {
 }
 
 impl MessageWidget {
-    pub fn show(&self, ui: &mut egui::Ui) {
+    pub fn show(&self, ui: &mut egui::Ui) -> Option<MessageAction> {
         let available_width = ui.available_width();
 
-        ui.allocate_ui_with_layout(
+        let inner = ui.allocate_ui_with_layout(
             egui::vec2(available_width, 0.0),
             egui::Layout::left_to_right(egui::Align::TOP),
             |ui| {
                 if self.outgoing {
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::TOP), |ui| {
-                        self.bubble(ui);
-                    });
+                        self.bubble(ui)
+                    })
+                    .inner
                 } else {
-                    self.bubble(ui);
+                    self.bubble(ui)
                 }
             },
         );
 
         ui.add_space(4.0);
+        inner.inner
     }
 
-    fn bubble(&self, ui: &mut egui::Ui) {
+    /// Малює бульбашку і повертає дію з випливаючого меню (якщо вибрана).
+    fn bubble(&self, ui: &mut egui::Ui) -> Option<MessageAction> {
         let bubble_color = if self.outgoing {
             egui::Color32::from_rgb(210, 240, 190)
         } else {
             egui::Color32::from_rgb(245, 245, 245)
         };
 
-        egui::Frame::new()
+        let frame_response = egui::Frame::new()
             .fill(bubble_color)
             .corner_radius(egui::CornerRadius::same(12))
             .inner_margin(egui::Margin {
@@ -53,11 +62,8 @@ impl MessageWidget {
                         .size(14.0)
                         .color(egui::Color32::from_rgb(40, 100, 180)),
                 );
-
                 ui.add_space(3.0);
-
                 ui.label(egui::RichText::new(&self.text).size(15.0));
-
                 ui.add_space(5.0);
 
                 ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
@@ -67,7 +73,33 @@ impl MessageWidget {
                             .color(egui::Color32::GRAY),
                     );
                 });
-            });
+            })
+            .response
+            .interact(Sense::click()); // робимо весь Frame клікабельним
+
+        self.popup(&frame_response)
+    }
+
+    fn popup(&self, response: &Response) -> Option<MessageAction> {
+        let mut action = None;
+
+        egui::Popup::menu(response).show(|ui| {
+            ui.set_min_width(140.0);
+            if ui.button("Редактувати").clicked() {
+                action = Some(MessageAction::Edit);
+                ui.close();
+            }
+            if ui.button("Копіювати").clicked() {
+                action = Some(MessageAction::Copy);
+                ui.close();
+            }
+            if ui.button("Видалити").clicked() {
+                action = Some(MessageAction::Delete);
+                ui.close();
+            }
+        });
+
+        action
     }
 }
 

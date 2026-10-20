@@ -1,8 +1,9 @@
 use crate::logic::db::Db;
+use crate::logic::logic::process_packet_message;
 use crate::utils::audio::AudioPlayer;
 use crate::utils::audio::SoundType;
-use crate::utils::audio::SoundType::Send;
 use crate::utils::audio::set_max_vol;
+use crate::utils::types::ActionPacket;
 use crate::utils::types::MessagePacket;
 use crate::utils::types::MsgType::FILE;
 use crate::utils::types::MsgType::STICKER;
@@ -10,7 +11,6 @@ use crate::utils::types::MsgType::{IMAGE, TEXT};
 use chrono::Local;
 
 use log::{error, info, warn};
-use teloxide::types::InputFile;
 
 use std::fs;
 use std::sync::Arc;
@@ -19,17 +19,13 @@ use teloxide::{dispatching::dialogue::GetChatId, prelude::*};
 use tokio::fs::File as TokioFile;
 use tokio::sync::mpsc::{Receiver, Sender};
 pub struct Backend {
-    tx_bot: Sender<MessagePacket>,
-    rx_bot: Receiver<MessagePacket>,
-    database: Db,
-    player: Arc<AudioPlayer>,
+    pub(crate) tx_bot: Sender<ActionPacket>,
+    pub(crate) rx_bot: Receiver<ActionPacket>,
+    pub(crate) database: Db,
+    pub(crate) player: Arc<AudioPlayer>,
 }
 impl Backend {
-    pub fn new(
-        tx_bot: Sender<MessagePacket>,
-        rx_bot: Receiver<MessagePacket>,
-        database: Db,
-    ) -> Self {
+    pub fn new(tx_bot: Sender<ActionPacket>, rx_bot: Receiver<ActionPacket>, database: Db) -> Self {
         Self {
             tx_bot,
             rx_bot,
@@ -51,74 +47,22 @@ impl Backend {
 
         tokio::spawn(async move {
             while let Some(packet) = rx_bot.recv().await {
-                info!("Received packet for chat {}", packet.chat_id);
-                match packet.msg_type {
-                    TEXT => {
-                        let r = bot_for_gui
-                            .send_message(packet.chat_id, packet.text.clone())
-                            .await;
-                        self.player.play(Send);
-
-                        db_for_gui.clone().add_message(&packet).await;
-
-                        match r {
-                            Ok(m) => {
-                                let chat_id = m.chat.id.0 as i64;
-                                info!(
-                                    "Successful send msg! chat_id:{}, msg:{}",
-                                    chat_id,
-                                    m.text().unwrap_or("occurred message")
-                                );
-                            }
-                            Err(e) => {
-                                error!("Failed to send message, err: {}", e);
-                            }
-                        }
+                let db_for_gui = db_for_gui.clone();
+                match packet {
+                    ActionPacket::Send(pack) => {
+                        process_packet_message(&pack, &bot_for_gui, &db_for_gui, &player).await;
+                        info!("Received packet for chat {}", pack.chat_id);
                     }
-                    FILE => {
+                    ActionPacket::Edit(msg) => {
                         let r = bot_for_gui
-                            .send_document(packet.chat_id, InputFile::file(packet.text.clone()))
+                            .edit_message_text(
+                                msg.chat_id.clone(),
+                                msg.id.clone(),
+                                msg.new_text.clone().unwrap().as_str(),
+                            )
                             .await;
-
-                        self.player.play(Send);
-
-                        db_for_gui.clone().add_message(&packet).await;
-
-                        match r {
-                            Ok(m) => {
-                                let chat_id = m.chat.id.0 as i64;
-                                info!(
-                                    "Successful send msg! chat_id:{}, msg:{}",
-                                    chat_id,
-                                    m.text().unwrap_or("occurred message")
-                                );
-                            }
-                            Err(e) => {
-                                error!("Failed to send message, err: {}", e);
-                            }
-                        }
-                    }
-                    IMAGE => {
-                        let r = bot_for_gui
-                            .send_photo(packet.chat_id, InputFile::file(packet.text.clone()))
-                            .await;
-
-                        self.player.play(Send);
-
-                        db_for_gui.clone().add_message(&packet).await;
-
-                        match r {
-                            Ok(m) => {
-                                let chat_id = m.chat.id.0 as i64;
-                                info!(
-                                    "Successful send msg! chat_id:{}, msg:{}",
-                                    chat_id,
-                                    m.text().unwrap_or("occurred message")
-                                );
-                            }
-                            Err(e) => {
-                                error!("Failed to send message, err: {}", e);
-                            }
+                        if r.is_ok() {
+                            db_for_gui.edit_message(msg.clone()).await;
                         }
                     }
                     _ => {}
@@ -127,7 +71,7 @@ impl Backend {
         });
         let tx_bot_clone = self.tx_bot.clone();
         let database = self.database.clone();
-
+        let player = self.player.clone();
         teloxide::repl(bot, move |bot: Bot, msg: Message| {
             let tx = tx_bot_clone.clone();
             let database = database.clone();
@@ -142,9 +86,10 @@ impl Backend {
                         msg_type: TEXT,
                         is_bot: false,
                         is_read: true,
-                        msg_name: None,
+                        message_name: None,
+                        message_id: Some(msg.id),
                     };
-                    let t = tx.send(m.clone()).await;
+                    let t = tx.send(ActionPacket::Send(m.clone())).await;
 
                     database.clone().add_message(&m).await;
                     set_max_vol();
@@ -184,9 +129,10 @@ impl Backend {
                             msg_type: IMAGE,
                             is_bot: false,
                             is_read: true,
-                            msg_name: None,
+                            message_name: None,
+                            message_id: Some(msg.id),
                         };
-                        let _ = tx.send(p.clone()).await;
+                        let _ = tx.send(ActionPacket::Send(p.clone())).await;
                         database.clone().add_message(&p).await;
                         set_max_vol();
                         player.play(SoundType::Message);
@@ -216,9 +162,10 @@ impl Backend {
                             msg_type: STICKER,
                             is_bot: false,
                             is_read: true,
-                            msg_name: None,
+                            message_name: None,
+                            message_id: Some(msg.id),
                         };
-                        let _ = tx.send(p.clone()).await;
+                        let _ = tx.send(ActionPacket::Send(p.clone())).await;
                         database.clone().add_message(&p).await;
                         set_max_vol();
                         player.play(SoundType::Message);
@@ -249,9 +196,10 @@ impl Backend {
                         msg_type: FILE,
                         is_bot: false,
                         is_read: true,
-                        msg_name: Some(file_name),
+                        message_name: Some(file_name),
+                        message_id: Some(msg.id),
                     };
-                    let _ = tx.send(p.clone()).await;
+                    let _ = tx.send(ActionPacket::Send(p.clone())).await;
                     database.clone().add_message(&p).await;
                     set_max_vol();
                     player.play(SoundType::Message);

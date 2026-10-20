@@ -1,5 +1,5 @@
 use crate::utils::types::{
-    Chat, MessagePacket,
+    self, Chat, MessagePacket,
     MsgType::{FILE, IMAGE, STICKER, TEXT},
 };
 
@@ -10,7 +10,7 @@ use sqlx::{
 };
 use std::collections::HashMap;
 use std::fs;
-use teloxide::types::ChatId;
+use teloxide::types::{ChatId, MessageId};
 
 #[derive(Clone)]
 pub struct Db {
@@ -77,7 +77,8 @@ impl Db {
                 is_bot INTEGER NOT NULL DEFAULT 0,
                 is_read INTEGER NOT NULL DEFAULT 0,
                 msg_type INTEGER NOT NULL,
-                msg_name TEXT
+                msg_name TEXT,
+                telegram_message_id INTEGER NOT NULL
             );
             "#,
         )
@@ -127,7 +128,7 @@ impl Db {
         };
 
         match sqlx::query(
-            "INSERT INTO messages (chat_id, username, text, date, is_bot, is_read, msg_type, msg_name)
+            "INSERT INTO messages (chat_id, username, text, date, is_bot, is_read, msg_type, msg_name, telegram_message_id)
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
         )
         .bind(&msg.chat_id.0)
@@ -137,7 +138,8 @@ impl Db {
         .bind(msg.is_bot as i64)
         .bind(msg.is_read as i64)
         .bind(msgtype as i64)
-        .bind(msg.msg_name.clone().unwrap_or(String::new()))
+        .bind(msg.message_name.clone().unwrap_or(String::new()))
+        .bind(msg.message_id.unwrap().0)
         .execute(&self.pool)
         .await
         {
@@ -148,6 +150,28 @@ impl Db {
                 error!(
                     "Failed to save message to DB for chat {}: {}",
                     msg.chat_id.0, e
+                );
+            }
+        }
+    }
+    pub async fn edit_message(self, msg: types::Message) {
+        match sqlx::query(
+            "UPDATE messages
+                SET text = ?
+                WHERE chat_id = ? AND telegram_message_id = ?;",
+        )
+        .bind(msg.chat_id.0)
+        .bind(msg.id.0)
+        .execute(&self.pool)
+        .await
+        {
+            Ok(_) => {
+                trace!("Message successfully edited in database.");
+            }
+            Err(e) => {
+                error!(
+                    "Failed to edit message: {} in DB for chat {}: {}",
+                    msg.id.0, msg.chat_id.0, e
                 );
             }
         }
@@ -184,7 +208,7 @@ impl Db {
         debug!("Loading all chat histories from database...");
 
         let rows: Vec<MessageRow> = match sqlx::query_as(
-            "SELECT chat_id, username, text, date, is_bot, is_read, msg_type, msg_name
+            "SELECT chat_id, username, text, date, is_bot, is_read, msg_type, msg_name, telegram_message_id
          FROM messages
          ORDER BY chat_id ASC, id ASC",
         )
@@ -222,7 +246,8 @@ impl Db {
                 is_read: r.is_read,
                 msg_type: msgtype,
                 chat_id: ChatId(r.chat_id),
-                msg_name: Some(r.msg_name),
+                message_name: Some(r.msg_name),
+                message_id: Some(MessageId(r.telegram_message_id)),
             });
         }
 
@@ -255,4 +280,5 @@ struct MessageRow {
     is_read: bool,
     msg_type: i64,
     msg_name: String,
+    telegram_message_id: i32,
 }

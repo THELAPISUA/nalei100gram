@@ -1,8 +1,9 @@
 use crate::ui::app::GramApp;
 
+use crate::ui::widgets::MessageAction::Edit;
 use crate::ui::widgets::{FileWidget, MessageWidget, PhotoWidget};
-use crate::utils::types::MessagePacket;
-use crate::utils::types::MsgType::*;
+use crate::utils::types::{ActionPacket, MessagePacket};
+use crate::utils::types::{Message, MsgType::*};
 use eframe::egui::{self, Align2, Color32, FontId, Sense, vec2};
 use image::ImageReader;
 use std::collections::HashMap;
@@ -16,81 +17,117 @@ impl GramApp {
             egui::ScrollArea::vertical()
                 .stick_to_bottom(true)
                 .show(ui, |ui| {
-                    for chat in &mut self.chats {
-                        if chat.chat_id == self.current_chat {
-                            for msg in &chat.messages {
-                                process_message(ui, msg, &mut self.photos);
-                            }
-                            chat.unreaded_count = 0;
-                            for msg in &mut chat.messages {
-                                msg.is_read = true;
-                            }
+                    let mut actions = Vec::new();
 
-                            break;
+                    if let Some(chat) = self
+                        .chats
+                        .iter_mut()
+                        .find(|chat| chat.chat_id == self.current_chat)
+                    {
+                        for msg in &chat.messages {
+                            if let Some(action) = process_message(ui, msg, &mut self.photos) {
+                                actions.push(action);
+                            }
+                        }
+
+                        chat.unreaded_count = 0;
+
+                        for msg in &mut chat.messages {
+                            msg.is_read = true;
                         }
                     }
+
+                    for action in actions {
+                        match action {
+                            ActionPacket::Edit(message) => {
+                                let _ = self.tx.try_send(ActionPacket::Edit(message));
+                            }
+                            ActionPacket::Delete(id) => {}
+                            _ => {}
+                        }
+                    }
+
+                    preview_files_being_dropped(ui.ctx());
                 });
-            preview_files_being_dropped(ui.ctx());
         });
     }
 }
-
+//
+// Короче я устав то давай, наклепай
+// 1) Зроби обробку чатів, треба шукати серед чату конкретне сообщение
+// 2) Зроби якусь удобну штуку для редактирования давай як в тг типа в поле ввода
+// 3) Зроби видалення для себе і для всіх
+// 4) Копіювання це просто в буфер кидай і якийсь плейсхолдер
 fn process_message(
     ui: &mut egui::Ui,
     msg: &MessagePacket,
     photos: &mut HashMap<String, egui::TextureHandle>,
-) {
+) -> Option<ActionPacket> {
     match msg.msg_type {
         TEXT => {
             let widget = MessageWidget {
-                username: msg.username.clone().unwrap_or(String::from("You")),
+                username: msg.username.clone().unwrap_or("You".into()),
                 text: msg.text.clone(),
                 time: msg.time.clone(),
                 outgoing: msg.is_bot,
             };
-            widget.show(ui);
+
+            if let Some(action) = widget.show(ui) {
+                match action {
+                    Edit => {
+                        let id = msg.message_id?;
+
+                        return Some(ActionPacket::Edit(Message {
+                            id,
+                            chat_id: msg.chat_id,
+                            new_text: Some("hello".into()),
+                        }));
+                    }
+                    _ => {}
+                }
+            }
         }
-        IMAGE => {
+
+        IMAGE | STICKER => {
             let widget = PhotoWidget {
-                username: msg.username.clone().unwrap_or(String::from("You")),
+                username: msg.username.clone().unwrap_or("You".into()),
                 texture: get_img(ui.ctx(), &msg.text, photos),
                 time: msg.time.clone(),
                 outgoing: msg.is_bot,
             };
+
             widget.show(ui);
         }
-        STICKER => {
-            let widget = PhotoWidget {
-                username: msg.username.clone().unwrap_or(String::from("You")),
-                texture: get_img(ui.ctx(), &msg.text, photos),
-                time: msg.time.clone(),
-                outgoing: msg.is_bot,
-            };
-            widget.show(ui);
-        }
+
         FILE => {
             let path = msg.text.clone();
+
             let widget = FileWidget {
-                username: msg.username.clone().unwrap_or(String::from("You")),
+                username: msg.username.clone().unwrap_or("You".into()),
                 _file_path: path.clone(),
                 time: msg.time.clone(),
                 outgoing: msg.is_bot,
-                file_name: msg.msg_name.clone().unwrap_or("FILE".to_string()),
+                file_name: msg.message_name.clone().unwrap_or("FILE".into()),
             };
+
             if widget.show(ui) {
                 let _ = open::that(path);
             }
         }
+
         _ => {
             let widget = MessageWidget {
-                username: msg.username.clone().unwrap_or(String::from("You")),
-                text: format!("Ошибка рендера неизвестний тип"),
+                username: msg.username.clone().unwrap_or("You".into()),
+                text: "Ошибка рендера неизвестний тип".into(),
                 time: msg.time.clone(),
                 outgoing: msg.is_bot,
             };
+
             widget.show(ui);
         }
     }
+
+    None
 }
 
 /// Затемнення з підказкою, поки файли тягнуть над вікном.
