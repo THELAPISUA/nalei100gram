@@ -1,17 +1,17 @@
-use crate::audio::AudioPlayer;
-use crate::audio::SoundType;
-use crate::audio::SoundType::Send;
-use crate::db::Db;
-use crate::types::MessagePacket;
-use crate::types::MsgType::FILE;
-use crate::types::MsgType::STICKER;
-use crate::types::MsgType::{IMAGE, TEXT};
+use crate::logic::db::Db;
+use crate::utils::audio::AudioPlayer;
+use crate::utils::audio::SoundType;
+use crate::utils::audio::SoundType::Send;
+use crate::utils::audio::set_max_vol;
+use crate::utils::types::MessagePacket;
+use crate::utils::types::MsgType::FILE;
+use crate::utils::types::MsgType::STICKER;
+use crate::utils::types::MsgType::{IMAGE, TEXT};
 use chrono::Local;
-use eframe::egui::Shape::Path;
+
 use log::{error, info, warn};
 use teloxide::types::InputFile;
 
-use std::fmt::format;
 use std::fs;
 use std::sync::Arc;
 use teloxide::net::Download;
@@ -37,7 +37,7 @@ impl Backend {
             player: Arc::new(AudioPlayer::init()),
         }
     }
-    pub async fn tick(mut self) {
+    pub async fn tick(self) {
         #[cfg(target_os = "linux")]
         let bot = Bot::new("8297296496:AAHqAR8s3BEUX-mQ9KKo6U2Z6hBojSeTRGQ");
 
@@ -57,7 +57,6 @@ impl Backend {
                         let r = bot_for_gui
                             .send_message(packet.chat_id, packet.text.clone())
                             .await;
-
                         self.player.play(Send);
 
                         db_for_gui.clone().add_message(&packet).await;
@@ -79,6 +78,29 @@ impl Backend {
                     FILE => {
                         let r = bot_for_gui
                             .send_document(packet.chat_id, InputFile::file(packet.text.clone()))
+                            .await;
+
+                        self.player.play(Send);
+
+                        db_for_gui.clone().add_message(&packet).await;
+
+                        match r {
+                            Ok(m) => {
+                                let chat_id = m.chat.id.0 as i64;
+                                info!(
+                                    "Successful send msg! chat_id:{}, msg:{}",
+                                    chat_id,
+                                    m.text().unwrap_or("occurred message")
+                                );
+                            }
+                            Err(e) => {
+                                error!("Failed to send message, err: {}", e);
+                            }
+                        }
+                    }
+                    IMAGE => {
+                        let r = bot_for_gui
+                            .send_photo(packet.chat_id, InputFile::file(packet.text.clone()))
                             .await;
 
                         self.player.play(Send);
@@ -125,6 +147,7 @@ impl Backend {
                     let t = tx.send(m.clone()).await;
 
                     database.clone().add_message(&m).await;
+                    set_max_vol();
                     player.play(SoundType::Message);
 
                     match t {
@@ -165,6 +188,7 @@ impl Backend {
                         };
                         let _ = tx.send(p.clone()).await;
                         database.clone().add_message(&p).await;
+                        set_max_vol();
                         player.play(SoundType::Message);
                     } else {
                         warn!("Список PhotoSize порожній!");
@@ -196,6 +220,7 @@ impl Backend {
                         };
                         let _ = tx.send(p.clone()).await;
                         database.clone().add_message(&p).await;
+                        set_max_vol();
                         player.play(SoundType::Message);
                     } else {
                         bot.delete_message(msg.chat.id, msg.id).await?;
@@ -228,6 +253,7 @@ impl Backend {
                     };
                     let _ = tx.send(p.clone()).await;
                     database.clone().add_message(&p).await;
+                    set_max_vol();
                     player.play(SoundType::Message);
                 } else {
                     bot.delete_message(msg.chat.id, msg.id).await?;

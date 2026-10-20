@@ -13,7 +13,7 @@ pub enum TrayCommand {
 }
 
 fn load_tray_icon() -> tray_icon::Icon {
-    let bytes = include_bytes!("../assets/nalei100gramICO.png");
+    let bytes = include_bytes!("../../assets/nalei100gramICO.png");
 
     let image = image::load_from_memory(bytes)
         .expect("Не вдалося завантажити icon.png")

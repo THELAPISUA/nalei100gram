@@ -1,17 +1,13 @@
 #![windows_subsystem = "windows"]
 
-mod audio;
-mod backend;
-mod db;
-mod tray;
-mod types;
+mod logic;
 mod ui;
-mod widgets;
+mod utils;
 
-use crate::backend::Backend;
-use crate::db::Db;
-use crate::tray::init_tray;
-use crate::ui::GramApp;
+use crate::logic::backend::Backend;
+use crate::logic::db::Db;
+use crate::ui::app::GramApp;
+use crate::ui::tray::init_tray;
 
 use env_logger::{Builder, Target};
 use log::{LevelFilter, info};

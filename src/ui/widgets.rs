@@ -157,7 +157,7 @@ pub struct FileWidget {
     pub username: String,
     pub time: String,
     pub file_name: String,
-    pub file_path: String,
+    pub _file_path: String,
     pub outgoing: bool,
 }
 impl FileWidget {

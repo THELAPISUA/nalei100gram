@@ -1,8 +1,8 @@
-use crate::types::{
+use crate::utils::types::{
     Chat, MessagePacket,
     MsgType::{FILE, IMAGE, STICKER, TEXT},
 };
-use eframe::wgpu::naga::compact::KeepUnused::No;
+
 use log::{debug, error, info, trace, warn};
 use sqlx::{
     Pool, Sqlite,
@@ -153,7 +153,7 @@ impl Db {
         }
     }
 
-    pub async fn mark_readed_all(&self, chat_id: ChatId) {
+    pub async fn _mark_readed_all(&self, chat_id: ChatId) {
         debug!("Marking all messages as read for ChatId: {}", chat_id.0);
 
         match sqlx::query(

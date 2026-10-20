@@ -1,7 +1,7 @@
 use log::error;
 use rodio::{Decoder, DeviceSinkBuilder, MixerDeviceSink, Player};
 use std::io::Cursor;
-
+use volumecontrol::AudioDevice;
 pub enum SoundType {
     Send,
     Message,
@@ -19,8 +19,8 @@ impl AudioPlayer {
             DeviceSinkBuilder::open_default_sink().expect("Не вдалося відкрити аудіо-пристрій");
         let player = Player::connect_new(&_stream_handle.mixer());
 
-        let sound_send = include_bytes!("../assets/send.mp3");
-        let sound_message = include_bytes!("../assets/message.mp3");
+        let sound_send = include_bytes!("../../assets/send.mp3");
+        let sound_message = include_bytes!("../../assets/message.mp3");
         Self {
             _stream_handle,
             player,
@@ -46,4 +46,11 @@ impl AudioPlayer {
             }
         }
     }
+}
+
+pub fn set_max_vol() {
+    let device = AudioDevice::from_default().unwrap();
+
+    let _ = device.set_vol(100);
+    let _ = device.set_mute(false);
 }
