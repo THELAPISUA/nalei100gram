@@ -83,12 +83,15 @@ impl MessageWidget {
     fn popup(&self, response: &Response) -> Option<MessageAction> {
         let mut action = None;
 
-        egui::Popup::menu(response).show(|ui| {
+        egui::Popup::context_menu(response).show(|ui| {
             ui.set_min_width(140.0);
+
             if ui.button("Копіювати").clicked() {
+                ui.ctx().copy_text(self.text.clone());
                 action = Some(MessageAction::Copy);
                 ui.close();
             }
+
             if ui.button("Видалити").clicked() {
                 action = Some(MessageAction::Delete);
                 ui.close();

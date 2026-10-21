@@ -168,5 +168,5 @@ pub(crate) fn delete_msg(msg_id: MessageId, chat: &mut Chat) {
 }
 pub(crate) fn copy_to_clipboard(text: &str) {
     let mut clipboard = Clipboard::new().unwrap();
-    clipboard.set_text("Привет из Rust!").unwrap();
+    clipboard.set_text(text).unwrap();
 }
