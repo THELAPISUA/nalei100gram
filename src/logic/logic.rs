@@ -20,11 +20,14 @@ pub(crate) async fn process_packet_message(
                 .await;
             player.play(SoundType::Send);
 
-            db_for_gui.clone().add_message(&packet).await;
-
             match r {
                 Ok(m) => {
                     let chat_id = m.chat.id.0 as i64;
+                    let new_packet = MessagePacket {
+                        message_id: Some(m.id),
+                        ..packet.clone()
+                    };
+                    db_for_gui.clone().add_message(&new_packet).await;
                     info!(
                         "Successful send msg! chat_id:{}, msg:{}",
                         chat_id,

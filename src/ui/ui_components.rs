@@ -1,7 +1,8 @@
 use crate::ui::app::GramApp;
 
-use crate::ui::widgets::MessageAction::Edit;
-use crate::ui::widgets::{FileWidget, MessageWidget, PhotoWidget};
+use crate::ui::logic::{copy_to_clipboard, delete_msg};
+use crate::ui::widgets::{FileWidget, MessageAction, MessageWidget, PhotoWidget};
+
 use crate::utils::types::{ActionPacket, MessagePacket};
 use crate::utils::types::{Message, MsgType::*};
 use eframe::egui::{self, Align2, Color32, FontId, Sense, vec2};
@@ -42,7 +43,18 @@ impl GramApp {
                             ActionPacket::Edit(message) => {
                                 let _ = self.tx.try_send(ActionPacket::Edit(message));
                             }
-                            ActionPacket::Delete(_id) => {}
+                            ActionPacket::Delete(msg) => {
+                                let chat_id = msg.chat_id;
+                                let message_id = msg.id;
+
+                                if let Some(chat) =
+                                    self.chats.iter_mut().find(|chat| chat.chat_id == chat_id)
+                                {
+                                    delete_msg(message_id, chat);
+                                }
+
+                                let _ = self.tx.try_send(ActionPacket::Delete(msg));
+                            }
                             _ => {}
                         }
                     }
@@ -74,13 +86,24 @@ fn process_message(
 
             if let Some(action) = widget.show(ui) {
                 match action {
-                    Edit => {
+                    MessageAction::Edit => {
                         let id = msg.message_id?;
 
                         return Some(ActionPacket::Edit(Message {
                             id,
                             chat_id: msg.chat_id,
                             new_text: Some("hello".into()),
+                        }));
+                    }
+                    MessageAction::Copy => {
+                        copy_to_clipboard(&msg.text);
+                    }
+                    MessageAction::Delete => {
+                        let id = msg.message_id?;
+                        return Some(ActionPacket::Delete(Message {
+                            id,
+                            chat_id: msg.chat_id,
+                            new_text: None,
                         }));
                     }
                     _ => {}

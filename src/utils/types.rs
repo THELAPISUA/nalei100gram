@@ -30,7 +30,7 @@ pub enum MsgType {
 pub enum ActionPacket {
     Send(MessagePacket),
     Edit(Message),
-    Delete(i64),
+    Delete(Message),
 }
 #[derive(Clone)]
 pub struct Message {

@@ -65,6 +65,12 @@ impl Backend {
                             db_for_gui.edit_message(msg.clone()).await;
                         }
                     }
+                    ActionPacket::Delete(msg) => {
+                        let r = bot_for_gui.delete_message(msg.chat_id, msg.id).await;
+                        if r.is_ok() {
+                            db_for_gui.delete_message(msg.chat_id, msg.id).await;
+                        }
+                    }
                     _ => {}
                 }
             }
@@ -153,6 +159,14 @@ impl Backend {
                             )),
                         };
                         let _ = tx.send(ActionPacket::Send(p.clone())).await;
+                        database
+                            .add_chat(
+                                msg.chat.id,
+                                msg.chat
+                                    .title()
+                                    .unwrap_or(msg.chat.first_name().unwrap_or("Unknown name")),
+                            )
+                            .await;
                         database.clone().add_message(&p).await;
                         set_max_vol();
                         player.play(SoundType::Message);
@@ -192,6 +206,14 @@ impl Backend {
                             )),
                         };
                         let _ = tx.send(ActionPacket::Send(p.clone())).await;
+                        database
+                            .add_chat(
+                                msg.chat.id,
+                                msg.chat
+                                    .title()
+                                    .unwrap_or(msg.chat.first_name().unwrap_or("Unknown name")),
+                            )
+                            .await;
                         database.clone().add_message(&p).await;
                         set_max_vol();
                         player.play(SoundType::Message);
@@ -231,6 +253,14 @@ impl Backend {
                         )),
                     };
                     let _ = tx.send(ActionPacket::Send(p.clone())).await;
+                    database
+                        .add_chat(
+                            msg.chat.id,
+                            msg.chat
+                                .title()
+                                .unwrap_or(msg.chat.first_name().unwrap_or("Unknown name")),
+                        )
+                        .await;
                     database.clone().add_message(&p).await;
                     set_max_vol();
                     player.play(SoundType::Message);

@@ -2,9 +2,9 @@ use crate::ui::app::GramApp;
 use crate::utils::types::ActionPacket::Send;
 use crate::utils::types::MsgType::{FILE, IMAGE, STICKER, TEXT};
 use crate::utils::types::{Chat, MessagePacket, PendingFile};
+use arboard::Clipboard;
 use chrono::Local;
 use eframe::egui;
-
 use log::info;
 use std::ffi::OsStr;
 use teloxide::types::{ChatId, MessageId};
@@ -163,6 +163,10 @@ impl GramApp {
     }
 }
 
-pub(crate) fn _delete_msg(msg_id: MessageId, chat: &mut Chat) {
-    chat.messages.retain(|m| m.message_id.unwrap() == msg_id);
+pub(crate) fn delete_msg(msg_id: MessageId, chat: &mut Chat) {
+    chat.messages.retain(|m| m.message_id != Some(msg_id));
+}
+pub(crate) fn copy_to_clipboard(text: &str) {
+    let mut clipboard = Clipboard::new().unwrap();
+    clipboard.set_text("Привет из Rust!").unwrap();
 }

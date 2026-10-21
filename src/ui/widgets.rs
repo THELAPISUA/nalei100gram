@@ -85,10 +85,6 @@ impl MessageWidget {
 
         egui::Popup::menu(response).show(|ui| {
             ui.set_min_width(140.0);
-            if ui.button("Редактувати").clicked() {
-                action = Some(MessageAction::Edit);
-                ui.close();
-            }
             if ui.button("Копіювати").clicked() {
                 action = Some(MessageAction::Copy);
                 ui.close();

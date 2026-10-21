@@ -113,38 +113,33 @@ impl Db {
     }
 
     pub async fn add_message(self, msg: &MessagePacket) {
-        debug!(
-            "Saving message to database. ChatId: {}, Username: {}",
-            msg.chat_id,
-            msg.username.clone()
-        );
-        let msgtype = match msg.msg_type {
-            TEXT => 0,
-            IMAGE => 1,
-            STICKER => 2,
-            FILE => 3,
-            _ => -1,
+        let Some(message_id) = msg.message_id else {
+            error!("Cannot save message without Telegram message ID");
+            return;
         };
 
         match sqlx::query(
-            "INSERT INTO messages (chat_id, username, text, date, is_bot, is_read, msg_type, msg_name, telegram_message_id)
-             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+            r#"
+    INSERT INTO messages (
+        chat_id, username, text, date, is_bot,
+        is_read, msg_type, msg_name, telegram_message_id
+    )
+    VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);
+    "#,
         )
-        .bind(&msg.chat_id.0)
+        .bind(msg.chat_id.0)
         .bind(&msg.username)
         .bind(&msg.text)
         .bind(&msg.time)
-        .bind(msg.is_bot as i64)
-        .bind(msg.is_read as i64)
-        .bind(msgtype as i64)
-        .bind(msg.message_name.clone().unwrap_or(String::new()))
-        .bind(msg.message_id.unwrap().0)
+        .bind(msg.is_bot)
+        .bind(msg.is_read)
+        .bind(msg.msg_type.clone() as i64)
+        .bind(msg.message_name.as_deref().unwrap_or(""))
+        .bind(message_id.0)
         .execute(&self.pool)
         .await
         {
-            Ok(_) => {
-                trace!("Message successfully written to database.");
-            }
+            Ok(_) => trace!("Message successfully written to database."),
             Err(e) => {
                 error!(
                     "Failed to save message to DB for chat {}: {}",
@@ -206,13 +201,14 @@ impl Db {
         if let Err(e) = sqlx::query(
             r#"
         INSERT INTO chats (chat_id, title)
-        VALUES (?1, ?3)
+        VALUES (?1, ?2)
         ON CONFLICT(chat_id) DO UPDATE SET
-            chat_type = excluded.chat_type,
             title = CASE
-                WHEN excluded.title != '' THEN excluded.title
+                WHEN excluded.title IS NOT NULL
+                     AND excluded.title != ''
+                THEN excluded.title
                 ELSE chats.title
-            END
+            END;
         "#,
         )
         .bind(chat_id.0)
@@ -221,6 +217,34 @@ impl Db {
         .await
         {
             error!("Failed to add/update chat {}: {}", chat_id.0, e);
+        }
+    }
+    pub async fn delete_message(&self, chat_id: ChatId, message_id: MessageId) {
+        match sqlx::query(
+            r#"
+        DELETE FROM messages
+        WHERE chat_id = ?1
+          AND telegram_message_id = ?2;
+        "#,
+        )
+        .bind(chat_id.0)
+        .bind(message_id.0)
+        .execute(&self.pool)
+        .await
+        {
+            Ok(result) => {
+                if result.rows_affected() > 0 {
+                    info!("Deleted message {} from chat {}", message_id.0, chat_id.0);
+                } else {
+                    warn!("Message {} not found in chat {}", message_id.0, chat_id.0);
+                }
+            }
+            Err(e) => {
+                error!(
+                    "Failed to delete message {} from chat {}: {}",
+                    message_id.0, chat_id.0, e
+                );
+            }
         }
     }
 
@@ -266,16 +290,18 @@ impl Db {
         let mut formatted_chats: Vec<Chat> = chats
             .into_iter()
             .map(|(chat_id, rows)| {
-                let name = rows
-                    .first()
-                    .map(|row| {
-                        if !row.chat_title.trim().is_empty() {
-                            row.chat_title.clone()
-                        } else {
-                            row.username.clone()
-                        }
-                    })
-                    .unwrap_or_default();
+                let title = rows.first().map(|row| row.chat_title.trim()).unwrap_or("");
+
+                let name = if !title.is_empty() {
+                    title.to_string()
+                } else {
+                    format!("Chat {chat_id}")
+                };
+
+                debug!(
+                    "Loaded chat: id={}, title='{}', displayed_name='{}'",
+                    chat_id, title, name
+                );
 
                 let unreaded_count = rows.iter().filter(|row| !row.is_read).count() as u32;
 
