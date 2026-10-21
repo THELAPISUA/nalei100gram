@@ -10,7 +10,7 @@ use sqlx::{
 };
 use std::collections::HashMap;
 use std::fs;
-use teloxide::types::ChatId;
+use teloxide::types::{ChatId, ChatType};
 
 #[derive(Clone)]
 pub struct Db {
@@ -52,7 +52,6 @@ impl Db {
             r#"
             CREATE TABLE IF NOT EXISTS chats (
                 chat_id INTEGER PRIMARY KEY,
-                chat_type TEXT,
                 title TEXT,
                 created_at INTEGER DEFAULT (strftime('%s','now'))
             );
@@ -116,7 +115,7 @@ impl Db {
         debug!(
             "Saving message to database. ChatId: {}, Username: {}",
             msg.chat_id,
-            msg.username.clone().unwrap_or(String::from("You"))
+            msg.username.clone()
         );
         let msgtype = match msg.msg_type {
             TEXT => 0,
@@ -179,59 +178,112 @@ impl Db {
             }
         }
     }
+    pub async fn add_chat(&self, chat_id: ChatId, title: &str) {
+        if let Err(e) = sqlx::query(
+            r#"
+        INSERT INTO chats (chat_id, title)
+        VALUES (?1, ?3)
+        ON CONFLICT(chat_id) DO UPDATE SET
+            chat_type = excluded.chat_type,
+            title = CASE
+                WHEN excluded.title != '' THEN excluded.title
+                ELSE chats.title
+            END
+        "#,
+        )
+        .bind(chat_id.0)
+        .bind(title)
+        .execute(&self.pool)
+        .await
+        {
+            error!("Failed to add/update chat {}: {}", chat_id.0, e);
+        }
+    }
 
     pub async fn load_chats(&self) -> Vec<Chat> {
         debug!("Loading all chat histories from database...");
 
         let rows: Vec<MessageRow> = match sqlx::query_as(
-            "SELECT chat_id, username, text, date, is_bot, is_read, msg_type, msg_name
-         FROM messages
-         ORDER BY chat_id ASC, id ASC",
+            r#"
+        SELECT
+            m.chat_id,
+            m.username,
+            m.text,
+            m.date,
+            m.is_bot,
+            m.is_read,
+            m.msg_type,
+            m.msg_name,
+            c.title AS chat_title
+        FROM messages m
+        LEFT JOIN chats c ON c.chat_id = m.chat_id
+        ORDER BY m.chat_id ASC, m.id ASC
+        "#,
         )
         .fetch_all(&self.pool)
         .await
         {
-            Ok(r) => r,
+            Ok(rows) => rows,
             Err(e) => {
                 error!("Failed to fetch messages from database: {}", e);
                 return Vec::new();
             }
         };
 
-        let mut chats: HashMap<i64, Vec<MessagePacket>> = HashMap::new();
         let rows_count = rows.len();
-        let mut count: u32 = 0;
-        for r in rows {
-            if !r.is_read {
-                count += 1;
-            }
+        let mut chats: HashMap<i64, Vec<MessageRow>> = HashMap::new();
 
-            let msgtype = match r.msg_type {
-                0 => TEXT,
-                1 => IMAGE,
-                2 => STICKER,
-                3 => FILE,
-                _ => TEXT,
-            };
-
-            chats.entry(r.chat_id).or_default().push(MessagePacket {
-                username: Some(r.username),
-                text: r.text,
-                time: r.date,
-                is_bot: r.is_bot,
-                is_read: r.is_read,
-                msg_type: msgtype,
-                chat_id: ChatId(r.chat_id),
-                msg_name: Some(r.msg_name),
-            });
+        for row in rows {
+            chats.entry(row.chat_id).or_default().push(row);
         }
 
         let formatted_chats: Vec<Chat> = chats
             .into_iter()
-            .map(|(chat_id, messages)| Chat {
-                chat_id: ChatId(chat_id),
-                messages,
-                unreaded_count: count,
+            .map(|(chat_id, messages)| {
+                let name = messages
+                    .first()
+                    .map(|m| {
+                        if !m.chat_title.trim().is_empty() {
+                            m.chat_title.clone()
+                        } else {
+                            m.username.clone()
+                        }
+                    })
+                    .unwrap_or_default();
+
+                let unreaded_count = messages.iter().filter(|m| !m.is_read).count() as u32;
+
+                let messages = messages
+                    .into_iter()
+                    .map(|r| {
+                        let msgtype = match r.msg_type {
+                            0 => TEXT,
+                            1 => IMAGE,
+                            2 => STICKER,
+                            3 => FILE,
+                            _ => TEXT,
+                        };
+
+                        MessagePacket {
+                            username: r.username,
+                            text: r.text,
+                            time: r.date,
+                            is_bot: r.is_bot,
+                            is_read: r.is_read,
+                            msg_type: msgtype,
+                            chat_id: ChatId(r.chat_id),
+                            msg_name: Some(r.msg_name),
+                            chat_name: Some(r.chat_title),
+                        }
+                    })
+                    .collect();
+
+                Chat {
+                    chat_id: ChatId(chat_id),
+                    messages,
+                    unreaded_count,
+                    name,
+                }
             })
             .collect();
 
@@ -245,7 +297,7 @@ impl Db {
     }
 }
 
-#[derive(sqlx::FromRow)]
+#[derive(Clone, sqlx::FromRow)]
 struct MessageRow {
     chat_id: i64,
     username: String,
@@ -255,4 +307,5 @@ struct MessageRow {
     is_read: bool,
     msg_type: i64,
     msg_name: String,
+    chat_title: String,
 }

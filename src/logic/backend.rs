@@ -9,7 +9,9 @@ use crate::utils::types::MsgType::STICKER;
 use crate::utils::types::MsgType::{IMAGE, TEXT};
 use chrono::Local;
 
+use eframe::egui::Key::P;
 use log::{error, info, warn};
+use teloxide::types::ChatType;
 use teloxide::types::InputFile;
 
 use std::fs;
@@ -135,7 +137,7 @@ impl Backend {
             async move {
                 if let Some(text) = msg.text() {
                     let m = MessagePacket {
-                        username: msg.chat.first_name().map(String::from),
+                        username: load_name(&msg),
                         text: text.to_string(),
                         chat_id: msg.chat_id().unwrap_or(ChatId(1)),
                         time: Local::now().format("%H:%M").to_string(),
@@ -143,10 +145,23 @@ impl Backend {
                         is_bot: false,
                         is_read: true,
                         msg_name: None,
+                        chat_name: Some(String::from(
+                            msg.chat
+                                .title()
+                                .unwrap_or(msg.chat.first_name().unwrap_or("Unknown name")),
+                        )),
                     };
                     let t = tx.send(m.clone()).await;
 
-                    database.clone().add_message(&m).await;
+                    database
+                        .add_chat(
+                            msg.chat.id,
+                            msg.chat
+                                .title()
+                                .unwrap_or(msg.chat.first_name().unwrap_or("Unknown name")),
+                        )
+                        .await;
+                    database.add_message(&m).await;
                     set_max_vol();
                     player.play(SoundType::Message);
 
@@ -177,7 +192,7 @@ impl Backend {
                         bot.download_file(&file_info.path, &mut destination_file)
                             .await?;
                         let p = MessagePacket {
-                            username: msg.chat.first_name().map(String::from),
+                            username: load_name(&msg),
                             text: path,
                             chat_id: msg.chat_id().unwrap_or(ChatId(1)),
                             time: Local::now().format("%H:%M").to_string(),
@@ -185,6 +200,11 @@ impl Backend {
                             is_bot: false,
                             is_read: true,
                             msg_name: None,
+                            chat_name: Some(String::from(
+                                msg.chat
+                                    .title()
+                                    .unwrap_or(msg.chat.first_name().unwrap_or("Unknown name")),
+                            )),
                         };
                         let _ = tx.send(p.clone()).await;
                         database.clone().add_message(&p).await;
@@ -209,7 +229,7 @@ impl Backend {
                         bot.download_file(&file_info.path, &mut destination_file)
                             .await?;
                         let p = MessagePacket {
-                            username: msg.chat.first_name().map(String::from),
+                            username: load_name(&msg),
                             text: path,
                             chat_id: msg.chat_id().unwrap_or(ChatId(1)),
                             time: Local::now().format("%H:%M").to_string(),
@@ -217,6 +237,11 @@ impl Backend {
                             is_bot: false,
                             is_read: true,
                             msg_name: None,
+                            chat_name: Some(String::from(
+                                msg.chat
+                                    .title()
+                                    .unwrap_or(msg.chat.first_name().unwrap_or("Unknown name")),
+                            )),
                         };
                         let _ = tx.send(p.clone()).await;
                         database.clone().add_message(&p).await;
@@ -242,7 +267,7 @@ impl Backend {
                         .await?;
 
                     let p = MessagePacket {
-                        username: msg.chat.first_name().map(String::from),
+                        username: load_name(&msg),
                         text: path,
                         chat_id: msg.chat_id().unwrap_or(ChatId(1)),
                         time: Local::now().format("%H:%M").to_string(),
@@ -250,6 +275,11 @@ impl Backend {
                         is_bot: false,
                         is_read: true,
                         msg_name: Some(file_name),
+                        chat_name: Some(String::from(
+                            msg.chat
+                                .title()
+                                .unwrap_or(msg.chat.first_name().unwrap_or("Unknown name")),
+                        )),
                     };
                     let _ = tx.send(p.clone()).await;
                     database.clone().add_message(&p).await;
@@ -263,4 +293,17 @@ impl Backend {
         })
         .await;
     }
+}
+fn load_name(msg: &Message) -> String {
+    let user = msg.clone().from;
+
+    let name = if user.is_some() {
+        user.unwrap().full_name()
+    } else {
+        msg.chat
+            .first_name()
+            .map(String::from)
+            .unwrap_or(msg.chat.title().unwrap_or("Ошибка имени").to_string())
+    };
+    name
 }

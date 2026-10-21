@@ -3,12 +3,13 @@ use crate::utils::types::MsgType::{FILE, IMAGE, STICKER, TEXT};
 use crate::utils::types::{Chat, MessagePacket, PendingFile};
 use chrono::Local;
 use eframe::egui;
+
 use log::info;
 use std::ffi::OsStr;
 use teloxide::types::ChatId;
 
 impl GramApp {
-    pub(crate) fn get_or_create_chat(&mut self, chat_id: ChatId) -> &mut Chat {
+    pub(crate) fn get_or_create_chat(&mut self, chat_id: ChatId, name: String) -> &mut Chat {
         if let Some(index) = self.chats.iter().position(|chat| chat.chat_id == chat_id) {
             return &mut self.chats[index];
         }
@@ -17,6 +18,7 @@ impl GramApp {
             chat_id,
             messages: Vec::new(),
             unreaded_count: 0,
+            name: name,
         });
 
         self.chats.last_mut().unwrap()
@@ -24,7 +26,7 @@ impl GramApp {
     pub(crate) fn recv_messages(&mut self) {
         while let Ok(packet) = self.rx.try_recv() {
             let chat_id = packet.chat_id;
-            let chat = self.get_or_create_chat(chat_id);
+            let chat = self.get_or_create_chat(chat_id, packet.clone().username);
 
             chat.unreaded_count += 1;
             chat.messages.push(packet.clone());
@@ -40,18 +42,19 @@ impl GramApp {
                 };
                 let msg = MessagePacket {
                     time: Local::now().format("%H:%M").to_string(),
-                    username: Some(String::from("You")),
+                    username: String::from("You"),
                     text: file.path.to_string_lossy().to_string(),
                     chat_id: self.current_chat.clone(),
                     msg_type: message_type,
                     is_bot: true,
                     is_read: true,
                     msg_name: Some(file.name),
+                    chat_name: None,
                 };
                 let is_ok = self.tx.try_send(msg.clone()).is_ok();
                 if is_ok {
                     let current_chat = self.current_chat.clone();
-                    let chat = self.get_or_create_chat(current_chat.clone());
+                    let chat = self.get_or_create_chat(current_chat.clone(), String::new());
                     chat.messages.push(msg);
                 }
             }
@@ -111,7 +114,7 @@ impl GramApp {
             .map(|c| &c.messages);
 
         let default_msg = MessagePacket {
-            username: Some(String::new()),
+            username: String::new(),
             text: String::from("Поки нема повідомлень!"),
             ..Default::default()
         };
@@ -130,17 +133,18 @@ impl GramApp {
     pub(crate) fn send_message_packet(&mut self, msg: String) {
         let packet = MessagePacket {
             time: Local::now().format("%H:%M").to_string(),
-            username: Some(String::from("You")),
+            username: String::from("You"),
             text: msg.clone(),
             chat_id: self.current_chat.clone(),
             msg_type: TEXT,
             is_bot: true,
             is_read: true,
             msg_name: None,
+            ..Default::default()
         };
         if self.tx.try_send(packet.clone()).is_ok() {
             let current_chat = self.current_chat.clone();
-            let chat = self.get_or_create_chat(current_chat.clone());
+            let chat = self.get_or_create_chat(current_chat.clone(), String::new());
 
             chat.messages.push(packet);
 
