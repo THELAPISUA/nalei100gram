@@ -52,7 +52,6 @@ impl Db {
             r#"
             CREATE TABLE IF NOT EXISTS chats (
                 chat_id INTEGER PRIMARY KEY,
-                chat_type TEXT,
                 title TEXT,
                 created_at INTEGER DEFAULT (strftime('%s','now'))
             );
@@ -117,7 +116,7 @@ impl Db {
         debug!(
             "Saving message to database. ChatId: {}, Username: {}",
             msg.chat_id,
-            msg.username.clone().unwrap_or(String::from("You"))
+            msg.username.clone()
         );
         let msgtype = match msg.msg_type {
             TEXT => 0,
@@ -203,62 +202,119 @@ impl Db {
             }
         }
     }
+    pub async fn add_chat(&self, chat_id: ChatId, title: &str) {
+        if let Err(e) = sqlx::query(
+            r#"
+        INSERT INTO chats (chat_id, title)
+        VALUES (?1, ?3)
+        ON CONFLICT(chat_id) DO UPDATE SET
+            chat_type = excluded.chat_type,
+            title = CASE
+                WHEN excluded.title != '' THEN excluded.title
+                ELSE chats.title
+            END
+        "#,
+        )
+        .bind(chat_id.0)
+        .bind(title)
+        .execute(&self.pool)
+        .await
+        {
+            error!("Failed to add/update chat {}: {}", chat_id.0, e);
+        }
+    }
 
     pub async fn load_chats(&self) -> Vec<Chat> {
         debug!("Loading all chat histories from database...");
 
         let rows: Vec<MessageRow> = match sqlx::query_as(
-            "SELECT chat_id, username, text, date, is_bot, is_read, msg_type, msg_name, telegram_message_id
-         FROM messages
-         ORDER BY chat_id ASC, id ASC",
+            r#"
+        SELECT
+            m.chat_id,
+            m.username,
+            m.text,
+            m.date,
+            m.is_bot,
+            m.is_read,
+            m.msg_type,
+            COALESCE(m.msg_name, '') AS msg_name,
+            m.telegram_message_id,
+            COALESCE(c.title, '') AS chat_title
+        FROM messages AS m
+        LEFT JOIN chats AS c ON c.chat_id = m.chat_id
+        ORDER BY m.chat_id ASC, m.id ASC;
+        "#,
         )
         .fetch_all(&self.pool)
         .await
         {
-            Ok(r) => r,
+            Ok(rows) => rows,
             Err(e) => {
                 error!("Failed to fetch messages from database: {}", e);
                 return Vec::new();
             }
         };
 
-        let mut chats: HashMap<i64, Vec<MessagePacket>> = HashMap::new();
         let rows_count = rows.len();
-        let mut count: u32 = 0;
-        for r in rows {
-            if !r.is_read {
-                count += 1;
-            }
 
-            let msgtype = match r.msg_type {
-                0 => TEXT,
-                1 => IMAGE,
-                2 => STICKER,
-                3 => FILE,
-                _ => TEXT,
-            };
+        let mut chats: HashMap<i64, Vec<MessageRow>> = HashMap::new();
 
-            chats.entry(r.chat_id).or_default().push(MessagePacket {
-                username: Some(r.username),
-                text: r.text,
-                time: r.date,
-                is_bot: r.is_bot,
-                is_read: r.is_read,
-                msg_type: msgtype,
-                chat_id: ChatId(r.chat_id),
-                message_name: Some(r.msg_name),
-                message_id: Some(MessageId(r.telegram_message_id)),
-            });
+        for row in rows {
+            chats.entry(row.chat_id).or_default().push(row);
         }
 
-        let formatted_chats: Vec<Chat> = chats
+        let mut formatted_chats: Vec<Chat> = chats
             .into_iter()
-            .map(|(chat_id, messages)| Chat {
-                chat_id: ChatId(chat_id),
-                messages,
-                unreaded_count: count,
+            .map(|(chat_id, rows)| {
+                let name = rows
+                    .first()
+                    .map(|row| {
+                        if !row.chat_title.trim().is_empty() {
+                            row.chat_title.clone()
+                        } else {
+                            row.username.clone()
+                        }
+                    })
+                    .unwrap_or_default();
+
+                let unreaded_count = rows.iter().filter(|row| !row.is_read).count() as u32;
+
+                let messages: Vec<MessagePacket> = rows
+                    .into_iter()
+                    .map(|row| {
+                        let msg_type = match row.msg_type {
+                            0 => TEXT,
+                            1 => IMAGE,
+                            2 => STICKER,
+                            3 => FILE,
+                            _ => TEXT,
+                        };
+
+                        MessagePacket {
+                            username: row.username,
+                            text: row.text,
+                            time: row.date,
+                            is_bot: row.is_bot,
+                            is_read: row.is_read,
+                            msg_type,
+                            chat_id: ChatId(row.chat_id),
+                            message_name: Some(row.msg_name),
+                            chat_name: Some(row.chat_title),
+                            message_id: Some(MessageId(row.telegram_message_id)),
+                        }
+                    })
+                    .collect();
+
+                Chat {
+                    chat_id: ChatId(chat_id),
+                    messages,
+                    unreaded_count,
+                    name,
+                }
             })
             .collect();
+
+        formatted_chats.sort_by_key(|chat| chat.chat_id.0);
 
         info!(
             "Successfully loaded {} messages, structured into {} chat objects.",
@@ -270,7 +326,7 @@ impl Db {
     }
 }
 
-#[derive(sqlx::FromRow)]
+#[derive(Clone, sqlx::FromRow)]
 struct MessageRow {
     chat_id: i64,
     username: String,
@@ -281,4 +337,5 @@ struct MessageRow {
     msg_type: i64,
     msg_name: String,
     telegram_message_id: i32,
+    chat_title: String,
 }

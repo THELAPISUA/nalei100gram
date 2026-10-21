@@ -1,5 +1,5 @@
 use crate::ui::ui_components::{draw_send_button, preview_files_being_dropped};
-use crate::utils::types::{ActionPacket, Chat, MessagePacket, PendingFile};
+use crate::utils::types::{ActionPacket, Chat, PendingFile};
 use eframe::egui;
 use eframe::egui::{
     Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Sense, Stroke, TextEdit,
@@ -51,17 +51,22 @@ impl eframe::App for GramApp {
         egui::Panel::left("my_left_panel").show(ui, |ui| {
             ui.add_space(4.0);
 
-            let chats = HashMap::from([(1714925468, "Кирилл"), (1136439451, "Влад")]);
+            //чe
+            let chats = self.chats.clone();
 
-            let mut sorted_chats: Vec<(&i64, &&str)> = chats.iter().collect();
-            sorted_chats.sort_by_key(|&(_, name)| name);
+            let mut sorted_chats: Vec<(&i64, String)> = chats
+                .iter()
+                .map(|item| (&item.chat_id.0, item.name.clone()))
+                .collect();
+
+            sorted_chats.sort_by(|a, b| a.1.cmp(&b.1));
 
             let telegram_blue = Color32::from_rgb(51, 144, 236);
             let row_height = 64.0;
 
             ui.spacing_mut().item_spacing.y = 0.0;
 
-            for (&chat_id, &name) in sorted_chats {
+            for (&chat_id, name) in sorted_chats {
                 let is_selected = self.current_chat == ChatId(chat_id);
 
                 let unreaded = self
@@ -118,11 +123,12 @@ impl eframe::App for GramApp {
                     FontId::proportional(16.0),
                     title_color,
                 );
+                let last_message = self.last_message(chat_id);
 
                 ui.painter().text(
                     egui::pos2(text_x, rect.top() + 36.0),
                     Align2::LEFT_TOP,
-                    self.last_message(chat_id),
+                    last_message,
                     FontId::proportional(13.0),
                     sub_color,
                 );

@@ -2,10 +2,7 @@ use std::sync::Arc;
 
 use crate::utils::audio::{AudioPlayer, SoundType};
 use crate::utils::types::MsgType::*;
-use crate::{
-    logic::{backend::Backend, db::Db},
-    utils::types::MessagePacket,
-};
+use crate::{logic::db::Db, utils::types::MessagePacket};
 use log::{error, info};
 use teloxide::prelude::Requester;
 use teloxide::{Bot, types::InputFile};

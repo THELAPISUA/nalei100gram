@@ -8,10 +8,13 @@ pub struct PendingFile {
     pub size: u64,
     pub extension: String,
 }
+
+#[derive(Clone)]
 pub struct Chat {
     pub chat_id: ChatId,
     pub messages: Vec<MessagePacket>,
     pub unreaded_count: u32,
+    pub name: String,
 }
 #[derive(Clone)]
 pub enum MsgType {
@@ -38,7 +41,7 @@ pub struct Message {
 
 #[derive(Clone)]
 pub struct MessagePacket {
-    pub username: Option<String>,
+    pub username: String,
     pub text: String,
     pub message_name: Option<String>,
     pub time: String,
@@ -47,11 +50,12 @@ pub struct MessagePacket {
     pub msg_type: MsgType,
     pub chat_id: ChatId,
     pub message_id: Option<MessageId>,
+    pub chat_name: Option<String>,
 }
 impl Default for MessagePacket {
     fn default() -> Self {
         Self {
-            username: Some(String::new()),
+            username: String::new(),
             text: String::new(),
             message_name: Some(String::new()),
             time: String::new(),
@@ -59,7 +63,8 @@ impl Default for MessagePacket {
             is_read: true,
             msg_type: TEXT,
             chat_id: ChatId(-1),
-            message_id: Some(MessageId(1)),
+            message_id: None,
+            chat_name: None,
         }
     }
 }

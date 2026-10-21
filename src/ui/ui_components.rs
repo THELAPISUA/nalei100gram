@@ -42,7 +42,7 @@ impl GramApp {
                             ActionPacket::Edit(message) => {
                                 let _ = self.tx.try_send(ActionPacket::Edit(message));
                             }
-                            ActionPacket::Delete(id) => {}
+                            ActionPacket::Delete(_id) => {}
                             _ => {}
                         }
                     }
@@ -66,7 +66,7 @@ fn process_message(
     match msg.msg_type {
         TEXT => {
             let widget = MessageWidget {
-                username: msg.username.clone().unwrap_or("You".into()),
+                username: msg.username.clone(),
                 text: msg.text.clone(),
                 time: msg.time.clone(),
                 outgoing: msg.is_bot,
@@ -90,12 +90,11 @@ fn process_message(
 
         IMAGE | STICKER => {
             let widget = PhotoWidget {
-                username: msg.username.clone().unwrap_or("You".into()),
+                username: msg.username.clone(),
                 texture: get_img(ui.ctx(), &msg.text, photos),
                 time: msg.time.clone(),
                 outgoing: msg.is_bot,
             };
-
             widget.show(ui);
         }
 
@@ -103,7 +102,7 @@ fn process_message(
             let path = msg.text.clone();
 
             let widget = FileWidget {
-                username: msg.username.clone().unwrap_or("You".into()),
+                username: msg.username.clone(),
                 _file_path: path.clone(),
                 time: msg.time.clone(),
                 outgoing: msg.is_bot,
@@ -117,8 +116,8 @@ fn process_message(
 
         _ => {
             let widget = MessageWidget {
-                username: msg.username.clone().unwrap_or("You".into()),
-                text: "Ошибка рендера неизвестний тип".into(),
+                username: msg.username.clone(),
+                text: format!("Ошибка рендера неизвестний тип"),
                 time: msg.time.clone(),
                 outgoing: msg.is_bot,
             };
