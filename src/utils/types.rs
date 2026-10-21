@@ -1,7 +1,24 @@
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use teloxide::types::{ChatId, MessageId};
 
 use crate::utils::types::MsgType::TEXT;
+
+//
+// Настройки юзера
+//
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Settings {
+    pub user: User,
+    pub theme: Theme,
+}
+#[derive(Serialize, Deserialize, Debug)]
+pub struct User {
+    pub token: String,
+}
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Theme {}
+
 pub struct PendingFile {
     pub name: String,
     pub path: PathBuf,
@@ -31,6 +48,8 @@ pub enum ActionPacket {
     Send(MessagePacket),
     Edit(Message),
     Delete(Message),
+
+    GetChats(Option<Vec<Chat>>),
 }
 #[derive(Clone)]
 pub struct Message {

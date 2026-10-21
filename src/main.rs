@@ -4,16 +4,18 @@ mod logic;
 mod ui;
 mod utils;
 
-use crate::logic::backend::Backend;
-use crate::logic::db::Db;
-use crate::ui::app::GramApp;
-use crate::ui::tray::init_tray;
-
 use env_logger::{Builder, Target};
 use log::{LevelFilter, info};
 
 use std::fs::File;
-use tokio::sync::mpsc;
+
+use crate::{
+    ui::{start_window::StartWindow, theme::AppTheme},
+    utils::{
+        settings::{self, load_settings},
+        types::{Settings, Theme, User},
+    },
+};
 
 fn main() {
     let log_file = File::options()
@@ -43,28 +45,7 @@ fn main() {
     info!("App started!");
 
     let rt = tokio::runtime::Runtime::new().expect("Не удалось создать Tokio runtime");
-
-    let database = rt.block_on(async {
-        let database = Db::connect().await;
-        database.init().await;
-        database
-    });
-
-    let chats = rt.block_on(database.load_chats());
-
-    info!("Chats loaded: {}", chats.len());
-
-    // Backend -> UI.
-    let (tx_bot, rx_ui) = mpsc::channel(32);
-
-    // UI -> Backend.
-    let (tx_ui, rx_bot) = mpsc::channel(32);
-
-    let backend = Backend::new(tx_bot, rx_bot, database);
-
-    let _backend_task = rt.spawn(async move {
-        backend.tick().await;
-    });
+    let runtime = rt.handle().clone();
 
     let icon = load_icon();
 
@@ -86,6 +67,19 @@ fn main() {
 
         ..Default::default()
     };
+    let mut started = false;
+    let settings = match load_settings() {
+        Some(s) => {
+            started = true;
+            s
+        }
+        None => Settings {
+            user: User {
+                token: String::new(),
+            },
+            theme: Theme {},
+        },
+    };
 
     let result = eframe::run_native(
         "Nalei100Gram",
@@ -93,13 +87,24 @@ fn main() {
         Box::new(move |cc| {
             egui_extras::install_image_loaders(&cc.egui_ctx);
 
-            let app = GramApp::new(tx_ui, rx_ui, chats);
-
-            Ok(Box::new(MainApp {
-                inner: app,
+            let mut app = StartWindow {
+                inner: None,
+                runtime,
                 tray: None,
-                hide_on_start: true,
-            }))
+                started: false,
+                theme: AppTheme::default(),
+                bot_token: settings.user.token,
+                show_token: false,
+                error: None,
+            };
+
+            // Якщо токен вже збережений — одразу запускаємо бекенд.
+            if !app.bot_token.trim().is_empty() {
+                let token = app.bot_token.clone();
+                app.start_backend(token);
+            }
+
+            Ok(Box::new(app))
         }),
     );
 
@@ -108,31 +113,6 @@ fn main() {
     }
 
     info!("App stopped");
-}
-
-struct MainApp {
-    inner: GramApp,
-    tray: Option<tray_icon::TrayIcon>,
-    hide_on_start: bool,
-}
-
-impl eframe::App for MainApp {
-    fn ui(&mut self, ui: &mut eframe::egui::Ui, frame: &mut eframe::Frame) {
-        let ctx = ui.ctx().clone();
-
-        if self.tray.is_none() {
-            self.tray = Some(init_tray(ctx.clone()));
-            info!("Tray initialized");
-        }
-
-        if self.hide_on_start {
-            ctx.send_viewport_cmd(eframe::egui::ViewportCommand::Visible(false));
-
-            self.hide_on_start = false;
-        }
-
-        eframe::App::ui(&mut self.inner, ui, frame);
-    }
 }
 
 fn load_icon() -> eframe::egui::IconData {

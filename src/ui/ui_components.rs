@@ -106,7 +106,6 @@ fn process_message(
                             new_text: None,
                         }));
                     }
-                    _ => {}
                 }
             }
         }

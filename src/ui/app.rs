@@ -10,6 +10,11 @@ use std::collections::HashMap;
 use teloxide::types::ChatId;
 use tokio::sync::mpsc::{Receiver, Sender};
 
+enum AppState {
+    Setup,
+    Running,
+}
+
 pub struct GramApp {
     pub(crate) tx: Sender<ActionPacket>,
     pub(crate) rx: Receiver<ActionPacket>,
@@ -48,25 +53,25 @@ impl eframe::App for GramApp {
 
         //Панель вибора чата
         ui.heading("Nalei100Gram");
+
         egui::Panel::left("my_left_panel").show(ui, |ui| {
             ui.add_space(4.0);
 
-            //чe
             let chats = self.chats.clone();
 
-            let mut sorted_chats: Vec<(&i64, String)> = chats
+            let mut sorted_chats: Vec<(i64, String)> = chats
                 .iter()
-                .map(|item| (&item.chat_id.0, item.name.clone()))
+                .map(|item| (item.chat_id.0, item.name.clone()))
                 .collect();
 
             sorted_chats.sort_by(|a, b| a.1.cmp(&b.1));
 
-            let telegram_blue = Color32::from_rgb(51, 144, 236);
+            let visuals = ui.visuals().clone();
             let row_height = 64.0;
 
             ui.spacing_mut().item_spacing.y = 0.0;
 
-            for (&chat_id, name) in sorted_chats {
+            for (chat_id, name) in sorted_chats {
                 let is_selected = self.current_chat == ChatId(chat_id);
 
                 let unreaded = self
@@ -80,29 +85,33 @@ impl eframe::App for GramApp {
                     ui.allocate_exact_size(vec2(ui.available_width(), row_height), Sense::click());
 
                 let bg = if is_selected {
-                    telegram_blue
+                    visuals.selection.bg_fill
                 } else if response.hovered() {
-                    ui.visuals().widgets.hovered.weak_bg_fill
+                    visuals.widgets.hovered.weak_bg_fill
                 } else {
                     Color32::TRANSPARENT
                 };
+
                 ui.painter()
                     .rect_filled(rect.shrink2(vec2(4.0, 2.0)), CornerRadius::same(10), bg);
 
                 let (title_color, sub_color) = if is_selected {
-                    (Color32::WHITE, Color32::from_white_alpha(200))
-                } else {
                     (
-                        ui.visuals().strong_text_color(),
-                        ui.visuals().weak_text_color(),
+                        visuals.selection.stroke.color,
+                        visuals.selection.stroke.color,
                     )
+                } else {
+                    (visuals.strong_text_color(), visuals.weak_text_color())
                 };
 
-                let avatar_center = rect.left_center() + vec2(12.0 + 24.0, 0.0);
+                // Аватар
+                let avatar_center = rect.left_center() + vec2(36.0, 0.0);
                 let hue = (chat_id.unsigned_abs() % 360) as f32 / 360.0;
                 let avatar_color: Color32 = egui::ecolor::Hsva::new(hue, 0.55, 0.80, 1.0).into();
+
                 ui.painter()
                     .circle_filled(avatar_center, 24.0, avatar_color);
+
                 ui.painter().text(
                     avatar_center,
                     Align2::CENTER_CENTER,
@@ -115,14 +124,18 @@ impl eframe::App for GramApp {
                     Color32::WHITE,
                 );
 
-                let text_x = avatar_center.x + 24.0 + 12.0;
+                // Назва чату
+                let text_x = avatar_center.x + 36.0;
+
                 ui.painter().text(
                     egui::pos2(text_x, rect.top() + 14.0),
                     Align2::LEFT_TOP,
-                    name,
+                    &name,
                     FontId::proportional(16.0),
                     title_color,
                 );
+
+                // Останнє повідомлення
                 let last_message = self.last_message(chat_id);
 
                 ui.painter().text(
@@ -136,23 +149,19 @@ impl eframe::App for GramApp {
                 // Бейдж непрочитаних
                 if unreaded > 0 {
                     let text = unreaded.to_string();
-                    let badge_w = (text.len() as f32 * 8.0 + 14.0).max(22.0);
+                    let badge_w = (text.chars().count() as f32 * 8.0 + 14.0).max(22.0);
+
                     let badge_rect = egui::Rect::from_center_size(
                         egui::pos2(rect.right() - 14.0 - badge_w / 2.0, rect.bottom() - 20.0),
                         vec2(badge_w, 22.0),
                     );
-                    let badge_bg = if is_selected {
-                        Color32::WHITE
-                    } else {
-                        telegram_blue
-                    };
-                    let badge_fg = if is_selected {
-                        telegram_blue
-                    } else {
-                        Color32::WHITE
-                    };
+
+                    let badge_bg = visuals.selection.bg_fill;
+                    let badge_fg = visuals.selection.stroke.color;
+
                     ui.painter()
                         .rect_filled(badge_rect, CornerRadius::same(11), badge_bg);
+
                     ui.painter().text(
                         badge_rect.center(),
                         Align2::CENTER_CENTER,
@@ -165,6 +174,7 @@ impl eframe::App for GramApp {
                 if response.clicked() {
                     self.current_chat = ChatId(chat_id);
                 }
+
                 if response.hovered() {
                     ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
                 }

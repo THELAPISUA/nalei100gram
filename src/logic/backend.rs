@@ -23,22 +23,25 @@ pub struct Backend {
     pub(crate) rx_bot: Receiver<ActionPacket>,
     pub(crate) database: Db,
     pub(crate) player: Arc<AudioPlayer>,
+    pub token: String,
 }
 impl Backend {
-    pub fn new(tx_bot: Sender<ActionPacket>, rx_bot: Receiver<ActionPacket>, database: Db) -> Self {
+    pub fn new(
+        tx_bot: Sender<ActionPacket>,
+        rx_bot: Receiver<ActionPacket>,
+        database: Db,
+        token: String,
+    ) -> Self {
         Self {
             tx_bot,
             rx_bot,
             database,
             player: Arc::new(AudioPlayer::init()),
+            token,
         }
     }
     pub async fn tick(self) {
-        #[cfg(target_os = "linux")]
-        let bot = Bot::new("8297296496:AAHqAR8s3BEUX-mQ9KKo6U2Z6hBojSeTRGQ");
-
-        #[cfg(target_os = "windows")]
-        let bot = Bot::new("5649333069:AAH3I94QCOkQZaDQ8rWHvHJWscEe5v2ybYk");
+        let bot = Bot::new(self.token);
 
         let bot_for_gui = bot.clone();
         let player = self.player.clone();
