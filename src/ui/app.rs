@@ -112,7 +112,7 @@ impl eframe::App for GramApp {
 
                 let painter = ui.painter();
 
-                let path_str = format!("data/temp/{}.jpg", chat_id);
+                let path_str = format!("data/temp/{}.png", chat_id);
                 let path = std::path::Path::new(&path_str);
 
                 if path.exists() {

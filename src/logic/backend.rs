@@ -1,6 +1,5 @@
 use crate::logic::db::Db;
 use crate::logic::logic::get_avatar;
-use crate::logic::logic::get_user_avatar;
 use crate::logic::logic::process_packet_message;
 use crate::utils::audio::AudioPlayer;
 use crate::utils::audio::SoundType;

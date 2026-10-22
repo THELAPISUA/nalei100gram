@@ -3,6 +3,9 @@ use std::sync::Arc;
 use crate::utils::audio::{AudioPlayer, SoundType};
 use crate::utils::types::MsgType::*;
 use crate::{logic::db::Db, utils::types::MessagePacket};
+use eframe::egui::WidgetType::Image;
+use eframe::wgpu::naga::back::spv::Capability::ImageBuffer;
+use image::RgbaImage;
 use log::{error, info};
 
 use teloxide::dispatching::dialogue::GetChatId;
@@ -94,18 +97,6 @@ pub(crate) async fn process_packet_message(
     }
 }
 
-pub async fn get_user_avatar(bot: Bot, msg: Message, is_user: bool) -> Option<String> {
-    if is_user {
-        let user = msg.from?;
-
-        let photos = bot.get_user_profile_photos(user.id).await.ok()?;
-
-        photos.photos.last()?.first().map(|p| p.file.id.clone())
-    } else {
-        let chat = bot.get_chat(msg.chat.id).await.ok()?;
-        chat.photo.map(|photo| photo.small_file_id)
-    }
-}
 pub async fn get_avatar(
     bot: Bot,
     msg: Message,
@@ -139,14 +130,45 @@ pub async fn get_avatar(
         (photo.big_file_id, format!("{}", msg.chat.id.0))
     };
 
+    let file_info = bot.get_file(file_id).await?;
     fs::create_dir_all("data/temp").await?;
 
-    let path = format!("data/temp/{}.jpg", owner_id);
-    let file_info = bot.get_file(file_id).await?;
-    let mut destination_file = TokioFile::create(&path).await?;
+    let temp_path = format!("data/temp/{}_original", owner_id);
+    let output_path = format!("data/temp/{}.png", owner_id);
+
+    let mut destination_file = TokioFile::create(&temp_path).await?;
 
     bot.download_file(&file_info.path, &mut destination_file)
         .await?;
 
+    drop(destination_file);
+
+    let bytes = fs::read(&temp_path).await?;
+
+    let mut img = image::load_from_memory(&bytes)?.to_rgba8();
+
+    make_circle(&mut img);
+
+    img.save(&output_path)?;
+
+    fs::remove_file(&temp_path).await?;
+
     Ok(())
+}
+fn make_circle(image: &mut image::RgbaImage) {
+    let (w, h) = image.dimensions();
+    let radius = w.min(h) as f32 / 2.0;
+    let cx = w as f32 / 2.0;
+    let cy = h as f32 / 2.0;
+
+    for y in 0..h {
+        for x in 0..w {
+            let dx = x as f32 + 0.5 - cx;
+            let dy = y as f32 + 0.5 - cy;
+
+            if dx * dx + dy * dy > radius * radius {
+                image.get_pixel_mut(x, y).0[3] = 0;
+            }
+        }
+    }
 }

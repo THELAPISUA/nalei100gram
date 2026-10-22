@@ -1,6 +1,8 @@
 use eframe::egui::{self, Sense};
 use egui::Response;
 
+use crate::ui::logic::line_break;
+
 pub enum MessageAction {
     Edit,
     Copy,
@@ -360,18 +362,4 @@ impl FileWidget {
             .on_hover_cursor(egui::CursorIcon::PointingHand)
             .clicked()
     }
-}
-
-pub fn line_break(s: &str) -> String {
-    let mut ans = String::new();
-
-    for (i, ch) in s.chars().enumerate() {
-        if i > 0 && i % 50 == 0 {
-            ans.push('\n');
-        }
-
-        ans.push(ch);
-    }
-
-    ans
 }

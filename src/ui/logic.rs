@@ -4,7 +4,8 @@ use crate::utils::types::MsgType::{FILE, IMAGE, STICKER, TEXT};
 use crate::utils::types::{Chat, MessagePacket, PendingFile};
 use arboard::Clipboard;
 use chrono::Local;
-use eframe::egui;
+use eframe::egui::{self, TextureHandle};
+
 use log::info;
 use std::ffi::OsStr;
 use teloxide::types::{ChatId, MessageId};
@@ -169,4 +170,17 @@ pub(crate) fn delete_msg(msg_id: MessageId, chat: &mut Chat) {
 pub(crate) fn copy_to_clipboard(text: &str) {
     let mut clipboard = Clipboard::new().unwrap();
     clipboard.set_text(text).unwrap();
+}
+pub fn line_break(s: &str) -> String {
+    let mut ans = String::new();
+
+    for (i, ch) in s.chars().enumerate() {
+        if i > 0 && i % 50 == 0 {
+            ans.push('\n');
+        }
+
+        ans.push(ch);
+    }
+
+    ans
 }
