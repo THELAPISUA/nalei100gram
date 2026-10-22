@@ -1,10 +1,11 @@
-use crate::ui::ui_components::{draw_send_button, preview_files_being_dropped};
+use crate::ui::ui_components::{draw_send_button, get_img, preview_files_being_dropped};
 use crate::utils::types::{ActionPacket, Chat, PendingFile};
-use eframe::egui;
+use eframe::egui::{self, Pos2, Rect};
 use eframe::egui::{
     Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Sense, Stroke, TextEdit,
     vec2,
 };
+
 use std::collections::HashMap;
 
 use teloxide::types::ChatId;
@@ -109,20 +110,37 @@ impl eframe::App for GramApp {
                 let hue = (chat_id.unsigned_abs() % 360) as f32 / 360.0;
                 let avatar_color: Color32 = egui::ecolor::Hsva::new(hue, 0.55, 0.80, 1.0).into();
 
-                ui.painter()
-                    .circle_filled(avatar_center, 24.0, avatar_color);
+                let painter = ui.painter();
 
-                ui.painter().text(
-                    avatar_center,
-                    Align2::CENTER_CENTER,
-                    name.chars()
-                        .next()
-                        .unwrap_or('?')
-                        .to_uppercase()
-                        .to_string(),
-                    FontId::proportional(20.0),
-                    Color32::WHITE,
-                );
+                let path_str = format!("data/temp/{}.jpg", chat_id);
+                let path = std::path::Path::new(&path_str);
+
+                if path.exists() {
+                    // Фото должно быть заранее обрезано по кругу
+                    let size = 48.0;
+                    let avatar_rect = Rect::from_center_size(avatar_center, vec2(size, size));
+
+                    painter.image(
+                        get_img(ui.ctx(), &path_str, &mut self.photos).id(),
+                        avatar_rect,
+                        Rect::from_min_max(Pos2::ZERO, Pos2::new(1.0, 1.0)),
+                        Color32::WHITE,
+                    );
+                } else {
+                    painter.circle_filled(avatar_center, 24.0, avatar_color);
+
+                    painter.text(
+                        avatar_center,
+                        Align2::CENTER_CENTER,
+                        name.chars()
+                            .next()
+                            .unwrap_or('?')
+                            .to_uppercase()
+                            .to_string(),
+                        FontId::proportional(20.0),
+                        Color32::WHITE,
+                    );
+                }
 
                 // Назва чату
                 let text_x = avatar_center.x + 36.0;

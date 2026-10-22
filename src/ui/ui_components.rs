@@ -201,7 +201,7 @@ pub fn get_img(
     photo_tmp
 }
 
-pub fn load_texture(
+fn load_texture(
     ctx: &egui::Context,
     name: &str,
     data: &[u8],

@@ -1,4 +1,6 @@
 use crate::logic::db::Db;
+use crate::logic::logic::get_avatar;
+use crate::logic::logic::get_user_avatar;
 use crate::logic::logic::process_packet_message;
 use crate::utils::audio::AudioPlayer;
 use crate::utils::audio::SoundType;
@@ -85,8 +87,12 @@ impl Backend {
             let tx = tx_bot_clone.clone();
             let database = database.clone();
             let player = player.clone();
+
             async move {
                 if let Some(text) = msg.text() {
+                    if let Err(e) = get_avatar(bot.clone(), msg.clone()).await {
+                        eprintln!("Помилка завантаження аватарки: {e}");
+                    }
                     let m = MessagePacket {
                         username: load_name(&msg),
                         text: text.to_string(),
@@ -127,10 +133,10 @@ impl Backend {
                         }
                     }
                 } else if let Some(imgs) = msg.photo() {
-                    if let Err(e) = fs::create_dir_all("data/temp") {
-                        error!("Failed to create 'data' directory: {}", e);
-                        panic!("{}", e);
+                    if let Err(e) = get_avatar(bot.clone(), msg.clone()).await {
+                        eprintln!("Помилка завантаження аватарки: {e}");
                     }
+
                     if let Some(best_photo) = imgs.iter().max_by_key(|p| p.width) {
                         let file_id = &best_photo.file.id;
 
@@ -177,10 +183,10 @@ impl Backend {
                         warn!("Список PhotoSize порожній!");
                     }
                 } else if let Some(stiker) = msg.sticker() {
-                    if let Err(e) = fs::create_dir_all("data/temp") {
-                        error!("Failed to create 'data' directory: {}", e);
-                        panic!("{}", e);
+                    if let Err(e) = get_avatar(bot.clone(), msg.clone()).await {
+                        eprintln!("Помилка завантаження аватарки: {e}");
                     }
+
                     if stiker.is_static() {
                         let file_id = &stiker.file.id;
 
@@ -224,9 +230,8 @@ impl Backend {
                         bot.delete_message(msg.chat.id, msg.id).await?;
                     }
                 } else if let Some(doc) = msg.document() {
-                    if let Err(e) = fs::create_dir_all("data/temp") {
-                        error!("Failed to create 'data' directory: {}", e);
-                        panic!("{}", e);
+                    if let Err(e) = get_avatar(bot.clone(), msg.clone()).await {
+                        eprintln!("Помилка завантаження аватарки: {e}");
                     }
                     let file_id = &doc.file.id;
 

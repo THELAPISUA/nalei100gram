@@ -1,7 +1,7 @@
 use crate::logic::backend::Backend;
 use crate::logic::db::Db;
 use crate::ui::app::GramApp;
-use crate::ui::theme::AppTheme;
+use crate::ui::theme::{AppTheme, setup_fonts};
 use crate::ui::tray::init_tray;
 use crate::utils::settings::save_settings;
 use crate::utils::types::{Settings, Theme, User};
@@ -57,6 +57,7 @@ impl eframe::App for StartWindow {
         use eframe::egui::{self, Align, Layout, RichText, TextEdit};
 
         let ctx = ui.ctx().clone();
+        setup_fonts(&ctx);
         self.theme.apply(&ctx);
 
         if self.tray.is_none() {

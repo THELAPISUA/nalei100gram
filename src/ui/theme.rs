@@ -1,4 +1,4 @@
-use eframe::egui::{Color32, Context, Visuals};
+use eframe::egui::{self, Color32, Context, FontData, FontDefinitions, FontFamily, Visuals};
 
 pub struct AppTheme {
     pub background: Color32,
@@ -34,4 +34,19 @@ impl AppTheme {
 
         ctx.set_visuals(visuals);
     }
+}
+
+pub fn setup_fonts(ctx: &Context) {
+    let mut fonts = FontDefinitions::default();
+
+    fonts.font_data.insert(
+        "Iosevka".to_owned(),
+        FontData::from_static(include_bytes!("../../assets/fonts/IosevkaAile-Bold.ttc")).into(),
+    );
+
+    let proportional = fonts.families.entry(FontFamily::Proportional).or_default();
+
+    proportional.insert(0, "Iosevka".to_owned());
+
+    ctx.set_fonts(fonts);
 }

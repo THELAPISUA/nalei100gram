@@ -67,12 +67,9 @@ fn main() {
 
         ..Default::default()
     };
-    let mut started = false;
+
     let settings = match load_settings() {
-        Some(s) => {
-            started = true;
-            s
-        }
+        Some(s) => s,
         None => Settings {
             user: User {
                 token: String::new(),
