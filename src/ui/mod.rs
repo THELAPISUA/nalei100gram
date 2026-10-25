@@ -1,6 +1,6 @@
 pub mod app;
 mod logic;
-mod settings_widget;
+pub mod settings_widget;
 pub mod start_window;
 pub mod theme;
 pub mod tray;

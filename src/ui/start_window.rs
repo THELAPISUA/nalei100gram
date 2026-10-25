@@ -17,6 +17,7 @@ pub struct StartWindow {
     pub bot_token: String,
     pub show_token: bool,
     pub error: Option<String>,
+    pub(crate) settings: Settings,
 }
 
 impl StartWindow {
@@ -45,7 +46,7 @@ impl StartWindow {
             backend.tick().await;
         });
 
-        self.inner = Some(GramApp::new(tx_ui, rx_ui, chats));
+        self.inner = Some(GramApp::new(tx_ui, rx_ui, chats, self.settings.clone()));
         self.started = true;
 
         info!("Backend started");
@@ -176,6 +177,7 @@ impl eframe::App for StartWindow {
                             token: token.clone(),
                         },
                         theme: None,
+                        selected_theme: 0,
                     });
                     self.start_backend(token);
                 }

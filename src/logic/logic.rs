@@ -97,6 +97,43 @@ pub(crate) async fn process_packet_message(
     }
 }
 
+pub async fn get_avatar_by_user_id(
+    bot: Bot,
+    id: UserId,
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    let photos = bot.get_user_profile_photos(id).await?;
+
+    let file_id = match photos.photos.last().and_then(|photos| photos.last()) {
+        Some(photo) => photo.file.id.clone(),
+        None => return Ok(()),
+    };
+
+    let file_info = bot.get_file(file_id).await?;
+    fs::create_dir_all("data/temp").await?;
+
+    let temp_path = format!("data/temp/{}_original", "my");
+    let output_path = format!("data/temp/{}.png", "my");
+
+    let mut destination_file = TokioFile::create(&temp_path).await?;
+
+    bot.download_file(&file_info.path, &mut destination_file)
+        .await?;
+
+    drop(destination_file);
+
+    let bytes = fs::read(&temp_path).await?;
+
+    let mut img = image::load_from_memory(&bytes)?.to_rgba8();
+
+    make_circle(&mut img);
+
+    img.save(&output_path)?;
+
+    fs::remove_file(&temp_path).await?;
+
+    Ok(())
+}
+
 pub async fn get_avatar(
     bot: Bot,
     msg: Message,

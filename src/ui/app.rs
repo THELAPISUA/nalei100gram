@@ -1,21 +1,19 @@
 use crate::ui::settings_widget::SettingsWidget;
-use crate::ui::ui_components::{draw_send_button, get_img, preview_files_being_dropped};
-use crate::utils::types::{ActionPacket, Chat, PendingFile};
+use crate::ui::ui_components::{
+    draw_avatar, draw_circle_button, get_img, preview_files_being_dropped,
+};
+use crate::utils::types::{ActionPacket, Chat, PendingFile, Settings};
 use eframe::egui::{self, Pos2, Rect};
 use eframe::egui::{
     Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Sense, Stroke, TextEdit,
     vec2,
 };
+use egui_material_icons::icons::{ICON_SEND, ICON_SETTINGS};
 
 use std::collections::HashMap;
 
 use teloxide::types::ChatId;
 use tokio::sync::mpsc::{Receiver, Sender};
-
-enum AppState {
-    Setup,
-    Running,
-}
 
 pub struct GramApp {
     pub(crate) tx: Sender<ActionPacket>,
@@ -29,7 +27,12 @@ pub struct GramApp {
 }
 
 impl GramApp {
-    pub fn new(tx: Sender<ActionPacket>, rx: Receiver<ActionPacket>, chats: Vec<Chat>) -> Self {
+    pub fn new(
+        tx: Sender<ActionPacket>,
+        rx: Receiver<ActionPacket>,
+        chats: Vec<Chat>,
+        settings: Settings,
+    ) -> Self {
         Self {
             tx,
             rx,
@@ -38,7 +41,7 @@ impl GramApp {
             current_chat: ChatId(0),
             photos: HashMap::new(),
             pending_files: Vec::new(),
-            settings_window: SettingsWidget::default(),
+            settings_window: SettingsWidget::default(settings),
         }
     }
 }
@@ -56,7 +59,6 @@ impl eframe::App for GramApp {
         self.recv_messages();
 
         //Панель вибора чата
-        ui.heading("Nalei100Gram");
 
         egui::Panel::left("my_left_panel").show(ui, |ui| {
             ui.add_space(4.0);
@@ -110,40 +112,7 @@ impl eframe::App for GramApp {
 
                 // Аватар
                 let avatar_center = rect.left_center() + vec2(36.0, 0.0);
-                let hue = (chat_id.unsigned_abs() % 360) as f32 / 360.0;
-                let avatar_color: Color32 = egui::ecolor::Hsva::new(hue, 0.55, 0.80, 1.0).into();
-
-                let painter = ui.painter();
-
-                let path_str = format!("data/temp/{}.png", chat_id);
-                let path = std::path::Path::new(&path_str);
-
-                if path.exists() {
-                    // Фото должно быть заранее обрезано по кругу
-                    let size = 48.0;
-                    let avatar_rect = Rect::from_center_size(avatar_center, vec2(size, size));
-
-                    painter.image(
-                        get_img(ui.ctx(), &path_str, &mut self.photos).id(),
-                        avatar_rect,
-                        Rect::from_min_max(Pos2::ZERO, Pos2::new(1.0, 1.0)),
-                        Color32::WHITE,
-                    );
-                } else {
-                    painter.circle_filled(avatar_center, 24.0, avatar_color);
-
-                    painter.text(
-                        avatar_center,
-                        Align2::CENTER_CENTER,
-                        name.chars()
-                            .next()
-                            .unwrap_or('?')
-                            .to_uppercase()
-                            .to_string(),
-                        FontId::proportional(20.0),
-                        Color32::WHITE,
-                    );
-                }
+                draw_avatar(ui, chat_id, &name, avatar_center, &mut self.photos);
 
                 // Назва чату
                 let text_x = avatar_center.x + 36.0;
@@ -201,9 +170,35 @@ impl eframe::App for GramApp {
                 }
             }
             egui::Panel::bottom("dock_panel").show(ui, |ui| {
-                if ui.button("Settings").clicked() {
-                    self.settings_window.open = true;
-                }
+                ui.horizontal(|ui| {
+                    let path_str = format!("data/temp/{}.png", "my");
+                    let path = std::path::Path::new(&path_str);
+
+                    let size = 48.0;
+                    let (rect, _) =
+                        ui.allocate_exact_size(egui::vec2(size, size), egui::Sense::hover());
+
+                    if path.exists() {
+                        let ctx = ui.ctx();
+                        let photo = get_img(ctx, &path_str, &mut self.photos);
+
+                        ui.put(
+                            rect,
+                            egui::Image::new(&photo).fit_to_exact_size(rect.size()),
+                        );
+                    } else {
+                        ui.painter().circle_filled(
+                            rect.center(),
+                            size / 2.0,
+                            Color32::from_rgb(100, 100, 100),
+                        );
+                    }
+                    ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
+                        if draw_circle_button(ui, true, ICON_SETTINGS).clicked() {
+                            self.settings_window.open = true;
+                        }
+                    });
+                });
             });
         });
         //ввод сообщений
@@ -237,7 +232,7 @@ impl eframe::App for GramApp {
                         .inner;
 
                     let has_text = !self.input_text.trim().is_empty();
-                    let send_res = draw_send_button(ui, has_text);
+                    let send_res = draw_circle_button(ui, has_text, ICON_SEND);
                     let send_clicked = send_res.clicked();
                     let enter_pressed = text_input_res.lost_focus()
                         && ui.input(|i| i.key_pressed(egui::Key::Enter));

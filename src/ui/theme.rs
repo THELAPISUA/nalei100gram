@@ -1,4 +1,7 @@
-use eframe::egui::{self, Color32, Context, FontData, FontDefinitions, FontFamily, Visuals};
+use eframe::{
+    egui::{self, Color32, Context, FontData, FontDefinitions, FontFamily, Visuals},
+    epaint::text::FontInsert,
+};
 
 use crate::utils::types::Theme;
 
@@ -49,16 +52,20 @@ impl AppTheme {
 }
 
 pub fn setup_fonts(ctx: &Context) {
-    let mut fonts = FontDefinitions::default();
-
-    fonts.font_data.insert(
-        "Iosevka".to_owned(),
+    let font = FontInsert::new(
+        "Iosevka",
         FontData::from_static(include_bytes!("../../assets/fonts/IosevkaAile-Bold.ttc")).into(),
+        vec![
+            egui::epaint::text::InsertFontFamily {
+                family: egui::FontFamily::Proportional,
+                priority: egui::epaint::text::FontPriority::Highest,
+            },
+            egui::epaint::text::InsertFontFamily {
+                family: egui::FontFamily::Monospace,
+                priority: egui::epaint::text::FontPriority::Lowest,
+            },
+        ],
     );
 
-    let proportional = fonts.families.entry(FontFamily::Proportional).or_default();
-
-    proportional.insert(0, "Iosevka".to_owned());
-
-    ctx.set_fonts(fonts);
+    ctx.add_font(font);
 }

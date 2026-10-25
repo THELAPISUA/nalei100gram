@@ -1,5 +1,6 @@
 use crate::logic::db::Db;
 use crate::logic::logic::get_avatar;
+use crate::logic::logic::get_avatar_by_user_id;
 use crate::logic::logic::process_packet_message;
 use crate::utils::audio::AudioPlayer;
 use crate::utils::audio::SoundType;
@@ -42,6 +43,12 @@ impl Backend {
     }
     pub async fn tick(self) {
         let bot = Bot::new(self.token);
+
+        let me = bot.get_me().await.unwrap();
+        let my_id = me.id;
+        if let Err(e) = get_avatar_by_user_id(bot.clone(), my_id).await {
+            eprintln!("Помилка завантаження аватарки: {e}");
+        }
 
         let bot_for_gui = bot.clone();
         let player = self.player.clone();

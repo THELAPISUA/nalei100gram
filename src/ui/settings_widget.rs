@@ -1,6 +1,13 @@
 use eframe::egui;
 
-use crate::{ui::widgets::MessageWidget, utils::themes::THEMES};
+use crate::{
+    ui::{theme, widgets::MessageWidget},
+    utils::{
+        settings::save_settings,
+        themes::THEMES,
+        types::{Settings, Theme},
+    },
+};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum SettingsTab {
@@ -12,8 +19,6 @@ pub enum SettingsTab {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum AppTheme {
     Dark,
-    Light,
-    System,
 }
 
 pub struct SettingsWidget {
@@ -21,19 +26,17 @@ pub struct SettingsWidget {
     active_tab: SettingsTab,
     pub theme: AppTheme,
     pub selected_theme: usize,
-    pub notifications: bool,
-    pub save_history: bool,
+    pub settings: Settings,
 }
 
-impl Default for SettingsWidget {
-    fn default() -> Self {
+impl SettingsWidget {
+    pub fn default(settings: Settings) -> Self {
         Self {
             open: false,
             active_tab: SettingsTab::General,
             theme: AppTheme::Dark,
             selected_theme: 0,
-            notifications: true,
-            save_history: true,
+            settings,
         }
     }
 }
@@ -112,12 +115,18 @@ impl SettingsWidget {
                 .radio_value(&mut self.selected_theme, index, *name)
                 .changed()
             {
-                self.apply_theme(ctx);
+                let theme = &THEMES[self.selected_theme].1;
+                apply_theme(ctx, theme);
+                self.settings.selected_theme = self.selected_theme;
+                save_settings(self.settings.clone());
             }
         }
 
         if self.theme != previous_theme {
-            self.apply_theme(ctx);
+            let theme = &THEMES[self.selected_theme].1;
+            apply_theme(ctx, theme);
+            self.settings.selected_theme = self.selected_theme;
+            save_settings(self.settings.clone());
         }
 
         ui.add_space(12.0);
@@ -142,40 +151,41 @@ impl SettingsWidget {
         ui.label("Версія: 0.7b");
         ui.label("GUI: egui");
     }
+}
+pub fn apply_theme(ctx: &egui::Context, theme: &Theme) {
+    let mut visuals = egui::Visuals::dark();
 
-    fn apply_theme(&self, ctx: &egui::Context) {
-        let theme = &THEMES[self.selected_theme].1;
+    let background = rgba(theme.background);
+    let surface = rgba(theme.surface);
+    let accent = rgba(theme.accent);
+    // let text = rgba(theme.text);
+    let muted = rgba(theme.muted);
+    let border = rgba(theme.border);
+    let hover = rgba(theme.hover);
+    let input = rgba(theme.input);
+    let accent_text = rgba(theme.accent_text);
 
-        let mut visuals = egui::Visuals::dark();
+    visuals.panel_fill = background;
+    visuals.window_fill = surface;
+    visuals.window_stroke = egui::Stroke::new(1.0, border);
 
-        visuals.panel_fill = egui::Color32::from_rgba_unmultiplied(
-            theme.background[0],
-            theme.background[1],
-            theme.background[2],
-            theme.background[3],
-        );
+    visuals.override_text_color = None;
+    visuals.weak_text_color = Some(muted);
+    visuals.hyperlink_color = accent;
 
-        visuals.window_fill = egui::Color32::from_rgba_unmultiplied(
-            theme.surface[0],
-            theme.surface[1],
-            theme.surface[2],
-            theme.surface[3],
-        );
+    visuals.faint_bg_color = hover;
+    visuals.extreme_bg_color = input;
+    visuals.text_edit_bg_color = Some(input);
+    visuals.code_bg_color = input;
 
-        visuals.override_text_color = Some(egui::Color32::from_rgba_unmultiplied(
-            theme.text[0],
-            theme.text[1],
-            theme.text[2],
-            theme.text[3],
-        ));
+    visuals.selection.bg_fill = accent;
+    visuals.selection.stroke = egui::Stroke::new(1.0, accent_text);
 
-        visuals.widgets.active.bg_fill = egui::Color32::from_rgba_unmultiplied(
-            theme.accent[0],
-            theme.accent[1],
-            theme.accent[2],
-            theme.accent[3],
-        );
+    visuals.warn_fg_color = egui::Color32::from_rgb(245, 180, 70);
+    visuals.error_fg_color = egui::Color32::from_rgb(235, 80, 90);
 
-        ctx.set_visuals(visuals);
-    }
+    ctx.set_visuals(visuals);
+}
+fn rgba(color: [u8; 4]) -> egui::Color32 {
+    egui::Color32::from_rgba_unmultiplied(color[0], color[1], color[2], color[3])
 }

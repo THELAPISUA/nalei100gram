@@ -1352,6 +1352,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "egui_material_icons"
+version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cee0067630964844d829cc80f9b9744fdf0443b2eea1e66a0934ccc1af14eb82"
+dependencies = [
+ "egui",
+]
+
+[[package]]
 name = "either"
 version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2888,12 +2897,13 @@ dependencies = [
 
 [[package]]
 name = "nalei100gram"
-version = "0.7.0"
+version = "0.7.5"
 dependencies = [
  "arboard",
  "chrono",
  "eframe",
  "egui_extras",
+ "egui_material_icons",
  "env_logger",
  "image",
  "log",

@@ -10,10 +10,11 @@ use log::{LevelFilter, info};
 use std::fs::File;
 
 use crate::{
-    ui::{start_window::StartWindow, theme::AppTheme},
+    ui::{settings_widget::apply_theme, start_window::StartWindow, theme::AppTheme},
     utils::{
-        settings::{self, load_settings},
-        types::{Settings, Theme, User},
+        settings::load_settings,
+        themes::THEMES,
+        types::{Settings, User},
     },
 };
 
@@ -75,14 +76,19 @@ fn main() {
                 token: String::new(),
             },
             theme: None,
+            selected_theme: 0,
         },
     };
+    let theme = &THEMES[settings.selected_theme].1;
 
     let result = eframe::run_native(
         "Nalei100Gram",
         options,
         Box::new(move |cc| {
             egui_extras::install_image_loaders(&cc.egui_ctx);
+            egui_material_icons::initialize(&cc.egui_ctx);
+
+            apply_theme(&cc.egui_ctx, theme);
 
             let mut app = StartWindow {
                 inner: None,
@@ -90,9 +96,10 @@ fn main() {
                 tray: None,
                 started: false,
                 theme: AppTheme::default(),
-                bot_token: settings.user.token,
+                bot_token: settings.user.token.clone(),
                 show_token: false,
                 error: None,
+                settings,
             };
 
             // Якщо токен вже збережений — одразу запускаємо бекенд.
