@@ -1,5 +1,7 @@
 use eframe::egui::{self, Color32, Context, FontData, FontDefinitions, FontFamily, Visuals};
 
+use crate::utils::types::Theme;
+
 pub struct AppTheme {
     pub background: Color32,
     pub surface: Color32,
@@ -7,7 +9,17 @@ pub struct AppTheme {
     pub text: Color32,
     pub muted: Color32,
 }
-
+impl From<Theme> for AppTheme {
+    fn from(t: Theme) -> Self {
+        Self {
+            background: Color32::from_rgb(t.background[0], t.background[1], t.background[2]),
+            surface: Color32::from_rgb(t.surface[0], t.surface[1], t.surface[2]),
+            accent: Color32::from_rgb(t.accent[0], t.accent[1], t.accent[2]),
+            text: Color32::from_rgb(t.text[0], t.text[1], t.text[2]),
+            muted: Color32::from_rgb(t.muted[0], t.muted[1], t.muted[2]),
+        }
+    }
+}
 impl Default for AppTheme {
     fn default() -> Self {
         Self {

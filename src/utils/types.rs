@@ -10,14 +10,20 @@ use crate::utils::types::MsgType::TEXT;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Settings {
     pub user: User,
-    pub theme: Theme,
+    pub theme: Option<Theme>,
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct User {
     pub token: String,
 }
 #[derive(Serialize, Deserialize, Debug)]
-pub struct Theme {}
+pub struct Theme {
+    pub background: [u8; 4],
+    pub surface: [u8; 4],
+    pub accent: [u8; 4],
+    pub text: [u8; 4],
+    pub muted: [u8; 4],
+}
 
 pub struct PendingFile {
     pub name: String,

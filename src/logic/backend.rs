@@ -11,9 +11,8 @@ use crate::utils::types::MsgType::STICKER;
 use crate::utils::types::MsgType::{IMAGE, TEXT};
 use chrono::Local;
 
-use log::{error, info, warn};
+use log::{info, warn};
 
-use std::fs;
 use std::sync::Arc;
 use teloxide::net::Download;
 use teloxide::{dispatching::dialogue::GetChatId, prelude::*};

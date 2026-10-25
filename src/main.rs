@@ -74,7 +74,7 @@ fn main() {
             user: User {
                 token: String::new(),
             },
-            theme: Theme {},
+            theme: None,
         },
     };
 

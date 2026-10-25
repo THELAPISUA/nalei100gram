@@ -1,3 +1,4 @@
+use crate::ui::settings_widget::SettingsWidget;
 use crate::ui::ui_components::{draw_send_button, get_img, preview_files_being_dropped};
 use crate::utils::types::{ActionPacket, Chat, PendingFile};
 use eframe::egui::{self, Pos2, Rect};
@@ -24,6 +25,7 @@ pub struct GramApp {
     pub(crate) current_chat: ChatId,
     pub(crate) photos: HashMap<String, egui::TextureHandle>,
     pub(crate) pending_files: Vec<PendingFile>,
+    pub(crate) settings_window: SettingsWidget,
 }
 
 impl GramApp {
@@ -36,6 +38,7 @@ impl GramApp {
             current_chat: ChatId(0),
             photos: HashMap::new(),
             pending_files: Vec::new(),
+            settings_window: SettingsWidget::default(),
         }
     }
 }
@@ -197,6 +200,11 @@ impl eframe::App for GramApp {
                     ui.ctx().set_cursor_icon(egui::CursorIcon::PointingHand);
                 }
             }
+            egui::Panel::bottom("dock_panel").show(ui, |ui| {
+                if ui.button("Settings").clicked() {
+                    self.settings_window.open = true;
+                }
+            });
         });
         //ввод сообщений
         egui::Panel::bottom("input_panel")
@@ -244,5 +252,6 @@ impl eframe::App for GramApp {
         self.render_messages(ui);
 
         preview_files_being_dropped(ui.ctx());
+        self.settings_window.show(ui.ctx());
     }
 }

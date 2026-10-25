@@ -58,7 +58,6 @@ impl eframe::App for StartWindow {
 
         let ctx = ui.ctx().clone();
         setup_fonts(&ctx);
-        self.theme.apply(&ctx);
 
         if self.tray.is_none() {
             self.tray = Some(init_tray(ctx.clone()));
@@ -176,7 +175,7 @@ impl eframe::App for StartWindow {
                         user: User {
                             token: token.clone(),
                         },
-                        theme: Theme {},
+                        theme: None,
                     });
                     self.start_backend(token);
                 }
