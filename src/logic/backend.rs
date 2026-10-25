@@ -1,4 +1,5 @@
 use crate::logic::db::Db;
+use crate::logic::integrations::manager::manager::AccountManager;
 use crate::logic::logic::get_avatar;
 use crate::logic::logic::get_avatar_by_user_id;
 use crate::logic::logic::process_packet_message;
@@ -25,6 +26,7 @@ pub struct Backend {
     pub(crate) database: Db,
     pub(crate) player: Arc<AudioPlayer>,
     pub token: String,
+    account_manager: Arc<AccountManager>,
 }
 impl Backend {
     pub fn new(
@@ -39,12 +41,17 @@ impl Backend {
             database,
             player: Arc::new(AudioPlayer::init()),
             token,
+            account_manager: Arc::new(AccountManager::new()),
         }
     }
     pub async fn tick(self) {
-        let bot = Bot::new(self.token);
+        let bot = Bot::new(self.token.clone());
 
         let me = bot.get_me().await.unwrap();
+        let name = me.full_name();
+
+        self.tx_bot.try_send(ActionPacket::BotInfo(name)).unwrap();
+
         let my_id = me.id;
         if let Err(e) = get_avatar_by_user_id(bot.clone(), my_id).await {
             eprintln!("Помилка завантаження аватарки: {e}");

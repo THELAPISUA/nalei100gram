@@ -4,7 +4,8 @@ use crate::ui::app::GramApp;
 use crate::ui::theme::{AppTheme, setup_fonts};
 use crate::ui::tray::init_tray;
 use crate::utils::settings::save_settings;
-use crate::utils::types::{Settings, Theme, User};
+use crate::utils::types::{Settings, User};
+use egui_material_icons::icons::{ICON_HIDE_SOURCE, ICON_VISIBILITY, ICON_VISIBILITY_OFF};
 use log::info;
 use tokio::sync::mpsc;
 
@@ -116,7 +117,11 @@ impl eframe::App for StartWindow {
                                 ui.add_sized([260.0, 38.0], token_edit);
 
                                 if ui
-                                    .button(if self.show_token { "🙈" } else { "👁" })
+                                    .button(if self.show_token {
+                                        ICON_VISIBILITY
+                                    } else {
+                                        ICON_VISIBILITY_OFF
+                                    })
                                     .clicked()
                                 {
                                     self.show_token = !self.show_token;

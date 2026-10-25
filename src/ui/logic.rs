@@ -1,10 +1,10 @@
 use crate::ui::app::GramApp;
-use crate::utils::types::ActionPacket::Send;
+use crate::utils::types::ActionPacket::{BotInfo, Send};
 use crate::utils::types::MsgType::{FILE, IMAGE, STICKER, TEXT};
 use crate::utils::types::{Chat, MessagePacket, PendingFile};
 use arboard::Clipboard;
 use chrono::Local;
-use eframe::egui::{self, TextureHandle};
+use eframe::egui;
 
 use log::info;
 use std::ffi::OsStr;
@@ -34,6 +34,9 @@ impl GramApp {
 
                     chat.unreaded_count += 1;
                     chat.messages.push(m.clone());
+                }
+                BotInfo(name) => {
+                    self.name = name;
                 }
                 _ => {}
             }

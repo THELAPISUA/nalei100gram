@@ -4,7 +4,7 @@ use egui::Response;
 use crate::ui::logic::line_break;
 
 pub enum MessageAction {
-    Edit,
+    _Edit,
     Copy,
     Delete,
 }

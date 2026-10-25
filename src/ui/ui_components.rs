@@ -7,11 +7,9 @@ use crate::utils::types::{ActionPacket, MessagePacket};
 use crate::utils::types::{Message, MsgType::*};
 use eframe::egui::{self, Align2, Color32, FontId, Pos2, Rect, Sense, vec2};
 use egui_material_icons::MaterialIcon;
-use egui_material_icons::icons::ICON_SEND;
 use image::ImageReader;
 use std::collections::HashMap;
 use std::io::Cursor;
-use teloxide::types::ChatId;
 
 const ERROR_LOAD: &[u8; 94191] = include_bytes!("../../assets/error_load.png");
 
@@ -89,7 +87,7 @@ fn process_message(
 
             if let Some(action) = widget.show(ui) {
                 match action {
-                    MessageAction::Edit => {
+                    MessageAction::_Edit => {
                         let id = msg.message_id?;
 
                         return Some(ActionPacket::Edit(Message {

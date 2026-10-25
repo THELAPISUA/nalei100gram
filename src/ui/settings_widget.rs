@@ -1,7 +1,8 @@
 use eframe::egui;
+use egui_material_icons::icons::{ICON_INFO, ICON_SETTINGS, ICON_WALLPAPER};
 
 use crate::{
-    ui::{theme, widgets::MessageWidget},
+    ui::widgets::MessageWidget,
     utils::{
         settings::save_settings,
         themes::THEMES,
@@ -63,15 +64,19 @@ impl SettingsWidget {
                         ui.selectable_value(
                             &mut self.active_tab,
                             SettingsTab::General,
-                            "⚙ Загальні",
+                            format!("{} Загальні", ICON_SETTINGS.codepoint),
                         );
 
-                        ui.selectable_value(&mut self.active_tab, SettingsTab::Themes, "🎨 Теми");
+                        ui.selectable_value(
+                            &mut self.active_tab,
+                            SettingsTab::Themes,
+                            format!("{} Теми", ICON_WALLPAPER.codepoint),
+                        );
 
                         ui.selectable_value(
                             &mut self.active_tab,
                             SettingsTab::About,
-                            "ⓘ Про програму",
+                            format!("{} Про програму", ICON_INFO.codepoint),
                         );
                     });
 
@@ -135,10 +140,17 @@ impl SettingsWidget {
         ui.label("Попередній перегляд");
 
         MessageWidget {
-            username: "Яна Цист".to_string(),
-            text: "Привет вась".to_string(),
+            username: "Вадим".to_string(),
+            text: "О то усно можна не робить".to_string(),
             time: "3:00".to_string(),
             outgoing: false,
+        }
+        .show(ui);
+        MessageWidget {
+            username: "Костя".to_string(),
+            text: "Не, усно це як письмово, тільки по другом".to_string(),
+            time: "3:01".to_string(),
+            outgoing: true,
         }
         .show(ui);
     }
@@ -148,7 +160,7 @@ impl SettingsWidget {
         ui.add_space(8.0);
 
         ui.label("Назва: Nalei100Gram");
-        ui.label("Версія: 0.7b");
+        ui.label(format!("Версія: {}", env!("CARGO_PKG_VERSION")));
         ui.label("GUI: egui");
     }
 }

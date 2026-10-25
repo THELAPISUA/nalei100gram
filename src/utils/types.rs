@@ -61,7 +61,7 @@ pub enum ActionPacket {
     Edit(Message),
     Delete(Message),
 
-    GetChats(Option<Vec<Chat>>),
+    BotInfo(String),
 }
 #[derive(Clone)]
 pub struct Message {

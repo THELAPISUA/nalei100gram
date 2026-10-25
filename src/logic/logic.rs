@@ -3,12 +3,9 @@ use std::sync::Arc;
 use crate::utils::audio::{AudioPlayer, SoundType};
 use crate::utils::types::MsgType::*;
 use crate::{logic::db::Db, utils::types::MessagePacket};
-use eframe::egui::WidgetType::Image;
-use eframe::wgpu::naga::back::spv::Capability::ImageBuffer;
-use image::RgbaImage;
+
 use log::{error, info};
 
-use teloxide::dispatching::dialogue::GetChatId;
 use teloxide::net::Download; // Важно для работы .download_file()
 use teloxide::prelude::Requester;
 use teloxide::prelude::*;
