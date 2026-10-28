@@ -1,2 +1,2 @@
-mod bot;
-mod mtproto;
+pub mod bot;
+pub mod mtproto;

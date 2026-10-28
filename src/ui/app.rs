@@ -20,7 +20,9 @@ pub struct GramApp {
     pub(crate) rx: Receiver<ActionPacket>,
     pub(crate) chats: Vec<Chat>,
     pub(crate) input_text: String,
-    pub(crate) current_chat: ChatId,
+    pub(crate) current_chat: i64,
+    pub(crate) accounts: Vec<(i64, String)>,
+    pub(crate) current_account_id: i64,
     pub(crate) photos: HashMap<String, egui::TextureHandle>,
     pub(crate) pending_files: Vec<PendingFile>,
     pub(crate) settings_window: SettingsWidget,
@@ -31,6 +33,7 @@ impl GramApp {
     pub fn new(
         tx: Sender<ActionPacket>,
         rx: Receiver<ActionPacket>,
+        accounts: Vec<(i64, String)>,
         chats: Vec<Chat>,
         settings: Settings,
     ) -> Self {
@@ -39,11 +42,13 @@ impl GramApp {
             rx,
             chats: chats,
             input_text: String::new(),
-            current_chat: ChatId(0),
+            current_chat: 0,
             photos: HashMap::new(),
             pending_files: Vec::new(),
             settings_window: SettingsWidget::default(settings),
             name: String::new(),
+            current_account_id: accounts.clone().first().unwrap().0,
+            accounts: accounts,
         }
     }
 }
@@ -71,7 +76,7 @@ impl eframe::App for GramApp {
 
                 let mut sorted_chats: Vec<(i64, String)> = chats
                     .iter()
-                    .map(|item| (item.chat_id.0, item.name.clone()))
+                    .map(|item| (item.chat_id, item.name.clone()))
                     .collect();
 
                 sorted_chats.sort_by(|a, b| a.1.cmp(&b.1));
@@ -82,12 +87,12 @@ impl eframe::App for GramApp {
                 ui.spacing_mut().item_spacing.y = 0.0;
 
                 for (chat_id, name) in sorted_chats {
-                    let is_selected = self.current_chat == ChatId(chat_id);
+                    let is_selected = self.current_chat == chat_id;
 
                     let unreaded = self
                         .chats
                         .iter()
-                        .find(|chat| chat.chat_id == ChatId(chat_id))
+                        .find(|chat| chat.chat_id == chat_id)
                         .map(|c| c.unreaded_count)
                         .unwrap_or(0);
 
@@ -171,7 +176,7 @@ impl eframe::App for GramApp {
                     }
 
                     if response.clicked() {
-                        self.current_chat = ChatId(chat_id);
+                        self.current_chat = chat_id;
                     }
 
                     if response.hovered() {

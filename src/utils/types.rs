@@ -40,7 +40,7 @@ pub struct PendingFile {
 
 #[derive(Clone)]
 pub struct Chat {
-    pub chat_id: ChatId,
+    pub chat_id: i64,
     pub messages: Vec<MessagePacket>,
     pub unreaded_count: u32,
     pub name: String,
@@ -61,13 +61,14 @@ pub enum ActionPacket {
     Edit(Message),
     Delete(Message),
 
-    BotInfo(String),
+    AccountInfo(String, i64),
 }
 #[derive(Clone)]
 pub struct Message {
-    pub id: MessageId,
-    pub chat_id: ChatId,
+    pub id: i32,
+    pub chat_id: i64,
     pub new_text: Option<String>,
+    pub account_id: i64,
 }
 
 #[derive(Clone)]
@@ -79,9 +80,10 @@ pub struct MessagePacket {
     pub is_bot: bool,
     pub is_read: bool,
     pub msg_type: MsgType,
-    pub chat_id: ChatId,
-    pub message_id: Option<MessageId>,
+    pub chat_id: i64,
+    pub message_id: Option<i32>,
     pub chat_name: Option<String>,
+    pub account_id: i64,
 }
 impl Default for MessagePacket {
     fn default() -> Self {
@@ -93,9 +95,10 @@ impl Default for MessagePacket {
             is_bot: true,
             is_read: true,
             msg_type: TEXT,
-            chat_id: ChatId(-1),
+            chat_id: -1,
             message_id: None,
             chat_name: None,
+            account_id: 0,
         }
     }
 }

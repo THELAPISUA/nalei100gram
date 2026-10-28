@@ -27,7 +27,9 @@ impl GramApp {
                         .find(|chat| chat.chat_id == self.current_chat)
                     {
                         for msg in &chat.messages {
-                            if let Some(action) = process_message(ui, msg, &mut self.photos) {
+                            if let Some(action) =
+                                process_message(self.current_account_id, ui, msg, &mut self.photos)
+                            {
                                 actions.push(action);
                             }
                         }
@@ -72,6 +74,7 @@ impl GramApp {
 // 3) Зроби видалення для себе і для всіх
 // 4) Копіювання це просто в буфер кидай і якийсь плейсхолдер
 fn process_message(
+    account_id: i64,
     ui: &mut egui::Ui,
     msg: &MessagePacket,
     photos: &mut HashMap<String, egui::TextureHandle>,
@@ -91,9 +94,10 @@ fn process_message(
                         let id = msg.message_id?;
 
                         return Some(ActionPacket::Edit(Message {
-                            id,
+                            id: id,
                             chat_id: msg.chat_id,
                             new_text: Some("hello".into()),
+                            account_id,
                         }));
                     }
                     MessageAction::Copy => {
@@ -102,9 +106,10 @@ fn process_message(
                     MessageAction::Delete => {
                         let id = msg.message_id?;
                         return Some(ActionPacket::Delete(Message {
-                            id,
+                            id: id,
                             chat_id: msg.chat_id,
                             new_text: None,
+                            account_id,
                         }));
                     }
                 }

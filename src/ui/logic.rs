@@ -1,17 +1,18 @@
 use crate::ui::app::GramApp;
-use crate::utils::types::ActionPacket::{BotInfo, Send};
+use crate::utils::types::ActionPacket::{AccountInfo, Send};
 use crate::utils::types::MsgType::{FILE, IMAGE, STICKER, TEXT};
 use crate::utils::types::{Chat, MessagePacket, PendingFile};
 use arboard::Clipboard;
 use chrono::Local;
 use eframe::egui;
 
+use eframe::wgpu::wgc::id;
 use log::info;
 use std::ffi::OsStr;
 use teloxide::types::{ChatId, MessageId};
 
 impl GramApp {
-    pub(crate) fn get_or_create_chat(&mut self, chat_id: ChatId, name: String) -> &mut Chat {
+    pub(crate) fn get_or_create_chat(&mut self, chat_id: i64, name: String) -> &mut Chat {
         if let Some(index) = self.chats.iter().position(|chat| chat.chat_id == chat_id) {
             return &mut self.chats[index];
         }
@@ -35,7 +36,7 @@ impl GramApp {
                     chat.unreaded_count += 1;
                     chat.messages.push(m.clone());
                 }
-                BotInfo(name) => {
+                AccountInfo(name, id) => {
                     self.name = name;
                 }
                 _ => {}
@@ -60,7 +61,7 @@ impl GramApp {
                     is_read: true,
                     message_name: Some(file.name),
                     message_id: None,
-
+                    account_id: self.current_account_id,
                     chat_name: None,
                 };
                 let is_ok = self.tx.try_send(Send(msg.clone())).is_ok();
@@ -122,7 +123,7 @@ impl GramApp {
         let curr_chat = self
             .chats
             .iter()
-            .find(|c| c.chat_id == ChatId(chad_id))
+            .find(|c| c.chat_id == chad_id)
             .map(|c| &c.messages);
 
         let default_msg = MessagePacket {
@@ -167,7 +168,7 @@ impl GramApp {
     }
 }
 
-pub(crate) fn delete_msg(msg_id: MessageId, chat: &mut Chat) {
+pub(crate) fn delete_msg(msg_id: i32, chat: &mut Chat) {
     chat.messages.retain(|m| m.message_id != Some(msg_id));
 }
 pub(crate) fn copy_to_clipboard(text: &str) {

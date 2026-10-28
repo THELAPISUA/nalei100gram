@@ -53,7 +53,8 @@ impl Db {
             CREATE TABLE IF NOT EXISTS chats (
                 chat_id INTEGER PRIMARY KEY,
                 title TEXT,
-                created_at INTEGER DEFAULT (strftime('%s','now'))
+                created_at INTEGER DEFAULT (strftime('%s','now')),
+                account_id INTEGER NOT NULL
             );
             "#,
         )
@@ -68,7 +69,7 @@ impl Db {
         match sqlx::query(
             r#"
             CREATE TABLE IF NOT EXISTS messages (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                id INTEGER NOT NULL,
                 chat_id INTEGER NOT NULL,
                 username TEXT NOT NULL,
                 text TEXT NOT NULL,
@@ -77,7 +78,7 @@ impl Db {
                 is_read INTEGER NOT NULL DEFAULT 0,
                 msg_type INTEGER NOT NULL,
                 msg_name TEXT,
-                telegram_message_id INTEGER NOT NULL
+                account_id INTEGER NOT NULL
             );
             "#,
         )
@@ -122,12 +123,12 @@ impl Db {
             r#"
     INSERT INTO messages (
         chat_id, username, text, date, is_bot,
-        is_read, msg_type, msg_name, telegram_message_id
+        is_read, msg_type, msg_name, id
     )
     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);
     "#,
         )
-        .bind(msg.chat_id.0)
+        .bind(msg.chat_id)
         .bind(&msg.username)
         .bind(&msg.text)
         .bind(&msg.time)
@@ -135,7 +136,7 @@ impl Db {
         .bind(msg.is_read)
         .bind(msg.msg_type.clone() as i64)
         .bind(msg.message_name.as_deref().unwrap_or(""))
-        .bind(message_id.0)
+        .bind(message_id)
         .execute(&self.pool)
         .await
         {
@@ -143,7 +144,7 @@ impl Db {
             Err(e) => {
                 error!(
                     "Failed to save message to DB for chat {}: {}",
-                    msg.chat_id.0, e
+                    msg.chat_id, e
                 );
             }
         }
@@ -154,8 +155,8 @@ impl Db {
                 SET text = ?
                 WHERE chat_id = ? AND telegram_message_id = ?;",
         )
-        .bind(msg.chat_id.0)
-        .bind(msg.id.0)
+        .bind(msg.chat_id)
+        .bind(msg.id)
         .execute(&self.pool)
         .await
         {
@@ -165,7 +166,7 @@ impl Db {
             Err(e) => {
                 error!(
                     "Failed to edit message: {} in DB for chat {}: {}",
-                    msg.id.0, msg.chat_id.0, e
+                    msg.id, msg.chat_id, e
                 );
             }
         }
@@ -219,7 +220,7 @@ impl Db {
             error!("Failed to add/update chat {}: {}", chat_id.0, e);
         }
     }
-    pub async fn delete_message(&self, chat_id: ChatId, message_id: MessageId) {
+    pub async fn delete_message(&self, chat_id: i64, message_id: i32) {
         match sqlx::query(
             r#"
         DELETE FROM messages
@@ -227,22 +228,22 @@ impl Db {
           AND telegram_message_id = ?2;
         "#,
         )
-        .bind(chat_id.0)
-        .bind(message_id.0)
+        .bind(chat_id)
+        .bind(message_id)
         .execute(&self.pool)
         .await
         {
             Ok(result) => {
                 if result.rows_affected() > 0 {
-                    info!("Deleted message {} from chat {}", message_id.0, chat_id.0);
+                    info!("Deleted message {} from chat {}", message_id, chat_id);
                 } else {
-                    warn!("Message {} not found in chat {}", message_id.0, chat_id.0);
+                    warn!("Message {} not found in chat {}", message_id, chat_id);
                 }
             }
             Err(e) => {
                 error!(
                     "Failed to delete message {} from chat {}: {}",
-                    message_id.0, chat_id.0, e
+                    message_id, chat_id, e
                 );
             }
         }
@@ -323,16 +324,17 @@ impl Db {
                             is_bot: row.is_bot,
                             is_read: row.is_read,
                             msg_type,
-                            chat_id: ChatId(row.chat_id),
+                            chat_id: row.chat_id,
                             message_name: Some(row.msg_name),
                             chat_name: Some(row.chat_title),
-                            message_id: Some(MessageId(row.telegram_message_id)),
+                            message_id: Some(row.telegram_message_id),
+                            account_id: row.account_id,
                         }
                     })
                     .collect();
 
                 Chat {
-                    chat_id: ChatId(chat_id),
+                    chat_id: chat_id,
                     messages,
                     unreaded_count,
                     name,
@@ -340,7 +342,7 @@ impl Db {
             })
             .collect();
 
-        formatted_chats.sort_by_key(|chat| chat.chat_id.0);
+        formatted_chats.sort_by_key(|chat| chat.chat_id);
 
         info!(
             "Successfully loaded {} messages, structured into {} chat objects.",
@@ -364,4 +366,5 @@ struct MessageRow {
     msg_name: String,
     telegram_message_id: i32,
     chat_title: String,
+    account_id: i64,
 }

@@ -1,4 +1,4 @@
 pub mod backend;
 pub mod db;
-mod integrations;
+pub mod integrations;
 mod logic;

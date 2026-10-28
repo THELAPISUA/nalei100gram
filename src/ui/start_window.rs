@@ -1,11 +1,16 @@
+use std::sync::Arc;
+
 use crate::logic::backend::Backend;
 use crate::logic::db::Db;
+use crate::logic::integrations::manager::account::Account;
+use crate::logic::integrations::manager::manager::AccountManager;
+use crate::logic::integrations::telegram::bot::TelegramBot;
 use crate::ui::app::GramApp;
 use crate::ui::theme::{AppTheme, setup_fonts};
 use crate::ui::tray::init_tray;
 use crate::utils::settings::save_settings;
 use crate::utils::types::{Settings, User};
-use egui_material_icons::icons::{ICON_HIDE_SOURCE, ICON_VISIBILITY, ICON_VISIBILITY_OFF};
+use egui_material_icons::icons::{ICON_VISIBILITY, ICON_VISIBILITY_OFF};
 use log::info;
 use tokio::sync::mpsc;
 
@@ -40,14 +45,27 @@ impl StartWindow {
         let (tx_bot, rx_ui) = mpsc::channel(32);
         let (tx_ui, rx_bot) = mpsc::channel(32);
 
+        let mut account_manager = AccountManager::new();
+        let accounts = vec![(0, String::new())];
+        account_manager.add_account(Account::new(
+            accounts[0].0,
+            Box::new(TelegramBot::new(&token)),
+        ));
+
         // Додай token до конструктора Backend.
-        let backend = Backend::new(tx_bot, rx_bot, database, token);
+        let backend = Backend::new(tx_bot, rx_bot, database, Arc::new(account_manager));
 
         self.runtime.spawn(async move {
             backend.tick().await;
         });
 
-        self.inner = Some(GramApp::new(tx_ui, rx_ui, chats, self.settings.clone()));
+        self.inner = Some(GramApp::new(
+            tx_ui,
+            rx_ui,
+            accounts,
+            chats,
+            self.settings.clone(),
+        ));
         self.started = true;
 
         info!("Backend started");
