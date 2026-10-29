@@ -45,7 +45,7 @@ impl StartWindow {
         let (tx_bot, rx_ui) = mpsc::channel(32);
         let (tx_ui, rx_bot) = mpsc::channel(32);
 
-        let mut account_manager = AccountManager::new();
+        let (rx, mut account_manager) = AccountManager::new();
         let accounts = vec![(0, String::new())];
         account_manager.add_account(Account::new(
             accounts[0].0,
@@ -53,7 +53,7 @@ impl StartWindow {
         ));
 
         // Додай token до конструктора Backend.
-        let backend = Backend::new(tx_bot, rx_bot, database, Arc::new(account_manager));
+        let backend = Backend::new(tx_bot, rx_bot, database, Arc::new(account_manager), rx);
 
         self.runtime.spawn(async move {
             backend.tick().await;

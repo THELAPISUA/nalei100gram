@@ -1,8 +1,9 @@
+use crate::logic::integrations::types::{ActionPacket, Chat};
 use crate::ui::settings_widget::SettingsWidget;
 use crate::ui::ui_components::{
     draw_avatar, draw_circle_button, get_img, preview_files_being_dropped,
 };
-use crate::utils::types::{ActionPacket, Chat, PendingFile, Settings};
+use crate::utils::types::{PendingFile, Settings};
 use eframe::egui;
 use eframe::egui::{
     Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Sense, Stroke, TextEdit,
@@ -12,7 +13,6 @@ use egui_material_icons::icons::{ICON_SEND, ICON_SETTINGS};
 
 use std::collections::HashMap;
 
-use teloxide::types::ChatId;
 use tokio::sync::mpsc::{Receiver, Sender};
 
 pub struct GramApp {
@@ -176,6 +176,7 @@ impl eframe::App for GramApp {
                     }
 
                     if response.clicked() {
+                        log::info!("Clicked chat: {chat_id}");
                         self.current_chat = chat_id;
                     }
 

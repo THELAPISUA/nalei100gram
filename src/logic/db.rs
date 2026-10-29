@@ -1,16 +1,37 @@
-use crate::utils::types::{
-    self, Chat, MessagePacket,
-    MsgType::{FILE, IMAGE, STICKER, TEXT},
-};
-
 use log::{debug, error, info, trace, warn};
 use sqlx::{
-    Pool, Sqlite,
+    AssertSqlSafe, Pool, Row, Sqlite,
     sqlite::{SqliteConnectOptions, SqlitePool},
 };
 use std::collections::HashMap;
 use std::fs;
-use teloxide::types::{ChatId, MessageId};
+
+use crate::logic::integrations::types::{Chat, MessageType, ReceivedMessage};
+
+const CREATE_CHATS: &str = r#"
+    CREATE TABLE IF NOT EXISTS chats (
+        chat_id INTEGER NOT NULL,
+        account_id INTEGER NOT NULL,
+        title TEXT,
+        created_at INTEGER NOT NULL DEFAULT (strftime('%s','now')),
+        PRIMARY KEY (chat_id, account_id)
+    );
+"#;
+
+const CREATE_MESSAGES: &str = r#"
+    CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER NOT NULL,
+        chat_id INTEGER NOT NULL,
+        account_id INTEGER NOT NULL,
+        username TEXT NOT NULL,
+        text TEXT NOT NULL DEFAULT '',
+        date TEXT NOT NULL,
+        is_read INTEGER NOT NULL DEFAULT 0,
+        sender_is_you INTEGER NOT NULL DEFAULT 0,
+        msg_type INTEGER NOT NULL,
+        PRIMARY KEY (account_id, chat_id, id)
+    );
+"#;
 
 #[derive(Clone)]
 pub struct Db {
@@ -47,44 +68,19 @@ impl Db {
     pub async fn init(&self) {
         debug!("Initializing database table structures...");
 
-        // Creating 'chats' table
-        match sqlx::query(
-            r#"
-            CREATE TABLE IF NOT EXISTS chats (
-                chat_id INTEGER PRIMARY KEY,
-                title TEXT,
-                created_at INTEGER DEFAULT (strftime('%s','now')),
-                account_id INTEGER NOT NULL
-            );
-            "#,
-        )
-        .execute(&self.pool)
-        .await
-        {
-            Ok(_) => debug!("Table 'chats' verified/created successfully."),
-            Err(e) => error!("Failed to create 'chats' table: {}", e),
+        if let Err(e) = self.migrate_legacy_tables().await {
+            error!("Failed to migrate legacy database tables: {}", e);
         }
 
-        // Creating 'messages' table
-        match sqlx::query(
-            r#"
-            CREATE TABLE IF NOT EXISTS messages (
-                id INTEGER NOT NULL,
-                chat_id INTEGER NOT NULL,
-                username TEXT NOT NULL,
-                text TEXT NOT NULL,
-                date TEXT NOT NULL,
-                is_bot INTEGER NOT NULL DEFAULT 0,
-                is_read INTEGER NOT NULL DEFAULT 0,
-                msg_type INTEGER NOT NULL,
-                msg_name TEXT,
-                account_id INTEGER NOT NULL
-            );
-            "#,
-        )
-        .execute(&self.pool)
-        .await
-        {
+        match sqlx::query(CREATE_CHATS).execute(&self.pool).await {
+            Ok(_) => debug!("Table 'chats' verified/created successfully."),
+            Err(e) => {
+                error!("Failed to create 'chats' table: {}", e);
+                panic!("{}", e);
+            }
+        }
+
+        match sqlx::query(CREATE_MESSAGES).execute(&self.pool).await {
             Ok(_) => debug!("Table 'messages' verified/created successfully."),
             Err(e) => {
                 error!("Failed to create 'messages' table: {}", e);
@@ -92,16 +88,19 @@ impl Db {
             }
         }
 
-        // Creating index
-        match sqlx::query("CREATE INDEX IF NOT EXISTS idx_messages_chat_id ON messages(chat_id);")
-            .execute(&self.pool)
-            .await
+        if let Err(e) = sqlx::query(
+            "CREATE INDEX IF NOT EXISTS idx_messages_account_chat
+             ON messages(account_id, chat_id);",
+        )
+        .execute(&self.pool)
+        .await
         {
-            Ok(_) => debug!("Index 'idx_messages_chat_id' verified/created."),
-            Err(e) => warn!("Failed to create index on messages(chat_id): {}", e),
+            warn!(
+                "Failed to create index on messages(account_id, chat_id): {}",
+                e
+            );
         }
 
-        // Enabling WAL mode
         match sqlx::query("PRAGMA journal_mode=WAL;")
             .execute(&self.pool)
             .await
@@ -113,74 +112,242 @@ impl Db {
         info!("Database successfully initialized and optimized.");
     }
 
-    pub async fn add_message(self, msg: &MessagePacket) {
-        let Some(message_id) = msg.message_id else {
-            error!("Cannot save message without Telegram message ID");
-            return;
+    async fn migrate_legacy_tables(&self) -> Result<(), sqlx::Error> {
+        let chats = self.table_info("chats").await?;
+        if !chats.is_empty() && !is_current_chats_schema(&chats) {
+            info!("Migrating legacy 'chats' table to the new schema...");
+            self.migrate_chats_table(&chats).await?;
+        }
+
+        let messages = self.table_info("messages").await?;
+        if !messages.is_empty() && !is_current_messages_schema(&messages) {
+            info!("Migrating legacy 'messages' table to the new schema...");
+            self.migrate_messages_table(&messages).await?;
+        }
+
+        Ok(())
+    }
+
+    async fn table_info(&self, table: &str) -> Result<Vec<TableColumn>, sqlx::Error> {
+        let rows = sqlx::query(AssertSqlSafe(format!("PRAGMA table_info({table})")))
+            .fetch_all(&self.pool)
+            .await?;
+
+        Ok(rows
+            .into_iter()
+            .map(|row| TableColumn {
+                name: row.get("name"),
+                pk: row.get("pk"),
+            })
+            .collect())
+    }
+
+    async fn migrate_chats_table(&self, columns: &[TableColumn]) -> Result<(), sqlx::Error> {
+        let has_account = has_column(columns, "account_id");
+        let has_title = has_column(columns, "title");
+        let has_created = has_column(columns, "created_at");
+
+        let account = if has_account {
+            "COALESCE(account_id, 0)"
+        } else {
+            "0"
         };
+        let title = if has_title { "title" } else { "NULL" };
+        let created = if has_created {
+            "COALESCE(created_at, strftime('%s','now'))"
+        } else {
+            "strftime('%s','now')"
+        };
+
+        let mut tx = self.pool.begin().await?;
+
+        sqlx::query("DROP TABLE IF EXISTS chats_legacy;")
+            .execute(&mut *tx)
+            .await?;
+        sqlx::query("ALTER TABLE chats RENAME TO chats_legacy;")
+            .execute(&mut *tx)
+            .await?;
+        sqlx::query(CREATE_CHATS).execute(&mut *tx).await?;
+
+        sqlx::query(AssertSqlSafe(format!(
+            r#"
+            INSERT OR IGNORE INTO chats (chat_id, account_id, title, created_at)
+            SELECT chat_id, {account}, {title}, {created}
+            FROM chats_legacy;
+            "#
+        )))
+        .execute(&mut *tx)
+        .await?;
+
+        sqlx::query("DROP TABLE chats_legacy;")
+            .execute(&mut *tx)
+            .await?;
+
+        tx.commit().await?;
+
+        Ok(())
+    }
+
+    async fn migrate_messages_table(&self, columns: &[TableColumn]) -> Result<(), sqlx::Error> {
+        let has_account = has_column(columns, "account_id");
+        let has_sender = has_column(columns, "sender_is_you");
+        let has_is_bot = has_column(columns, "is_bot");
+        let has_is_read = has_column(columns, "is_read");
+        let has_text = has_column(columns, "text");
+        let has_date = has_column(columns, "date");
+        let has_username = has_column(columns, "username");
+        let has_msg_type = has_column(columns, "msg_type");
+
+        let account = if has_account {
+            "COALESCE(account_id, 0)"
+        } else {
+            "0"
+        };
+        let sender = if has_sender {
+            "COALESCE(sender_is_you, 0)"
+        } else if has_is_bot {
+            "COALESCE(is_bot, 0)"
+        } else {
+            "0"
+        };
+        let is_read = if has_is_read {
+            "COALESCE(is_read, 0)"
+        } else {
+            "0"
+        };
+        let text = if has_text { "COALESCE(text, '')" } else { "''" };
+        let date = if has_date { "COALESCE(date, '')" } else { "''" };
+        let username = if has_username {
+            "COALESCE(username, '')"
+        } else {
+            "''"
+        };
+        let msg_type = if has_msg_type {
+            "COALESCE(msg_type, 0)"
+        } else {
+            "0"
+        };
+
+        let mut tx = self.pool.begin().await?;
+
+        sqlx::query("DROP TABLE IF EXISTS messages_legacy;")
+            .execute(&mut *tx)
+            .await?;
+        sqlx::query("ALTER TABLE messages RENAME TO messages_legacy;")
+            .execute(&mut *tx)
+            .await?;
+        sqlx::query(CREATE_MESSAGES).execute(&mut *tx).await?;
+
+        sqlx::query(AssertSqlSafe(format!(
+            r#"
+            INSERT OR REPLACE INTO messages (
+                id, chat_id, account_id, username, text, date,
+                is_read, sender_is_you, msg_type
+            )
+            SELECT
+                id, chat_id, {account}, {username}, {text}, {date},
+                {is_read}, {sender}, {msg_type}
+            FROM messages_legacy;
+            "#
+        )))
+        .execute(&mut *tx)
+        .await?;
+
+        sqlx::query("DROP TABLE messages_legacy;")
+            .execute(&mut *tx)
+            .await?;
+
+        tx.commit().await?;
+
+        Ok(())
+    }
+
+    pub async fn add_message(&self, msg: &ReceivedMessage) {
+        let (msg_type, text) = message_to_row(&msg.t);
 
         match sqlx::query(
             r#"
-    INSERT INTO messages (
-        chat_id, username, text, date, is_bot,
-        is_read, msg_type, msg_name, id
-    )
-    VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);
-    "#,
+            INSERT OR REPLACE INTO messages (
+                id, chat_id, account_id, username, text, date,
+                is_read, sender_is_you, msg_type
+            )
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);
+            "#,
         )
+        .bind(msg.id)
         .bind(msg.chat_id)
+        .bind(msg.account_id)
         .bind(&msg.username)
-        .bind(&msg.text)
-        .bind(&msg.time)
-        .bind(msg.is_bot)
-        .bind(msg.is_read)
-        .bind(msg.msg_type.clone() as i64)
-        .bind(msg.message_name.as_deref().unwrap_or(""))
-        .bind(message_id)
+        .bind(text)
+        .bind(&msg.date)
+        .bind(msg.readed)
+        .bind(msg.sender_is_you)
+        .bind(msg_type)
         .execute(&self.pool)
         .await
         {
             Ok(_) => trace!("Message successfully written to database."),
             Err(e) => {
                 error!(
-                    "Failed to save message to DB for chat {}: {}",
-                    msg.chat_id, e
+                    "Failed to save message to DB for chat {} (account {}): {}",
+                    msg.chat_id, msg.account_id, e
                 );
             }
         }
     }
-    pub async fn edit_message(self, msg: types::Message) {
+
+    pub async fn edit_message(
+        &self,
+        account_id: i64,
+        chat_id: i64,
+        message_id: i32,
+        new_text: &str,
+    ) {
         match sqlx::query(
-            "UPDATE messages
-                SET text = ?
-                WHERE chat_id = ? AND telegram_message_id = ?;",
+            r#"
+            UPDATE messages
+            SET text = ?1
+            WHERE account_id = ?2 AND chat_id = ?3 AND id = ?4;
+            "#,
         )
-        .bind(msg.chat_id)
-        .bind(msg.id)
+        .bind(new_text)
+        .bind(account_id)
+        .bind(chat_id)
+        .bind(message_id)
         .execute(&self.pool)
         .await
         {
-            Ok(_) => {
-                trace!("Message successfully edited in database.");
+            Ok(result) => {
+                trace!(
+                    "Message {} successfully edited in database (rows affected: {}).",
+                    message_id,
+                    result.rows_affected()
+                );
             }
             Err(e) => {
                 error!(
-                    "Failed to edit message: {} in DB for chat {}: {}",
-                    msg.id, msg.chat_id, e
+                    "Failed to edit message {} in DB for chat {} (account {}): {}",
+                    message_id, chat_id, account_id, e
                 );
             }
         }
     }
 
-    pub async fn _mark_readed_all(&self, chat_id: ChatId) {
-        debug!("Marking all messages as read for ChatId: {}", chat_id.0);
+    pub async fn mark_readed_all(&self, account_id: i64, chat_id: i64) {
+        debug!(
+            "Marking all messages as read for chat {} (account {})...",
+            chat_id, account_id
+        );
 
         match sqlx::query(
-            "UPDATE messages 
-             SET is_read = 1 
-             WHERE chat_id = ?1 AND is_read = 0",
+            r#"
+            UPDATE messages
+            SET is_read = 1
+            WHERE account_id = ?1 AND chat_id = ?2 AND is_read = 0;
+            "#,
         )
-        .bind(chat_id.0)
+        .bind(account_id)
+        .bind(chat_id)
         .execute(&self.pool)
         .await
         {
@@ -192,42 +359,48 @@ impl Db {
             }
             Err(e) => {
                 error!(
-                    "Failed to mark messages as read for chat {}: {}",
-                    chat_id.0, e
+                    "Failed to mark messages as read for chat {} (account {}): {}",
+                    chat_id, account_id, e
                 );
             }
         }
     }
-    pub async fn add_chat(&self, chat_id: ChatId, title: &str) {
+
+    pub async fn add_chat(&self, account_id: i64, chat_id: i64, title: &str) {
         if let Err(e) = sqlx::query(
             r#"
-        INSERT INTO chats (chat_id, title)
-        VALUES (?1, ?2)
-        ON CONFLICT(chat_id) DO UPDATE SET
-            title = CASE
-                WHEN excluded.title IS NOT NULL
-                     AND excluded.title != ''
-                THEN excluded.title
-                ELSE chats.title
-            END;
-        "#,
+            INSERT INTO chats (chat_id, account_id, title)
+            VALUES (?1, ?2, ?3)
+            ON CONFLICT(chat_id, account_id) DO UPDATE SET
+                title = CASE
+                    WHEN excluded.title IS NOT NULL
+                         AND excluded.title != ''
+                    THEN excluded.title
+                    ELSE chats.title
+                END;
+            "#,
         )
-        .bind(chat_id.0)
+        .bind(chat_id)
+        .bind(account_id)
         .bind(title)
         .execute(&self.pool)
         .await
         {
-            error!("Failed to add/update chat {}: {}", chat_id.0, e);
+            error!(
+                "Failed to add/update chat {} (account {}): {}",
+                chat_id, account_id, e
+            );
         }
     }
-    pub async fn delete_message(&self, chat_id: i64, message_id: i32) {
+
+    pub async fn delete_message(&self, account_id: i64, chat_id: i64, message_id: i32) {
         match sqlx::query(
             r#"
-        DELETE FROM messages
-        WHERE chat_id = ?1
-          AND telegram_message_id = ?2;
-        "#,
+            DELETE FROM messages
+            WHERE account_id = ?1 AND chat_id = ?2 AND id = ?3;
+            "#,
         )
+        .bind(account_id)
         .bind(chat_id)
         .bind(message_id)
         .execute(&self.pool)
@@ -235,15 +408,21 @@ impl Db {
         {
             Ok(result) => {
                 if result.rows_affected() > 0 {
-                    info!("Deleted message {} from chat {}", message_id, chat_id);
+                    info!(
+                        "Deleted message {} from chat {} (account {})",
+                        message_id, chat_id, account_id
+                    );
                 } else {
-                    warn!("Message {} not found in chat {}", message_id, chat_id);
+                    warn!(
+                        "Message {} not found in chat {} (account {})",
+                        message_id, chat_id, account_id
+                    );
                 }
             }
             Err(e) => {
                 error!(
-                    "Failed to delete message {} from chat {}: {}",
-                    message_id, chat_id, e
+                    "Failed to delete message {} from chat {} (account {}): {}",
+                    message_id, chat_id, account_id, e
                 );
             }
         }
@@ -254,21 +433,22 @@ impl Db {
 
         let rows: Vec<MessageRow> = match sqlx::query_as(
             r#"
-        SELECT
-            m.chat_id,
-            m.username,
-            m.text,
-            m.date,
-            m.is_bot,
-            m.is_read,
-            m.msg_type,
-            COALESCE(m.msg_name, '') AS msg_name,
-            m.telegram_message_id,
-            COALESCE(c.title, '') AS chat_title
-        FROM messages AS m
-        LEFT JOIN chats AS c ON c.chat_id = m.chat_id
-        ORDER BY m.chat_id ASC, m.id ASC;
-        "#,
+            SELECT
+                m.id,
+                m.chat_id,
+                m.account_id,
+                m.username,
+                m.text,
+                m.date,
+                m.is_read,
+                m.sender_is_you,
+                m.msg_type,
+                COALESCE(c.title, '') AS chat_title
+            FROM messages AS m
+            LEFT JOIN chats AS c
+                ON c.chat_id = m.chat_id AND c.account_id = m.account_id
+            ORDER BY m.chat_id ASC, m.id ASC;
+            "#,
         )
         .fetch_all(&self.pool)
         .await
@@ -281,7 +461,6 @@ impl Db {
         };
 
         let rows_count = rows.len();
-
         let mut chats: HashMap<i64, Vec<MessageRow>> = HashMap::new();
 
         for row in rows {
@@ -299,42 +478,24 @@ impl Db {
                     format!("Chat {chat_id}")
                 };
 
-                debug!(
-                    "Loaded chat: id={}, title='{}', displayed_name='{}'",
-                    chat_id, title, name
-                );
-
                 let unreaded_count = rows.iter().filter(|row| !row.is_read).count() as u32;
 
-                let messages: Vec<MessagePacket> = rows
+                let messages: Vec<ReceivedMessage> = rows
                     .into_iter()
-                    .map(|row| {
-                        let msg_type = match row.msg_type {
-                            0 => TEXT,
-                            1 => IMAGE,
-                            2 => STICKER,
-                            3 => FILE,
-                            _ => TEXT,
-                        };
-
-                        MessagePacket {
-                            username: row.username,
-                            text: row.text,
-                            time: row.date,
-                            is_bot: row.is_bot,
-                            is_read: row.is_read,
-                            msg_type,
-                            chat_id: row.chat_id,
-                            message_name: Some(row.msg_name),
-                            chat_name: Some(row.chat_title),
-                            message_id: Some(row.telegram_message_id),
-                            account_id: row.account_id,
-                        }
+                    .map(|row| ReceivedMessage {
+                        id: row.id,
+                        username: row.username,
+                        t: row_to_message_type(row.msg_type, row.text),
+                        date: row.date,
+                        chat_id: row.chat_id,
+                        readed: row.is_read,
+                        sender_is_you: row.sender_is_you,
+                        account_id: row.account_id,
                     })
                     .collect();
 
                 Chat {
-                    chat_id: chat_id,
+                    chat_id,
                     messages,
                     unreaded_count,
                     name,
@@ -354,17 +515,75 @@ impl Db {
     }
 }
 
+fn message_to_row(message_type: &MessageType) -> (i64, String) {
+    match message_type {
+        MessageType::TEXT { text } => (0, text.clone()),
+        MessageType::PHOTO { path } => (1, path.clone()),
+        MessageType::FILE { path, name: _ } => (2, path.clone()),
+        MessageType::STICKER { path } => (3, path.clone()),
+    }
+}
+
+fn row_to_message_type(msg_type: i64, text: String) -> MessageType {
+    match msg_type {
+        0 => MessageType::TEXT { text },
+        1 => MessageType::PHOTO { path: text },
+        2 => MessageType::FILE {
+            path: text,
+            name: String::new(),
+        },
+        3 => MessageType::STICKER { path: text },
+        _ => MessageType::TEXT { text },
+    }
+}
+
+#[derive(Clone)]
+struct TableColumn {
+    name: String,
+    pk: i64,
+}
+
+fn has_column(columns: &[TableColumn], name: &str) -> bool {
+    columns.iter().any(|column| column.name == name)
+}
+
+fn is_current_chats_schema(columns: &[TableColumn]) -> bool {
+    has_column(columns, "chat_id")
+        && has_column(columns, "account_id")
+        && has_column(columns, "title")
+        && has_column(columns, "created_at")
+        && primary_key(columns) == ["chat_id", "account_id"]
+}
+
+fn is_current_messages_schema(columns: &[TableColumn]) -> bool {
+    has_column(columns, "id")
+        && has_column(columns, "chat_id")
+        && has_column(columns, "account_id")
+        && has_column(columns, "username")
+        && has_column(columns, "text")
+        && has_column(columns, "date")
+        && has_column(columns, "is_read")
+        && has_column(columns, "sender_is_you")
+        && has_column(columns, "msg_type")
+        && primary_key(columns) == ["account_id", "chat_id", "id"]
+}
+
+fn primary_key(columns: &[TableColumn]) -> Vec<&str> {
+    let mut key: Vec<&TableColumn> = columns.iter().filter(|column| column.pk > 0).collect();
+    key.sort_by_key(|column| column.pk);
+    key.into_iter().map(|column| column.name.as_str()).collect()
+}
+
 #[derive(Clone, sqlx::FromRow)]
 struct MessageRow {
+    id: i32,
     chat_id: i64,
+    account_id: i64,
     username: String,
     text: String,
     date: String,
-    is_bot: bool,
     is_read: bool,
+    sender_is_you: bool,
     msg_type: i64,
-    msg_name: String,
-    telegram_message_id: i32,
     chat_title: String,
-    account_id: i64,
 }

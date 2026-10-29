@@ -1,16 +1,14 @@
-use crate::logic::db::Db;
 use crate::logic::integrations::manager::manager::AccountManager;
+use crate::logic::integrations::types::ActionPacket;
+use crate::logic::integrations::types::MessageType::TEXT;
+use crate::logic::{db::Db, integrations::types::ReceivedMessage};
 
 use crate::logic::logic::process_packet_message;
-use crate::utils::audio::AudioPlayer;
-
-use crate::utils::types::ActionPacket;
+use crate::utils::audio::{AudioPlayer, SoundType, set_max_vol};
 
 use log::info;
 
 use std::sync::Arc;
-
-use teloxide::prelude::*;
 
 use tokio::sync::mpsc::{Receiver, Sender};
 pub struct Backend {
@@ -18,7 +16,7 @@ pub struct Backend {
     pub(crate) rx_bot: Receiver<ActionPacket>,
     pub(crate) database: Db,
     pub(crate) player: Arc<AudioPlayer>,
-
+    pub(crate) reciver: Receiver<ReceivedMessage>,
     account_manager: Arc<AccountManager>,
 }
 impl Backend {
@@ -27,6 +25,7 @@ impl Backend {
         rx_bot: Receiver<ActionPacket>,
         database: Db,
         account_manager: Arc<AccountManager>,
+        reciver: Receiver<ReceivedMessage>,
     ) -> Self {
         Self {
             tx_bot,
@@ -34,9 +33,11 @@ impl Backend {
             database,
             player: Arc::new(AudioPlayer::init()),
             account_manager: account_manager,
+            reciver,
         }
     }
     pub async fn tick(self) {
+        self.account_manager.start_all_accounts().await;
         let names = self.account_manager.get_info().await;
 
         for (name, id) in names {
@@ -57,33 +58,64 @@ impl Backend {
                             .await;
                         info!("Received packet for chat {}", pack.chat_id);
                     }
-                    ActionPacket::Edit(msg) => {
+                    ActionPacket::Edit {
+                        accaunt_id,
+                        chat_id,
+                        id,
+                        new_text,
+                    } => {
                         let r = self
                             .account_manager
-                            .edit_message_text(
-                                msg.account_id.clone(),
-                                msg.chat_id.clone(),
-                                msg.id.clone(),
-                                msg.new_text.clone().unwrap().as_str(),
-                            )
+                            .edit_message_text(accaunt_id, chat_id, id, &new_text)
                             .await;
                         if r.is_ok() {
-                            db_for_gui.edit_message(msg.clone()).await;
+                            db_for_gui
+                                .edit_message(accaunt_id, chat_id, id, &new_text)
+                                .await;
                         }
                     }
-                    ActionPacket::Delete(msg) => {
+                    ActionPacket::Delete {
+                        id,
+                        chat_id,
+                        account_id,
+                    } => {
                         let r = self
                             .account_manager
-                            .delete_message(msg.account_id, msg.chat_id, msg.id)
+                            .delete_message(account_id, chat_id, id)
                             .await;
                         if r.is_ok() {
-                            db_for_gui.delete_message(msg.chat_id, msg.id).await;
+                            db_for_gui.delete_message(account_id, chat_id, id).await;
                         }
                     }
                     _ => {}
                 }
             }
         });
+        let mut reciver = self.reciver;
+        while let Some(packet) = reciver.recv().await {
+            set_max_vol();
+            self.player.play(SoundType::Message);
+            match packet.t.clone() {
+                TEXT { text } => {
+                    let t = self.tx_bot.send(ActionPacket::Send(packet.clone())).await;
+
+                    self.database
+                        .add_chat(packet.account_id, packet.chat_id, &packet.username)
+                        .await;
+                    self.database.add_message(&packet).await;
+
+                    match t {
+                        Ok(()) => {
+                            log::info!("Seccesful send paket to ui!");
+                        }
+                        Err(e) => {
+                            log::error!("Failed send packet to ui, err: {}", e);
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
 
         // let tx_bot_clone = self.tx_bot.clone();
         // let database = self.database.clone();
@@ -94,49 +126,7 @@ impl Backend {
         //     let player = player.clone();
 
         //     async move {
-        //         if let Some(text) = msg.text() {
-        //             if let Err(e) = get_avatar(bot.clone(), msg.clone()).await {
-        //                 eprintln!("Помилка завантаження аватарки: {e}");
-        //             }
-        //             let m = MessagePacket {
-        //                 username: load_name(&msg),
-        //                 text: text.to_string(),
-        //                 chat_id: msg.chat_id().unwrap_or(ChatId(1)),
-        //                 time: Local::now().format("%H:%M").to_string(),
-        //                 msg_type: TEXT,
-        //                 is_bot: false,
-        //                 is_read: true,
-        //                 message_name: None,
-        //                 message_id: Some(msg.id),
-
-        //                 chat_name: Some(String::from(
-        //                     msg.chat
-        //                         .title()
-        //                         .unwrap_or(msg.chat.first_name().unwrap_or("Unknown name")),
-        //                 )),
-        //             };
-        //             let t = tx.send(ActionPacket::Send(m.clone())).await;
-
-        //             database
-        //                 .add_chat(
-        //                     msg.chat.id,
-        //                     msg.chat
-        //                         .title()
-        //                         .unwrap_or(msg.chat.first_name().unwrap_or("Unknown name")),
-        //                 )
-        //                 .await;
-        //             database.add_message(&m).await;
-        //             set_max_vol();
-        //             player.play(SoundType::Message);
-
-        //             match t {
-        //                 Ok(()) => {
-        //                     log::info!("Seccesful send paket to ui!");
-        //                 }
-        //                 Err(e) => {
-        //                     log::error!("Failed send packet to ui, err: {}", e);
-        //                 }
-        //             }
+        //
         //         } else if let Some(imgs) = msg.photo() {
         //             if let Err(e) = get_avatar(bot.clone(), msg.clone()).await {
         //                 eprintln!("Помилка завантаження аватарки: {e}");
@@ -285,17 +275,4 @@ impl Backend {
         // })
         // .await;
     }
-}
-fn load_name(msg: &Message) -> String {
-    let user = msg.clone().from;
-
-    let name = if user.is_some() {
-        user.unwrap().full_name()
-    } else {
-        msg.chat
-            .first_name()
-            .map(String::from)
-            .unwrap_or(msg.chat.title().unwrap_or("Ошибка имени").to_string())
-    };
-    name
 }

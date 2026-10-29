@@ -1,12 +1,14 @@
 use anyhow::Error;
-use teloxide::types::{Message, True};
+use teloxide::{
+    RequestError,
+    types::{Message, True},
+};
 use tokio::sync::mpsc::{self, Receiver, Sender};
 
 use crate::logic::integrations::{manager::account::Account, types::ReceivedMessage};
 
 pub struct AccountManager {
     accounts: Vec<Account>,
-
     tx: Sender<ReceivedMessage>,
 }
 impl AccountManager {
@@ -26,8 +28,13 @@ impl AccountManager {
             .find(|account| account.id == account_id)
             .expect("Account not found!")
             .integration
-            .start(self.tx.clone())
+            .start(self.tx.clone(), account_id)
             .await;
+    }
+    pub async fn start_all_accounts(&self) {
+        for a in &self.accounts {
+            a.integration.start(self.tx.clone(), a.id).await;
+        }
     }
     pub async fn edit_message_text(
         &self,
@@ -35,7 +42,7 @@ impl AccountManager {
         chat_id: i64,
         message_id: i32,
         text: &str,
-    ) -> Result<Message, Error> {
+    ) -> anyhow::Result<Message, RequestError> {
         let r = self
             .accounts
             .iter()
@@ -54,7 +61,7 @@ impl AccountManager {
         account_id: i64,
         chat_id: i64,
         msg: &str,
-    ) -> Result<Message, Error> {
+    ) -> anyhow::Result<Message, RequestError> {
         let r = self
             .accounts
             .iter()
@@ -86,7 +93,7 @@ impl AccountManager {
         account_id: i64,
         chat_id: i64,
         path: &str,
-    ) -> Result<Message, Error> {
+    ) -> anyhow::Result<Message, RequestError> {
         let r = self
             .accounts
             .iter()
@@ -102,7 +109,7 @@ impl AccountManager {
         account_id: i64,
         chat_id: i64,
         path: &str,
-    ) -> Result<Message, Error> {
+    ) -> anyhow::Result<Message, RequestError> {
         let r = self
             .accounts
             .iter()

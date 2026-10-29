@@ -1,30 +1,30 @@
 use std::sync::Arc;
 
+use crate::logic::db::Db;
 use crate::logic::integrations::manager::manager::AccountManager;
+use crate::logic::integrations::types::{MessageType::*, ReceivedMessage};
 use crate::utils::audio::{AudioPlayer, SoundType};
-use crate::utils::types::MsgType::*;
-use crate::{logic::db::Db, utils::types::MessagePacket};
 
 use log::{error, info};
 
 pub(crate) async fn process_packet_message(
-    packet: &MessagePacket,
+    packet: &ReceivedMessage,
     account_manager: &Arc<AccountManager>,
     db_for_gui: &Db,
     player: &Arc<AudioPlayer>,
 ) {
-    match packet.msg_type {
-        TEXT => {
+    match packet.t {
+        TEXT { ref text } => {
             let r = account_manager
-                .send_message(packet.account_id, packet.chat_id, packet.text.as_str())
+                .send_message(packet.account_id, packet.chat_id, &text)
                 .await;
             player.play(SoundType::Send);
 
             match r {
                 Ok(m) => {
                     let chat_id = m.chat.id.0 as i64;
-                    let new_packet = MessagePacket {
-                        message_id: Some(m.id.0),
+                    let new_packet = ReceivedMessage {
+                        id: packet.id,
                         ..packet.clone()
                     };
                     db_for_gui.clone().add_message(&new_packet).await;
@@ -39,9 +39,9 @@ pub(crate) async fn process_packet_message(
                 }
             }
         }
-        FILE => {
+        FILE { ref path, name: _ } => {
             let r = account_manager
-                .send_document(packet.account_id, packet.chat_id, packet.text.as_str())
+                .send_document(packet.account_id, packet.chat_id, &path)
                 .await;
 
             player.play(SoundType::Send);
@@ -62,9 +62,9 @@ pub(crate) async fn process_packet_message(
                 }
             }
         }
-        IMAGE => {
+        PHOTO { ref path } => {
             let r = account_manager
-                .send_photo(packet.account_id, packet.chat_id, packet.text.as_str())
+                .send_photo(packet.account_id, packet.chat_id, &path)
                 .await;
 
             player.play(SoundType::Send);

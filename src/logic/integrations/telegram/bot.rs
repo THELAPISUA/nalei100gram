@@ -1,5 +1,7 @@
 use async_trait::async_trait;
+
 use log::error;
+use teloxide::RequestError;
 use teloxide::net::Download;
 use teloxide::{
     Bot,
@@ -24,12 +26,13 @@ impl TelegramBot {
 
 #[async_trait]
 impl AccauntIntegration for TelegramBot {
-    async fn start(&self, tx: Sender<ReceivedMessage>) {
+    async fn start(&self, tx: Sender<ReceivedMessage>, id: i64) {
         let bot = self.bot.clone();
-
-        tokio::spawn(async {
+        let account_id = id;
+        tokio::spawn(async move {
             teloxide::repl(bot, move |_: Bot, msg: Message| {
                 let tx = tx.clone();
+
                 async move {
                     if let Some(text) = msg.text() {
                         let m = ReceivedMessage {
@@ -38,10 +41,13 @@ impl AccauntIntegration for TelegramBot {
                             t: crate::logic::integrations::types::MessageType::TEXT {
                                 text: text.to_string(),
                             },
+                            date: msg.date.format("%H:%M").to_string(),
+                            chat_id: msg.chat.id.0,
+                            readed: true,
+                            sender_is_you: false,
+                            account_id,
                         };
-
                         let t = tx.send(m).await;
-
                         match t {
                             Ok(()) => {
                                 log::info!("Seccesful send paket to ui!");
@@ -57,38 +63,43 @@ impl AccauntIntegration for TelegramBot {
             .await;
         });
     }
-    async fn send_message(&self, chat_id: i64, text: &str) -> anyhow::Result<Message> {
-        let r = self.bot.send_message(ChatId(chat_id), text).await.unwrap();
-        Ok(r)
+    async fn send_message(
+        &self,
+        chat_id: i64,
+        text: &str,
+    ) -> anyhow::Result<Message, RequestError> {
+        let r = self.bot.send_message(ChatId(chat_id), text).await;
+        r
     }
-    async fn send_document(&self, chat_id: i64, path: &str) -> anyhow::Result<Message> {
+    async fn send_document(
+        &self,
+        chat_id: i64,
+        path: &str,
+    ) -> anyhow::Result<Message, RequestError> {
         let r = self
             .bot
             .send_document(ChatId(chat_id), InputFile::file(path))
-            .await
-            .unwrap();
-        Ok(r)
+            .await;
+        r
     }
-    async fn send_photo(&self, chat_id: i64, path: &str) -> anyhow::Result<Message> {
+    async fn send_photo(&self, chat_id: i64, path: &str) -> anyhow::Result<Message, RequestError> {
         let r = self
             .bot
             .send_photo(ChatId(chat_id), InputFile::file(path))
-            .await
-            .unwrap();
-        Ok(r)
+            .await;
+        r
     }
     async fn edit_message_text(
         &self,
         chat_id: i64,
         message_id: i32,
         text: &str,
-    ) -> anyhow::Result<Message> {
+    ) -> anyhow::Result<Message, RequestError> {
         let r = self
             .bot
             .edit_message_text(ChatId(chat_id), MessageId(message_id), text)
-            .await
-            .unwrap();
-        Ok(r)
+            .await;
+        r
     }
     async fn delete_message(&self, chat_id: i64, message_id: i32) -> anyhow::Result<True> {
         let r = self

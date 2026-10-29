@@ -1,10 +1,13 @@
+use crate::logic::integrations::types::{
+    ActionPacket,
+    MessageType::{self, *},
+    ReceivedMessage,
+};
 use crate::ui::app::GramApp;
 
 use crate::ui::logic::{copy_to_clipboard, delete_msg};
 use crate::ui::widgets::{FileWidget, MessageAction, MessageWidget, PhotoWidget};
 
-use crate::utils::types::{ActionPacket, MessagePacket};
-use crate::utils::types::{Message, MsgType::*};
 use eframe::egui::{self, Align2, Color32, FontId, Pos2, Rect, Sense, vec2};
 use egui_material_icons::MaterialIcon;
 use image::ImageReader;
@@ -37,26 +40,41 @@ impl GramApp {
                         chat.unreaded_count = 0;
 
                         for msg in &mut chat.messages {
-                            msg.is_read = true;
+                            msg.readed = true;
                         }
                     }
 
                     for action in actions {
                         match action {
-                            ActionPacket::Edit(message) => {
-                                let _ = self.tx.try_send(ActionPacket::Edit(message));
+                            ActionPacket::Edit {
+                                accaunt_id,
+                                chat_id,
+                                id,
+                                new_text,
+                            } => {
+                                let _ = self.tx.try_send(ActionPacket::Edit {
+                                    accaunt_id,
+                                    chat_id,
+                                    id,
+                                    new_text,
+                                });
                             }
-                            ActionPacket::Delete(msg) => {
-                                let chat_id = msg.chat_id;
-                                let message_id = msg.id;
-
+                            ActionPacket::Delete {
+                                id,
+                                account_id,
+                                chat_id,
+                            } => {
                                 if let Some(chat) =
                                     self.chats.iter_mut().find(|chat| chat.chat_id == chat_id)
                                 {
-                                    delete_msg(message_id, chat);
+                                    delete_msg(id, account_id, chat);
                                 }
 
-                                let _ = self.tx.try_send(ActionPacket::Delete(msg));
+                                let _ = self.tx.try_send(ActionPacket::Delete {
+                                    id,
+                                    account_id,
+                                    chat_id,
+                                });
                             }
                             _ => {}
                         }
@@ -76,65 +94,59 @@ impl GramApp {
 fn process_message(
     account_id: i64,
     ui: &mut egui::Ui,
-    msg: &MessagePacket,
+    msg: &ReceivedMessage,
     photos: &mut HashMap<String, egui::TextureHandle>,
 ) -> Option<ActionPacket> {
-    match msg.msg_type {
-        TEXT => {
+    match msg.t {
+        MessageType::TEXT { ref text } => {
             let widget = MessageWidget {
                 username: msg.username.clone(),
-                text: msg.text.clone(),
-                time: msg.time.clone(),
-                outgoing: msg.is_bot,
+                text: text.clone(),
+                time: msg.date.clone(),
+                outgoing: msg.sender_is_you,
             };
 
             if let Some(action) = widget.show(ui) {
                 match action {
                     MessageAction::_Edit => {
-                        let id = msg.message_id?;
-
-                        return Some(ActionPacket::Edit(Message {
-                            id: id,
+                        return Some(ActionPacket::Edit {
+                            accaunt_id: account_id,
                             chat_id: msg.chat_id,
-                            new_text: Some("hello".into()),
-                            account_id,
-                        }));
+                            id: msg.id,
+                            new_text: "HELLO BRO".to_string(),
+                        });
                     }
                     MessageAction::Copy => {
-                        copy_to_clipboard(&msg.text);
+                        copy_to_clipboard(&text);
                     }
                     MessageAction::Delete => {
-                        let id = msg.message_id?;
-                        return Some(ActionPacket::Delete(Message {
-                            id: id,
-                            chat_id: msg.chat_id,
-                            new_text: None,
+                        return Some(ActionPacket::Delete {
+                            id: msg.id,
                             account_id,
-                        }));
+                            chat_id: msg.chat_id,
+                        });
                     }
                 }
             }
         }
 
-        IMAGE | STICKER => {
+        MessageType::PHOTO { ref path } | MessageType::STICKER { ref path } => {
             let widget = PhotoWidget {
                 username: msg.username.clone(),
-                texture: get_img(ui.ctx(), &msg.text, photos),
-                time: msg.time.clone(),
-                outgoing: msg.is_bot,
+                texture: get_img(ui.ctx(), &path, photos),
+                time: msg.date.clone(),
+                outgoing: msg.sender_is_you,
             };
             widget.show(ui);
         }
 
-        FILE => {
-            let path = msg.text.clone();
-
+        MessageType::FILE { ref path, ref name } => {
             let widget = FileWidget {
                 username: msg.username.clone(),
                 _file_path: path.clone(),
-                time: msg.time.clone(),
-                outgoing: msg.is_bot,
-                file_name: msg.message_name.clone().unwrap_or("FILE".into()),
+                time: msg.date.clone(),
+                outgoing: msg.sender_is_you,
+                file_name: name.clone(),
             };
 
             if widget.show(ui) {
@@ -146,8 +158,8 @@ fn process_message(
             let widget = MessageWidget {
                 username: msg.username.clone(),
                 text: format!("Ошибка рендера неизвестний тип"),
-                time: msg.time.clone(),
-                outgoing: msg.is_bot,
+                time: msg.date.clone(),
+                outgoing: msg.sender_is_you,
             };
 
             widget.show(ui);
