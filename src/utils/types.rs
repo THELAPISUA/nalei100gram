@@ -6,13 +6,18 @@ use std::path::PathBuf;
 //
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Settings {
-    pub user: User,
-    pub theme: Option<Theme>,
+    pub users: Vec<User>,
     pub selected_theme: usize,
 }
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub enum AccountPlatform {
+    Telegram,
+    Discord,
+}
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct User {
     pub token: String,
+    pub platform: AccountPlatform,
 }
 #[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub struct Theme {

@@ -22,7 +22,7 @@ impl AccountManager {
             },
         )
     }
-    pub async fn start_account(&self, account_id: i64) {
+    pub async fn _start_account(&self, account_id: i64) {
         self.accounts
             .iter()
             .find(|account| account.id == account_id)

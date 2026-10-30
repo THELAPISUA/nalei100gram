@@ -36,7 +36,9 @@ impl GramApp {
                     chat.messages.push(m.clone());
                 }
                 AccountInfo(name, id) => {
-                    self.name = name;
+                    if let Some(account) = self.accounts.iter_mut().find(|i| i.0 == id) {
+                        account.1 = name;
+                    }
                 }
                 _ => {}
             }
@@ -52,7 +54,7 @@ impl GramApp {
                     },
                     _ => MessageType::FILE {
                         path: file.path.to_string_lossy().to_string(),
-                        name: String::new(),
+                        name: file.name,
                     },
                 };
                 let msg = ReceivedMessage {

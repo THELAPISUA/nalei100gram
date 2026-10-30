@@ -14,7 +14,7 @@ use crate::{
     utils::{
         settings::load_settings,
         themes::THEMES,
-        types::{Settings, User},
+        types::AccountPlatform::{self, Telegram},
     },
 };
 
@@ -69,17 +69,14 @@ fn main() {
         ..Default::default()
     };
 
-    let settings = match load_settings() {
-        Some(s) => s,
-        None => Settings {
-            user: User {
-                token: String::new(),
-            },
-            theme: None,
-            selected_theme: 0,
-        },
+    let settings = load_settings();
+
+    let selected = match settings {
+        Some(ref s) => s.selected_theme,
+        None => 0,
     };
-    let theme = &THEMES[settings.selected_theme].1;
+
+    let theme = &THEMES[selected].1;
 
     let result = eframe::run_native(
         "Nalei100Gram",
@@ -96,16 +93,24 @@ fn main() {
                 tray: None,
                 started: false,
                 theme: AppTheme::default(),
-                bot_token: settings.user.token.clone(),
                 show_token: false,
                 error: None,
                 settings,
+                bot_token: String::new(),
+                accounts: Vec::new(),
+                selected_platform: Telegram,
             };
 
-            // Якщо токен вже збережений — одразу запускаємо бекенд.
-            if !app.bot_token.trim().is_empty() {
-                let token = app.bot_token.clone();
-                app.start_backend(token);
+            if let Some(settings) = &app.settings {
+                app.accounts = settings.users.clone();
+            }
+
+            if app
+                .accounts
+                .iter()
+                .any(|account| matches!(account.platform, AccountPlatform::Telegram))
+            {
+                app.start_backend();
             }
 
             Ok(Box::new(app))

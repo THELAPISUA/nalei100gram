@@ -333,7 +333,7 @@ impl Db {
         }
     }
 
-    pub async fn mark_readed_all(&self, account_id: i64, chat_id: i64) {
+    pub async fn _mark_readed_all(&self, account_id: i64, chat_id: i64) {
         debug!(
             "Marking all messages as read for chat {} (account {})...",
             chat_id, account_id

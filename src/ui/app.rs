@@ -4,7 +4,7 @@ use crate::ui::ui_components::{
     draw_avatar, draw_circle_button, get_img, preview_files_being_dropped,
 };
 use crate::utils::types::{PendingFile, Settings};
-use eframe::egui;
+use eframe::egui::{self, Response, response};
 use eframe::egui::{
     Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Sense, Stroke, TextEdit,
     vec2,
@@ -26,7 +26,6 @@ pub struct GramApp {
     pub(crate) photos: HashMap<String, egui::TextureHandle>,
     pub(crate) pending_files: Vec<PendingFile>,
     pub(crate) settings_window: SettingsWidget,
-    pub(crate) name: String,
 }
 
 impl GramApp {
@@ -46,7 +45,6 @@ impl GramApp {
             photos: HashMap::new(),
             pending_files: Vec::new(),
             settings_window: SettingsWidget::default(settings),
-            name: String::new(),
             current_account_id: accounts.clone().first().unwrap().0,
             accounts: accounts,
         }
@@ -185,13 +183,20 @@ impl eframe::App for GramApp {
                     }
                 }
                 egui::Panel::bottom("dock_panel").show(ui, |ui| {
+                    let name = self
+                        .accounts
+                        .iter()
+                        .find(|a| a.0 == self.current_account_id)
+                        .map(|n| n.1.clone())
+                        .unwrap();
+
                     ui.horizontal(|ui| {
-                        let path_str = format!("data/temp/{}.png", "my");
+                        let path_str = format!("data/temp/{}.png", name);
                         let path = std::path::Path::new(&path_str);
 
                         let size = 48.0;
-                        let (rect, _) =
-                            ui.allocate_exact_size(egui::vec2(size, size), egui::Sense::hover());
+                        let (rect, response) =
+                            ui.allocate_exact_size(egui::vec2(size, size), egui::Sense::click());
 
                         if path.exists() {
                             let ctx = ui.ctx();
@@ -208,7 +213,15 @@ impl eframe::App for GramApp {
                                 Color32::from_rgb(100, 100, 100),
                             );
                         }
-                        ui.label(&self.name);
+
+                        egui::Popup::menu(&response).show(|ui| {
+                            for (id, name) in &self.accounts {
+                                if ui.button(name).clicked() && self.current_account_id != *id {
+                                    self.current_account_id = *id;
+                                }
+                            }
+                        });
+                        ui.label(name);
 
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                             if draw_circle_button(ui, true, ICON_SETTINGS).clicked() {

@@ -1,16 +1,19 @@
 use async_trait::async_trait;
 
-use log::error;
+use log::{error, info, warn};
 use teloxide::RequestError;
 use teloxide::net::Download;
+
 use teloxide::{
     Bot,
     requests::Requester,
     respond,
     types::{ChatId, InputFile, Message, MessageId, True, UserId},
 };
+use tokio::fs::File;
 use tokio::{fs, sync::mpsc::Sender};
 
+use crate::logic::integrations::types::MessageType;
 use crate::logic::integrations::{traits::AccauntIntegration, types::ReceivedMessage};
 
 pub struct TelegramBot {
@@ -30,7 +33,7 @@ impl AccauntIntegration for TelegramBot {
         let bot = self.bot.clone();
         let account_id = id;
         tokio::spawn(async move {
-            teloxide::repl(bot, move |_: Bot, msg: Message| {
+            teloxide::repl(bot, move |bot: Bot, msg: Message| {
                 let tx = tx.clone();
 
                 async move {
@@ -56,7 +59,91 @@ impl AccauntIntegration for TelegramBot {
                                 log::error!("Failed send packet to ui, err: {}", e);
                             }
                         }
+                    } else if let Some(photo) = msg.photo() {
+                        if let Some(best_photo) = photo.iter().max_by_key(|p| p.width) {
+                            let file_id = &best_photo.file.id;
+
+                            info!("Успішно знайдено file_id: {}", file_id);
+
+                            let file_info = bot.get_file(file_id.clone()).await?;
+
+                            let path = format!("data/temp/{}.jpg", file_id);
+
+                            let mut destination_file = File::create(path.clone()).await?;
+
+                            bot.download_file(&file_info.path, &mut destination_file)
+                                .await?;
+                            let p = ReceivedMessage {
+                                username: msg.from.unwrap().full_name(),
+                                chat_id: msg.chat.id.0,
+                                date: msg.date.format("%H:%M").to_string(),
+                                t: MessageType::PHOTO { path },
+                                sender_is_you: false,
+                                readed: true,
+                                id: msg.id.0,
+                                account_id,
+                            };
+                            let _ = tx.send(p.clone()).await;
+                        } else {
+                            warn!("Список PhotoSize порожній!");
+                        }
+                    } else if let Some(stiker) = msg.sticker() {
+                        if stiker.is_static() {
+                            let file_id = &stiker.file.id;
+                            info!("Успішно знайдено file_id: {}", file_id);
+
+                            let file_info = bot.get_file(file_id.clone()).await?;
+
+                            let path = format!("data/temp/{}.jpg", file_id);
+
+                            let mut destination_file = File::create(path.clone()).await?;
+
+                            bot.download_file(&file_info.path, &mut destination_file)
+                                .await?;
+
+                            let p = ReceivedMessage {
+                                username: msg.from.unwrap().full_name(),
+                                chat_id: msg.chat.id.0,
+                                date: msg.date.format("%H:%M").to_string(),
+                                t: MessageType::PHOTO { path },
+                                sender_is_you: false,
+                                readed: true,
+                                id: msg.id.0,
+                                account_id,
+                            };
+                            let _ = tx.send(p.clone()).await;
+                        } else {
+                            warn!("Cant process sticker!");
+                        }
+                    } else if let Some(doc) = msg.document() {
+                        let file_id = &doc.file.id;
+                        info!("Успішно знайдено file_id: {}", file_id);
+
+                        let file_info = bot.get_file(file_id.clone()).await?;
+                        let file_format = format!("{}.dat", file_id);
+                        let file_name = doc.file_name.clone().unwrap_or(file_format);
+                        let path = format!("data/temp/{}", file_name);
+
+                        let mut destination_file = File::create(path.clone()).await?;
+
+                        bot.download_file(&file_info.path, &mut destination_file)
+                            .await?;
+                        let p = ReceivedMessage {
+                            username: msg.from.unwrap().full_name(),
+                            chat_id: msg.chat.id.0,
+                            date: msg.date.format("%H:%M").to_string(),
+                            t: MessageType::FILE {
+                                path,
+                                name: file_name,
+                            },
+                            sender_is_you: false,
+                            readed: true,
+                            id: msg.id.0,
+                            account_id,
+                        };
+                        let _ = tx.send(p.clone()).await;
                     }
+
                     respond(())
                 }
             })
@@ -112,7 +199,7 @@ impl AccauntIntegration for TelegramBot {
     }
     async fn get_info(&self) -> String {
         let me = self.bot.get_me().await.unwrap();
-        if let Err(e) = get_avatar_by_user_id(self.bot.clone(), me.id.0).await {
+        if let Err(e) = get_avatar_by_user_id(self.bot.clone(), me.id.0, &me.full_name()).await {
             error!("Помилка завантаження аватарки: {e}");
         }
         me.full_name()
@@ -122,6 +209,7 @@ impl AccauntIntegration for TelegramBot {
 pub async fn get_avatar_by_user_id(
     bot: Bot,
     id: u64,
+    name: &str,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let photos = bot.get_user_profile_photos(UserId(id)).await?;
 
@@ -133,8 +221,8 @@ pub async fn get_avatar_by_user_id(
     let file_info = bot.get_file(file_id).await?;
     fs::create_dir_all("data/temp").await?;
 
-    let temp_path = format!("data/temp/{}_original", "my");
-    let output_path = format!("data/temp/{}.png", "my");
+    let temp_path = format!("data/temp/{}_original", name);
+    let output_path = format!("data/temp/{}.png", name);
 
     let mut destination_file = fs::File::create(&temp_path).await?;
 
@@ -156,7 +244,7 @@ pub async fn get_avatar_by_user_id(
     Ok(())
 }
 
-pub async fn get_avatar(
+pub async fn _get_avatar(
     bot: Bot,
     msg: Message,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {

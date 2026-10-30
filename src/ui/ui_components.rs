@@ -30,10 +30,15 @@ impl GramApp {
                         .find(|chat| chat.chat_id == self.current_chat)
                     {
                         for msg in &chat.messages {
-                            if let Some(action) =
-                                process_message(self.current_account_id, ui, msg, &mut self.photos)
-                            {
-                                actions.push(action);
+                            if msg.account_id == self.current_account_id {
+                                if let Some(action) = process_message(
+                                    self.current_account_id,
+                                    ui,
+                                    msg,
+                                    &mut self.photos,
+                                ) {
+                                    actions.push(action);
+                                }
                             }
                         }
 
