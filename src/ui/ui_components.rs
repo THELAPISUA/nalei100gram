@@ -1,10 +1,7 @@
 use crate::ui::app::GramApp;
+use crate::utils::audio::{AudioPlayer, AudioState};
 use crate::{
-    logic::integrations::types::{
-        ActionPacket,
-        MessageType::{self, *},
-        ReceivedMessage,
-    },
+    logic::integrations::types::{ActionPacket, MessageType, ReceivedMessage},
     ui::widgets::AudioWidget,
 };
 
@@ -14,9 +11,11 @@ use crate::ui::widgets::{FileWidget, MessageAction, MessageWidget, PhotoWidget};
 use eframe::egui::{self, Align2, Color32, FontId, Pos2, Rect, Sense, vec2};
 use egui_material_icons::MaterialIcon;
 use image::ImageReader;
+use log::info;
 use std::collections::HashMap;
-use std::fs::File;
 use std::io::Cursor;
+use std::sync::{Arc, Mutex};
+use std::time::Duration;
 
 const ERROR_LOAD: &[u8; 94191] = include_bytes!("../../assets/error_load.png");
 
@@ -40,6 +39,7 @@ impl GramApp {
                                     ui,
                                     msg,
                                     &mut self.photos,
+                                    &self.player,
                                 ) {
                                     actions.push(action);
                                 }
@@ -76,7 +76,7 @@ impl GramApp {
                                 if let Some(chat) =
                                     self.chats.iter_mut().find(|chat| chat.chat_id == chat_id)
                                 {
-                                    delete_msg(id, account_id, chat);
+                                    delete_msg(id, account_id, chat, &self.tx);
                                 }
 
                                 let _ = self.tx.try_send(ActionPacket::Delete {
@@ -99,7 +99,9 @@ fn process_message(
     ui: &mut egui::Ui,
     msg: &ReceivedMessage,
     photos: &mut HashMap<String, egui::TextureHandle>,
+    player: &Arc<Mutex<AudioPlayer>>,
 ) -> Option<ActionPacket> {
+    ui.ctx().request_repaint_after(Duration::from_millis(16));
     match msg.t {
         MessageType::TEXT { ref text } => {
             let widget = MessageWidget {
@@ -157,18 +159,30 @@ fn process_message(
             }
         }
         MessageType::AUDIO { ref path, ref name } => {
+            let mut p = player.lock().unwrap();
+            let (progress, playing, duration) = match p.get_state(path) {
+                Some(state) => (state.position.as_secs_f64(), state.playing, state.duration),
+                None => (0.0, false, Duration::ZERO),
+            };
+
             let widget = AudioWidget {
                 username: msg.username.clone(),
                 time: msg.date.clone(),
                 outgoing: msg.sender_is_you,
                 file_name: name.clone(),
-                duration: "1:00".to_string(),
-                progress: 0.0,
-                playing: false,
+                duration: format_time(duration),
+                progress: progress / duration.as_secs_f64(),
+                playing,
             };
-            widget.show(ui);
-        }
 
+            if widget.show(ui) {
+                if playing {
+                    p.toggle();
+                } else {
+                    p.play_sound(path);
+                }
+            }
+        }
         _ => {
             let widget = MessageWidget {
                 username: msg.username.clone(),
@@ -327,4 +341,8 @@ pub(crate) fn draw_avatar(
             Color32::WHITE,
         );
     }
+}
+fn format_time(duration: Duration) -> String {
+    let secs = duration.as_secs();
+    format!("{}:{:02}", secs / 60, secs % 60)
 }

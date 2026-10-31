@@ -371,7 +371,7 @@ pub struct AudioWidget {
     pub duration: String,
     pub outgoing: bool,
 
-    pub progress: f32,
+    pub progress: f64,
     pub playing: bool,
 }
 
@@ -504,7 +504,7 @@ impl AudioWidget {
                             let progress_width = ui.available_width();
 
                             ui.add(
-                                egui::ProgressBar::new(self.progress.clamp(0.0, 1.0))
+                                egui::ProgressBar::new(self.progress.clamp(0.0, 1.0) as f32)
                                     .desired_width(progress_width)
                                     .desired_height(4.0)
                                     .corner_radius(egui::CornerRadius::same(2)),

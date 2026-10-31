@@ -3,16 +3,16 @@ use crate::ui::settings_widget::SettingsWidget;
 use crate::ui::ui_components::{
     draw_avatar, draw_circle_button, get_img, preview_files_being_dropped,
 };
+use crate::utils::audio::AudioPlayer;
 use crate::utils::types::{PendingFile, Settings};
-use eframe::egui::{self, Response, response};
 use eframe::egui::{
-    Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Sense, Stroke, TextEdit,
-    vec2,
+    self, Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Sense, Stroke,
+    TextEdit, vec2,
 };
 use egui_material_icons::icons::{ICON_SEND, ICON_SETTINGS};
-use rodio::Player;
 
 use std::collections::HashMap;
+use std::sync::{Arc, Mutex};
 
 use tokio::sync::mpsc::{Receiver, Sender};
 
@@ -27,6 +27,7 @@ pub struct GramApp {
     pub(crate) photos: HashMap<String, egui::TextureHandle>,
     pub(crate) pending_files: Vec<PendingFile>,
     pub(crate) settings_window: SettingsWidget,
+    pub(crate) player: Arc<Mutex<AudioPlayer>>,
 }
 
 impl GramApp {
@@ -36,6 +37,7 @@ impl GramApp {
         accounts: Vec<(i64, String)>,
         chats: Vec<Chat>,
         settings: Settings,
+        player: Arc<Mutex<AudioPlayer>>,
     ) -> Self {
         Self {
             tx,
@@ -48,6 +50,7 @@ impl GramApp {
             settings_window: SettingsWidget::default(settings),
             current_account_id: accounts.clone().first().unwrap().0,
             accounts,
+            player,
         }
     }
 }

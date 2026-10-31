@@ -1,5 +1,8 @@
 use crate::{
-    logic::integrations::types::{ActionPacket::*, Chat, MessageType, ReceivedMessage},
+    logic::integrations::types::{
+        ActionPacket::{self, *},
+        Chat, MessageType, ReceivedMessage,
+    },
     ui::app::GramApp,
     utils::types::PendingFile,
 };
@@ -9,6 +12,7 @@ use eframe::egui;
 
 use log::info;
 use std::ffi::OsStr;
+use tokio::sync::mpsc::Sender;
 
 impl GramApp {
     pub(crate) fn get_or_create_chat(&mut self, chat_id: i64, name: String) -> &mut Chat {
@@ -44,11 +48,23 @@ impl GramApp {
             }
         }
     }
+    pub(crate) fn get_last_id(&self, curr_chat: i64) -> i32 {
+        self.chats
+            .iter()
+            .find(|c| c.chat_id == curr_chat)
+            .and_then(|chat| chat.messages.last())
+            .map(|message| message.id)
+            .unwrap_or(0)
+    }
     pub(crate) fn sender_docs_messages(&mut self) {
         while let Some(file) = self.pending_files.pop() {
             //40 мб це ліміт на бота в тг
             if file.size <= 41943040 {
                 let message_type = match file.extension.as_str() {
+                    "mp3" | "wav" | "ogg" => MessageType::AUDIO {
+                        path: file.path.to_string_lossy().to_string(),
+                        name: file.name,
+                    },
                     "png" | "jpg" | "webp" => MessageType::PHOTO {
                         path: file.path.to_string_lossy().to_string(),
                     },
@@ -64,7 +80,7 @@ impl GramApp {
                     chat_id: self.current_chat.clone(),
                     sender_is_you: true,
                     readed: true,
-                    id: 1,
+                    id: self.get_last_id(self.current_chat.clone()) + 1,
                     account_id: self.current_account_id,
                 };
                 let is_ok = self.tx.try_send(Send(msg.clone())).is_ok();
@@ -155,7 +171,7 @@ impl GramApp {
             chat_id: self.current_chat.clone(),
             sender_is_you: true,
             readed: true,
-            id: 0,
+            id: self.get_last_id(self.current_chat.clone()) + 1,
             account_id: self.current_account_id,
         };
         if self.tx.try_send(Send(packet.clone())).is_ok() {
@@ -169,9 +185,14 @@ impl GramApp {
     }
 }
 
-pub(crate) fn delete_msg(msg_id: i32, account_id: i64, chat: &mut Chat) {
+pub(crate) fn delete_msg(msg_id: i32, account_id: i64, chat: &mut Chat, tx: &Sender<ActionPacket>) {
     chat.messages
         .retain(|m| m.id != msg_id && m.account_id == account_id);
+    tx.try_send(Delete {
+        id: msg_id,
+        account_id,
+        chat_id: chat.chat_id,
+    });
 }
 pub(crate) fn copy_to_clipboard(text: &str) {
     let mut clipboard = Clipboard::new().unwrap();

@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use crate::logic::db::Db;
 use crate::logic::integrations::manager::manager::AccountManager;
@@ -11,7 +11,7 @@ pub(crate) async fn process_packet_message(
     packet: &ReceivedMessage,
     account_manager: &Arc<AccountManager>,
     db_for_gui: &Db,
-    player: &Arc<AudioPlayer>,
+    player: &Arc<Mutex<AudioPlayer>>,
 ) {
     #[cfg(not(debug_assertions))]
     set_max_vol();
@@ -20,7 +20,6 @@ pub(crate) async fn process_packet_message(
             let r = account_manager
                 .send_message(packet.account_id, packet.chat_id, &text)
                 .await;
-            player.play(SoundType::Send);
 
             match r {
                 Ok(m) => {
@@ -41,12 +40,10 @@ pub(crate) async fn process_packet_message(
                 }
             }
         }
-        FILE { ref path, name: _ } => {
+        AUDIO { ref path, name: _ } | FILE { ref path, name: _ } => {
             let r = account_manager
                 .send_document(packet.account_id, packet.chat_id, &path)
                 .await;
-
-            player.play(SoundType::Send);
 
             db_for_gui.clone().add_message(&packet).await;
 
@@ -64,12 +61,11 @@ pub(crate) async fn process_packet_message(
                 }
             }
         }
+
         PHOTO { ref path } => {
             let r = account_manager
                 .send_photo(packet.account_id, packet.chat_id, &path)
                 .await;
-
-            player.play(SoundType::Send);
 
             db_for_gui.clone().add_message(&packet).await;
 
@@ -89,4 +85,5 @@ pub(crate) async fn process_packet_message(
         }
         _ => {}
     }
+    player.lock().unwrap().play_msg(SoundType::Send);
 }

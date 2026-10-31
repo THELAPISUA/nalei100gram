@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 use crate::logic::backend::Backend;
 use crate::logic::db::Db;
@@ -8,6 +8,7 @@ use crate::logic::integrations::telegram::bot::TelegramBot;
 use crate::ui::app::GramApp;
 use crate::ui::theme::{AppTheme, setup_fonts};
 use crate::ui::tray::init_tray;
+use crate::utils::audio::AudioPlayer;
 use crate::utils::settings::save_settings;
 use crate::utils::types::{AccountPlatform, Settings, User};
 use egui_material_icons::icons::{ICON_VISIBILITY, ICON_VISIBILITY_OFF};
@@ -119,13 +120,30 @@ impl StartWindow {
         save_settings(settings.clone());
         self.settings = Some(settings.clone());
 
-        let backend = Backend::new(tx_bot, rx_bot, database, Arc::new(account_manager), rx);
+        let player = Arc::new(Mutex::new(AudioPlayer::init()));
+        let player_clone = player.clone();
+
+        let backend = Backend::new(
+            tx_bot,
+            rx_bot,
+            database,
+            Arc::new(account_manager),
+            rx,
+            player,
+        );
 
         self.runtime.spawn(async move {
             backend.tick().await;
         });
 
-        self.inner = Some(GramApp::new(tx_ui, rx_ui, app_accounts, chats, settings));
+        self.inner = Some(GramApp::new(
+            tx_ui,
+            rx_ui,
+            app_accounts,
+            chats,
+            settings,
+            player_clone,
+        ));
 
         self.started = true;
 
