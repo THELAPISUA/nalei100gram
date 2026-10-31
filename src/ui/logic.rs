@@ -122,21 +122,26 @@ impl GramApp {
             });
         }
     }
-    pub(crate) fn last_message(&mut self, chad_id: i64) -> String {
+    pub(crate) fn last_message(&mut self, chad_id: i64, current_account_id: i64) -> String {
         let curr_chat = self
             .chats
             .iter()
             .find(|c| c.chat_id == chad_id)
             .map(|c| &c.messages);
 
-        let last_msg_p = curr_chat.and_then(|messages| messages.last());
+        let last_msg_p: Option<&ReceivedMessage> = curr_chat.as_ref().and_then(|messages| {
+            messages
+                .iter()
+                .rfind(|a| a.account_id == current_account_id)
+        });
 
         match last_msg_p {
             Some(m) => match m.t {
                 MessageType::TEXT { ref text } => text.clone(),
                 MessageType::PHOTO { path: _ } => String::from("Фото"),
                 MessageType::STICKER { path: _ } => String::from("Стикер"),
-                MessageType::FILE { path: _, name: _ } => String::from("ФАЙЛ"),
+                MessageType::FILE { path: _, name: _ } => String::from("Файл"),
+                MessageType::AUDIO { path: _, name: _ } => String::from("Аудіо"),
                 _ => String::from("Невідомий формат"),
             },
             None => String::from("Поки нема повідомлень!"),

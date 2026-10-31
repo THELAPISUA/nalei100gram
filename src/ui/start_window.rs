@@ -12,6 +12,7 @@ use crate::utils::settings::save_settings;
 use crate::utils::types::{AccountPlatform, Settings, User};
 use egui_material_icons::icons::{ICON_VISIBILITY, ICON_VISIBILITY_OFF};
 use log::info;
+use rodio::{DeviceSinkBuilder, Player};
 use tokio::sync::mpsc;
 
 pub struct StartWindow {

@@ -1,9 +1,12 @@
-use crate::logic::integrations::types::{
-    ActionPacket,
-    MessageType::{self, *},
-    ReceivedMessage,
-};
 use crate::ui::app::GramApp;
+use crate::{
+    logic::integrations::types::{
+        ActionPacket,
+        MessageType::{self, *},
+        ReceivedMessage,
+    },
+    ui::widgets::AudioWidget,
+};
 
 use crate::ui::logic::{copy_to_clipboard, delete_msg};
 use crate::ui::widgets::{FileWidget, MessageAction, MessageWidget, PhotoWidget};
@@ -12,6 +15,7 @@ use eframe::egui::{self, Align2, Color32, FontId, Pos2, Rect, Sense, vec2};
 use egui_material_icons::MaterialIcon;
 use image::ImageReader;
 use std::collections::HashMap;
+use std::fs::File;
 use std::io::Cursor;
 
 const ERROR_LOAD: &[u8; 94191] = include_bytes!("../../assets/error_load.png");
@@ -90,12 +94,6 @@ impl GramApp {
         });
     }
 }
-//
-// Короче я устав то давай, наклепай
-// 1) Зроби обробку чатів, треба шукати серед чату конкретне сообщение
-// 2) Зроби якусь удобну штуку для редактирования давай як в тг типа в поле ввода
-// 3) Зроби видалення для себе і для всіх
-// 4) Копіювання це просто в буфер кидай і якийсь плейсхолдер
 fn process_message(
     account_id: i64,
     ui: &mut egui::Ui,
@@ -148,7 +146,7 @@ fn process_message(
         MessageType::FILE { ref path, ref name } => {
             let widget = FileWidget {
                 username: msg.username.clone(),
-                _file_path: path.clone(),
+                file_path: path.clone(),
                 time: msg.date.clone(),
                 outgoing: msg.sender_is_you,
                 file_name: name.clone(),
@@ -157,6 +155,18 @@ fn process_message(
             if widget.show(ui) {
                 let _ = open::that(path);
             }
+        }
+        MessageType::AUDIO { ref path, ref name } => {
+            let widget = AudioWidget {
+                username: msg.username.clone(),
+                time: msg.date.clone(),
+                outgoing: msg.sender_is_you,
+                file_name: name.clone(),
+                duration: "1:00".to_string(),
+                progress: 0.0,
+                playing: false,
+            };
+            widget.show(ui);
         }
 
         _ => {

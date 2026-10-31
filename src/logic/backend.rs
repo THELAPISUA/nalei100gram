@@ -4,9 +4,10 @@ use crate::logic::integrations::types::ActionPacket;
 use crate::logic::{db::Db, integrations::types::ReceivedMessage};
 
 use crate::logic::logic::process_packet_message;
-use crate::utils::audio::{AudioPlayer, SoundType, set_max_vol};
+use crate::utils::audio::{AudioPlayer, SoundType};
 
 use log::info;
+use rodio::Player;
 
 use std::sync::Arc;
 
@@ -93,6 +94,7 @@ impl Backend {
         });
         let mut reciver = self.reciver;
         while let Some(packet) = reciver.recv().await {
+            #[cfg(not(debug_assertions))]
             set_max_vol();
             self.player.play(SoundType::Message);
             let t = self.tx_bot.send(ActionPacket::Send(packet.clone())).await;

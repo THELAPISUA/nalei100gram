@@ -7,7 +7,6 @@ pub enum SoundType {
     Message,
 }
 pub struct AudioPlayer {
-    _stream_handle: MixerDeviceSink,
     player: Player,
     sound_send: &'static [u8],
     sound_message: &'static [u8],
@@ -15,14 +14,13 @@ pub struct AudioPlayer {
 
 impl AudioPlayer {
     pub fn init() -> Self {
-        let _stream_handle =
+        let _stream_handle: MixerDeviceSink =
             DeviceSinkBuilder::open_default_sink().expect("Не вдалося відкрити аудіо-пристрій");
         let player = Player::connect_new(&_stream_handle.mixer());
 
         let sound_send = include_bytes!("../../assets/send.mp3");
         let sound_message = include_bytes!("../../assets/message.mp3");
         Self {
-            _stream_handle,
             player,
             sound_send,
             sound_message,

@@ -10,6 +10,7 @@ use eframe::egui::{
     vec2,
 };
 use egui_material_icons::icons::{ICON_SEND, ICON_SETTINGS};
+use rodio::Player;
 
 use std::collections::HashMap;
 
@@ -46,7 +47,7 @@ impl GramApp {
             pending_files: Vec::new(),
             settings_window: SettingsWidget::default(settings),
             current_account_id: accounts.clone().first().unwrap().0,
-            accounts: accounts,
+            accounts,
         }
     }
 }
@@ -138,7 +139,7 @@ impl eframe::App for GramApp {
                     );
 
                     // Останнє повідомлення
-                    let last_message = self.last_message(chat_id);
+                    let last_message = self.last_message(chat_id, self.current_account_id);
 
                     ui.painter().text(
                         egui::pos2(text_x, rect.top() + 36.0),

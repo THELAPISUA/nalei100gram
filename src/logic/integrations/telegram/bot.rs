@@ -37,6 +37,7 @@ impl AccauntIntegration for TelegramBot {
                 let tx = tx.clone();
 
                 async move {
+                    let _ = get_avatar(&bot, &msg).await;
                     if let Some(text) = msg.text() {
                         let m = ReceivedMessage {
                             username: msg.chat.first_name().unwrap_or("Err").to_string(),
@@ -133,6 +134,34 @@ impl AccauntIntegration for TelegramBot {
                             chat_id: msg.chat.id.0,
                             date: msg.date.format("%H:%M").to_string(),
                             t: MessageType::FILE {
+                                path,
+                                name: file_name,
+                            },
+                            sender_is_you: false,
+                            readed: true,
+                            id: msg.id.0,
+                            account_id,
+                        };
+                        let _ = tx.send(p.clone()).await;
+                    } else if let Some(audio) = msg.audio() {
+                        let file_id = &audio.file.id;
+                        info!("Успішно знайдено file_id: {}", file_id);
+
+                        let file_info = bot.get_file(file_id.clone()).await?;
+                        let file_format = format!("{}.dat", file_id);
+                        let file_name = audio.file_name.clone().unwrap_or(file_format);
+                        let path = format!("data/temp/{}", file_name);
+
+                        let mut destination_file = File::create(path.clone()).await?;
+
+                        bot.download_file(&file_info.path, &mut destination_file)
+                            .await?;
+
+                        let p = ReceivedMessage {
+                            username: msg.from.unwrap().full_name(),
+                            chat_id: msg.chat.id.0,
+                            date: msg.date.format("%H:%M").to_string(),
+                            t: MessageType::AUDIO {
                                 path,
                                 name: file_name,
                             },
@@ -244,9 +273,9 @@ pub async fn get_avatar_by_user_id(
     Ok(())
 }
 
-pub async fn _get_avatar(
-    bot: Bot,
-    msg: Message,
+pub async fn get_avatar(
+    bot: &Bot,
+    msg: &Message,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let chat = &msg.chat;
 

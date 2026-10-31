@@ -13,6 +13,8 @@ pub(crate) async fn process_packet_message(
     db_for_gui: &Db,
     player: &Arc<AudioPlayer>,
 ) {
+    #[cfg(not(debug_assertions))]
+    set_max_vol();
     match packet.t {
         TEXT { ref text } => {
             let r = account_manager

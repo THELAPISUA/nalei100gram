@@ -6,7 +6,11 @@ use sqlx::{
 use std::collections::HashMap;
 use std::fs;
 
-use crate::logic::integrations::types::{Chat, MessageType, ReceivedMessage};
+use crate::logic::integrations::types::{
+    Chat,
+    MessageType::{self, AUDIO, FILE},
+    ReceivedMessage,
+};
 
 const CREATE_CHATS: &str = r#"
     CREATE TABLE IF NOT EXISTS chats (
@@ -25,6 +29,7 @@ const CREATE_MESSAGES: &str = r#"
         account_id INTEGER NOT NULL,
         username TEXT NOT NULL,
         text TEXT NOT NULL DEFAULT '',
+        name TEXT NOT NULL DEFAULT '',
         date TEXT NOT NULL,
         is_read INTEGER NOT NULL DEFAULT 0,
         sender_is_you INTEGER NOT NULL DEFAULT 0,
@@ -263,15 +268,20 @@ impl Db {
     }
 
     pub async fn add_message(&self, msg: &ReceivedMessage) {
-        let (msg_type, text) = message_to_row(&msg.t);
+        let (msg_type, text, name) = message_to_row(&msg.t);
+
+        let name = match name {
+            Some(name) => name,
+            None => String::new(),
+        };
 
         match sqlx::query(
             r#"
             INSERT OR REPLACE INTO messages (
-                id, chat_id, account_id, username, text, date,
+                id, chat_id, account_id, username, text, name, date,
                 is_read, sender_is_you, msg_type
             )
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9);
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);
             "#,
         )
         .bind(msg.id)
@@ -279,6 +289,7 @@ impl Db {
         .bind(msg.account_id)
         .bind(&msg.username)
         .bind(text)
+        .bind(name)
         .bind(&msg.date)
         .bind(msg.readed)
         .bind(msg.sender_is_you)
@@ -439,6 +450,7 @@ impl Db {
                 m.account_id,
                 m.username,
                 m.text,
+                m.name,
                 m.date,
                 m.is_read,
                 m.sender_is_you,
@@ -485,7 +497,7 @@ impl Db {
                     .map(|row| ReceivedMessage {
                         id: row.id,
                         username: row.username,
-                        t: row_to_message_type(row.msg_type, row.text),
+                        t: row_to_message_type(row.msg_type, row.text, row.name),
                         date: row.date,
                         chat_id: row.chat_id,
                         readed: row.is_read,
@@ -515,24 +527,29 @@ impl Db {
     }
 }
 
-fn message_to_row(message_type: &MessageType) -> (i64, String) {
+fn message_to_row(message_type: &MessageType) -> (i64, String, Option<String>) {
     match message_type {
-        MessageType::TEXT { text } => (0, text.clone()),
-        MessageType::PHOTO { path } => (1, path.clone()),
-        MessageType::FILE { path, name: _ } => (2, path.clone()),
-        MessageType::STICKER { path } => (3, path.clone()),
+        MessageType::TEXT { text } => (0, text.clone(), None),
+        MessageType::PHOTO { path } => (1, path.clone(), None),
+        MessageType::FILE { path, name } => (2, path.clone(), Some(name.clone())),
+        MessageType::STICKER { path } => (3, path.clone(), None),
+        MessageType::AUDIO { path, name } => (4, path.clone(), Some(name.clone())),
     }
 }
 
-fn row_to_message_type(msg_type: i64, text: String) -> MessageType {
+fn row_to_message_type(msg_type: i64, text: String, name: String) -> MessageType {
     match msg_type {
         0 => MessageType::TEXT { text },
         1 => MessageType::PHOTO { path: text },
         2 => MessageType::FILE {
             path: text,
-            name: String::new(),
+            name: name,
         },
         3 => MessageType::STICKER { path: text },
+        4 => MessageType::AUDIO {
+            path: text,
+            name: name,
+        },
         _ => MessageType::TEXT { text },
     }
 }
@@ -561,6 +578,7 @@ fn is_current_messages_schema(columns: &[TableColumn]) -> bool {
         && has_column(columns, "account_id")
         && has_column(columns, "username")
         && has_column(columns, "text")
+        && has_column(columns, "name")
         && has_column(columns, "date")
         && has_column(columns, "is_read")
         && has_column(columns, "sender_is_you")
@@ -581,6 +599,7 @@ struct MessageRow {
     account_id: i64,
     username: String,
     text: String,
+    name: String,
     date: String,
     is_read: bool,
     sender_is_you: bool,
