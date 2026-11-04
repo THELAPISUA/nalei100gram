@@ -11,9 +11,9 @@ use crate::ui::tray::init_tray;
 use crate::utils::audio::AudioPlayer;
 use crate::utils::settings::save_settings;
 use crate::utils::types::{AccountPlatform, Settings, User};
+use eframe::egui::{self, Align, Layout, RichText, TextEdit};
 use egui_material_icons::icons::{ICON_VISIBILITY, ICON_VISIBILITY_OFF};
 use log::info;
-use rodio::{DeviceSinkBuilder, Player};
 use tokio::sync::mpsc;
 
 pub struct StartWindow {
@@ -152,8 +152,6 @@ impl StartWindow {
 }
 impl eframe::App for StartWindow {
     fn ui(&mut self, ui: &mut eframe::egui::Ui, frame: &mut eframe::Frame) {
-        use eframe::egui::{self, Align, Color32, Layout, RichText, TextEdit};
-
         let ctx = ui.ctx().clone();
         setup_fonts(&ctx);
 

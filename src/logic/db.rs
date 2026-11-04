@@ -534,6 +534,7 @@ fn message_to_row(message_type: &MessageType) -> (i64, String, Option<String>) {
         MessageType::FILE { path, name } => (2, path.clone(), Some(name.clone())),
         MessageType::STICKER { path } => (3, path.clone(), None),
         MessageType::AUDIO { path, name } => (4, path.clone(), Some(name.clone())),
+        MessageType::VOICE { path } => (5, path.clone(), None),
     }
 }
 
@@ -550,6 +551,7 @@ fn row_to_message_type(msg_type: i64, text: String, name: String) -> MessageType
             path: text,
             name: name,
         },
+        5 => MessageType::VOICE { path: text },
         _ => MessageType::TEXT { text },
     }
 }

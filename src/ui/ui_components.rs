@@ -1,17 +1,18 @@
 use crate::ui::app::GramApp;
-use crate::utils::audio::{AudioPlayer, AudioState};
+use crate::ui::widgets::VoiceAction;
+use crate::utils::audio::AudioPlayer;
 use crate::{
     logic::integrations::types::{ActionPacket, MessageType, ReceivedMessage},
     ui::widgets::AudioWidget,
 };
 
 use crate::ui::logic::{copy_to_clipboard, delete_msg};
-use crate::ui::widgets::{FileWidget, MessageAction, MessageWidget, PhotoWidget};
+use crate::ui::widgets::{FileWidget, MessageAction, MessageWidget, PhotoWidget, VoiceWidget};
 
 use eframe::egui::{self, Align2, Color32, FontId, Pos2, Rect, Sense, vec2};
 use egui_material_icons::MaterialIcon;
 use image::ImageReader;
-use log::info;
+
 use std::collections::HashMap;
 use std::io::Cursor;
 use std::sync::{Arc, Mutex};
@@ -160,18 +161,24 @@ fn process_message(
         }
         MessageType::AUDIO { ref path, ref name } => {
             let mut p = player.lock().unwrap();
-            let (progress, playing, duration) = match p.get_state(path) {
-                Some(state) => (state.position.as_secs_f64(), state.playing, state.duration),
-                None => (0.0, false, Duration::ZERO),
+            p.tick();
+            let (position, playing, duration) = match p.get_state(path) {
+                Some(state) => (state.position, state.playing, state.duration),
+                None => (Duration::ZERO, false, Duration::ZERO),
             };
-
+            let total = duration.as_secs_f64();
+            let progress = if total > 0.0 {
+                (position.as_secs_f64() / total).clamp(0.0, 1.0)
+            } else {
+                0.0
+            };
             let widget = AudioWidget {
                 username: msg.username.clone(),
                 time: msg.date.clone(),
                 outgoing: msg.sender_is_you,
                 file_name: name.clone(),
-                duration: format_time(duration),
-                progress: progress / duration.as_secs_f64(),
+                duration: format_time(position),
+                progress,
                 playing,
             };
 
@@ -181,6 +188,54 @@ fn process_message(
                 } else {
                     p.play_sound(path);
                 }
+            }
+            if playing {
+                ui.ctx().request_repaint_after(Duration::from_millis(50));
+            }
+        }
+        MessageType::VOICE { ref path } => {
+            let mut p = player.lock().unwrap();
+            p.tick();
+            let (position, playing, duration) = match p.get_state(path) {
+                Some(state) => (state.position, state.playing, state.duration),
+                None => (Duration::ZERO, false, Duration::ZERO),
+            };
+
+            let total = duration.as_secs_f64();
+            let progress = if total > 0.0 {
+                (position.as_secs_f64() / total).clamp(0.0, 1.0)
+            } else {
+                0.0
+            };
+
+            let mut widget = VoiceWidget {
+                username: msg.username.clone(),
+                time: msg.date.clone(),
+                outgoing: msg.sender_is_you,
+                duration: format_time(position),
+                progress,
+                playing,
+            };
+
+            match widget.show(ui) {
+                VoiceAction::PlayPause => {
+                    if playing {
+                        p.toggle();
+                    } else {
+                        p.play_sound(path);
+                    }
+                }
+                VoiceAction::Seek(progress) => {
+                    // перемотувати можна лише завантажений трек
+                    if total > 0.0 {
+                        p.seek(duration.mul_f64(progress));
+                    }
+                }
+                VoiceAction::None => {}
+            }
+
+            if playing {
+                ui.ctx().request_repaint_after(Duration::from_millis(50));
             }
         }
         _ => {

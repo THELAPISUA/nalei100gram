@@ -158,6 +158,7 @@ impl GramApp {
                 MessageType::STICKER { path: _ } => String::from("Стикер"),
                 MessageType::FILE { path: _, name: _ } => String::from("Файл"),
                 MessageType::AUDIO { path: _, name: _ } => String::from("Аудіо"),
+                MessageType::VOICE { path: _ } => String::from("Голосове"),
                 _ => String::from("Невідомий формат"),
             },
             None => String::from("Поки нема повідомлень!"),
@@ -188,7 +189,7 @@ impl GramApp {
 pub(crate) fn delete_msg(msg_id: i32, account_id: i64, chat: &mut Chat, tx: &Sender<ActionPacket>) {
     chat.messages
         .retain(|m| m.id != msg_id && m.account_id == account_id);
-    tx.try_send(Delete {
+    let _ = tx.try_send(Delete {
         id: msg_id,
         account_id,
         chat_id: chat.chat_id,

@@ -5,6 +5,7 @@ pub enum MessageType {
     FILE { path: String, name: String },
     STICKER { path: String },
     AUDIO { path: String, name: String },
+    VOICE { path: String },
 }
 #[derive(Clone)]
 pub struct ReceivedMessage {

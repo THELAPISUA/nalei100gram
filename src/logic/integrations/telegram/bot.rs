@@ -171,6 +171,30 @@ impl AccauntIntegration for TelegramBot {
                             account_id,
                         };
                         let _ = tx.send(p.clone()).await;
+                    } else if let Some(voice) = msg.voice() {
+                        let file_id = &voice.file.id;
+                        info!("Успішно знайдено file_id: {}", file_id);
+
+                        let file_info = bot.get_file(file_id.clone()).await?;
+
+                        let path = format!("data/temp/{}.ogg", file_info.id);
+
+                        let mut destination_file = File::create(path.clone()).await?;
+
+                        bot.download_file(&file_info.path, &mut destination_file)
+                            .await?;
+
+                        let p = ReceivedMessage {
+                            username: msg.from.unwrap().full_name(),
+                            chat_id: msg.chat.id.0,
+                            date: msg.date.format("%H:%M").to_string(),
+                            t: MessageType::VOICE { path },
+                            sender_is_you: false,
+                            readed: true,
+                            id: msg.id.0,
+                            account_id,
+                        };
+                        let _ = tx.send(p.clone()).await;
                     }
 
                     respond(())

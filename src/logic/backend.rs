@@ -9,8 +9,6 @@ use crate::utils::audio::{AudioPlayer, SoundType};
 use log::info;
 
 use std::sync::{Arc, Mutex};
-use std::thread;
-use std::time::Duration;
 
 use tokio::sync::mpsc::{Receiver, Sender};
 pub struct Backend {
@@ -51,14 +49,6 @@ impl Backend {
         let player = self.player.clone();
         let db_for_gui = self.database.clone();
         let mut rx_bot = self.rx_bot;
-
-        let player_events = self.player.clone();
-        tokio::spawn(async move {
-            loop {
-                player_events.lock().unwrap().tick();
-                tokio::time::sleep(Duration::from_millis(10)).await;
-            }
-        });
 
         tokio::spawn(async move {
             while let Some(packet) = rx_bot.recv().await {
