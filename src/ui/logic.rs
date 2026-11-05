@@ -6,12 +6,12 @@ use crate::{
     ui::app::GramApp,
     utils::types::PendingFile,
 };
-use arboard::Clipboard;
+use arboard::{Clipboard, ImageData};
 use chrono::Local;
 use eframe::egui;
 
 use log::info;
-use std::ffi::OsStr;
+use std::{borrow::Cow, ffi::OsStr};
 use tokio::sync::mpsc::Sender;
 
 impl GramApp {
@@ -159,7 +159,7 @@ impl GramApp {
                 MessageType::FILE { path: _, name: _ } => String::from("Файл"),
                 MessageType::AUDIO { path: _, name: _ } => String::from("Аудіо"),
                 MessageType::VOICE { path: _ } => String::from("Голосове"),
-                _ => String::from("Невідомий формат"),
+                // _ => String::from("Невідомий формат"),
             },
             None => String::from("Поки нема повідомлень!"),
         }
@@ -195,7 +195,7 @@ pub(crate) fn delete_msg(msg_id: i32, account_id: i64, chat: &mut Chat, tx: &Sen
         chat_id: chat.chat_id,
     });
 }
-pub(crate) fn copy_to_clipboard(text: &str) {
+pub(crate) fn copy_text_to_clipboard(text: &str) {
     let mut clipboard = Clipboard::new().unwrap();
     clipboard.set_text(text).unwrap();
 }
@@ -211,4 +211,17 @@ pub fn line_break(s: &str) -> String {
     }
 
     ans
+}
+pub(crate) fn copy_photo_to_clipboard(path: &str) {
+    let img = image::open(path).unwrap().to_rgba8();
+    let (width, height) = img.dimensions();
+
+    let image_data = ImageData {
+        width: width as usize,
+        height: height as usize,
+        bytes: Cow::Owned(img.into_raw()),
+    };
+
+    let mut clipboard = Clipboard::new().unwrap();
+    let _ = clipboard.set_image(image_data);
 }

@@ -6,11 +6,7 @@ use sqlx::{
 use std::collections::HashMap;
 use std::fs;
 
-use crate::logic::integrations::types::{
-    Chat,
-    MessageType::{self, AUDIO, FILE},
-    ReceivedMessage,
-};
+use crate::logic::integrations::types::{Chat, MessageType, ReceivedMessage};
 
 const CREATE_CHATS: &str = r#"
     CREATE TABLE IF NOT EXISTS chats (

@@ -2,7 +2,7 @@ use eframe::egui;
 use egui_material_icons::icons::{ICON_INFO, ICON_SETTINGS, ICON_WALLPAPER};
 
 use crate::{
-    ui::widgets::MessageWidget,
+    ui::widgets::message_widget::MessageWidget,
     utils::{
         settings::save_settings,
         themes::THEMES,

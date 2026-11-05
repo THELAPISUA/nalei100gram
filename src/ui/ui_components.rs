@@ -1,15 +1,19 @@
 use crate::ui::app::GramApp;
-use crate::ui::widgets::VoiceAction;
-use crate::utils::audio::AudioPlayer;
-use crate::{
-    logic::integrations::types::{ActionPacket, MessageType, ReceivedMessage},
-    ui::widgets::AudioWidget,
-};
 
-use crate::ui::logic::{copy_to_clipboard, delete_msg};
-use crate::ui::widgets::{FileWidget, MessageAction, MessageWidget, PhotoWidget, VoiceWidget};
+use crate::logic::integrations::types::{ActionPacket, MessageType, ReceivedMessage};
+
+use crate::ui::widgets::audio_widget::AudioWidget;
+use crate::ui::widgets::file_widget::FileWidget;
+use crate::ui::widgets::message_widget::MessageWidget;
+use crate::ui::widgets::photo_widget::PhotoWidget;
+use crate::ui::widgets::types::{MessageAction, VoiceAction};
+use crate::ui::widgets::voice_widget::VoiceWidget;
+use crate::utils::audio::AudioPlayer;
+
+use crate::ui::logic::{copy_photo_to_clipboard, copy_text_to_clipboard, delete_msg};
 
 use eframe::egui::{self, Align2, Color32, FontId, Pos2, Rect, Sense, vec2};
+
 use egui_material_icons::MaterialIcon;
 use image::ImageReader;
 
@@ -123,7 +127,7 @@ fn process_message(
                         });
                     }
                     MessageAction::Copy => {
-                        copy_to_clipboard(&text);
+                        copy_text_to_clipboard(&text);
                     }
                     MessageAction::Delete => {
                         return Some(ActionPacket::Delete {
@@ -132,11 +136,12 @@ fn process_message(
                             chat_id: msg.chat_id,
                         });
                     }
+                    _ => return None,
                 }
             }
         }
 
-        MessageType::PHOTO { ref path } | MessageType::STICKER { ref path } => {
+        MessageType::PHOTO { ref path } => {
             let widget = PhotoWidget {
                 username: msg.username.clone(),
                 texture: get_img(ui.ctx(), &path, photos),
@@ -144,19 +149,68 @@ fn process_message(
                 outgoing: msg.sender_is_you,
             };
             widget.show(ui);
+            if let Some(action) = widget.show(ui) {
+                match action {
+                    MessageAction::Open => {
+                        let _ = open::that(path);
+                    }
+                    MessageAction::Copy => copy_photo_to_clipboard(path),
+                    MessageAction::Delete => {
+                        return Some(ActionPacket::Delete {
+                            id: msg.id,
+                            account_id,
+                            chat_id: msg.chat_id,
+                        });
+                    }
+                    _ => return None,
+                }
+            }
+        }
+
+        MessageType::STICKER { ref path } => {
+            let widget = PhotoWidget {
+                username: msg.username.clone(),
+                texture: get_img(ui.ctx(), &path, photos),
+                time: msg.date.clone(),
+                outgoing: msg.sender_is_you,
+            };
+            widget.show(ui);
+            if let Some(action) = widget.show(ui) {
+                match action {
+                    MessageAction::Delete => {
+                        return Some(ActionPacket::Delete {
+                            id: msg.id,
+                            account_id,
+                            chat_id: msg.chat_id,
+                        });
+                    }
+                    _ => return None,
+                }
+            }
         }
 
         MessageType::FILE { ref path, ref name } => {
             let widget = FileWidget {
                 username: msg.username.clone(),
-                file_path: path.clone(),
+                _file_path: path.clone(),
                 time: msg.date.clone(),
                 outgoing: msg.sender_is_you,
                 file_name: name.clone(),
             };
-
-            if widget.show(ui) {
-                let _ = open::that(path);
+            if let Some(action) = widget.show(ui) {
+                match action {
+                    MessageAction::Open | MessageAction::Clicked => {
+                        let _ = open::that(path);
+                    }
+                    MessageAction::Delete => {
+                        return Some(ActionPacket::Delete {
+                            id: msg.id,
+                            account_id,
+                            chat_id: msg.chat_id,
+                        });
+                    }
+                    _ => return None,
+                }
             }
         }
         MessageType::AUDIO { ref path, ref name } => {
@@ -181,14 +235,29 @@ fn process_message(
                 progress,
                 playing,
             };
-
-            if widget.show(ui) {
-                if playing {
-                    p.toggle();
-                } else {
-                    p.play_sound(path);
+            if let Some(action) = widget.show(ui) {
+                match action {
+                    MessageAction::Open => {
+                        let _ = open::that(path);
+                    }
+                    MessageAction::Clicked => {
+                        if playing {
+                            p.toggle();
+                        } else {
+                            p.play_sound(path);
+                        }
+                    }
+                    MessageAction::Delete => {
+                        return Some(ActionPacket::Delete {
+                            id: msg.id,
+                            account_id,
+                            chat_id: msg.chat_id,
+                        });
+                    }
+                    _ => return None,
                 }
             }
+
             if playing {
                 ui.ctx().request_repaint_after(Duration::from_millis(50));
             }
@@ -237,17 +306,16 @@ fn process_message(
             if playing {
                 ui.ctx().request_repaint_after(Duration::from_millis(50));
             }
-        }
-        _ => {
-            let widget = MessageWidget {
-                username: msg.username.clone(),
-                text: format!("Ошибка рендера неизвестний тип"),
-                time: msg.date.clone(),
-                outgoing: msg.sender_is_you,
-            };
+        } // _ => {
+          //     let widget = MessageWidget {
+          //         username: msg.username.clone(),
+          //         text: format!("Ошибка рендера неизвестний тип"),
+          //         time: msg.date.clone(),
+          //         outgoing: msg.sender_is_you,
+          //     };
 
-            widget.show(ui);
-        }
+          //     widget.show(ui);
+          // }
     }
 
     None
