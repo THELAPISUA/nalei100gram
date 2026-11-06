@@ -25,6 +25,7 @@ const CREATE_MESSAGES: &str = r#"
         account_id INTEGER NOT NULL,
         username TEXT NOT NULL,
         text TEXT NOT NULL DEFAULT '',
+        caption TEXT NOT NULL DEFAULT '',
         name TEXT NOT NULL DEFAULT '',
         date TEXT NOT NULL,
         is_read INTEGER NOT NULL DEFAULT 0,
@@ -195,6 +196,8 @@ impl Db {
         let has_is_bot = has_column(columns, "is_bot");
         let has_is_read = has_column(columns, "is_read");
         let has_text = has_column(columns, "text");
+        let has_caption = has_column(columns, "caption");
+        let has_name = has_column(columns, "name");
         let has_date = has_column(columns, "date");
         let has_username = has_column(columns, "username");
         let has_msg_type = has_column(columns, "msg_type");
@@ -217,6 +220,12 @@ impl Db {
             "0"
         };
         let text = if has_text { "COALESCE(text, '')" } else { "''" };
+        let caption = if has_caption {
+            "COALESCE(caption, '')"
+        } else {
+            "''"
+        };
+        let name = if has_name { "COALESCE(name, '')" } else { "''" };
         let date = if has_date { "COALESCE(date, '')" } else { "''" };
         let username = if has_username {
             "COALESCE(username, '')"
@@ -242,11 +251,11 @@ impl Db {
         sqlx::query(AssertSqlSafe(format!(
             r#"
             INSERT OR REPLACE INTO messages (
-                id, chat_id, account_id, username, text, date,
+                id, chat_id, account_id, username, text, caption, name, date,
                 is_read, sender_is_you, msg_type
             )
             SELECT
-                id, chat_id, {account}, {username}, {text}, {date},
+                id, chat_id, {account}, {username}, {text}, {caption}, {name}, {date},
                 {is_read}, {sender}, {msg_type}
             FROM messages_legacy;
             "#
@@ -264,20 +273,24 @@ impl Db {
     }
 
     pub async fn add_message(&self, msg: &ReceivedMessage) {
-        let (msg_type, text, name) = message_to_row(&msg.t);
+        let (msg_type, text, name, caption) = message_to_row(&msg.t);
 
         let name = match name {
             Some(name) => name,
+            None => String::new(),
+        };
+        let caption = match caption {
+            Some(c) => c,
             None => String::new(),
         };
 
         match sqlx::query(
             r#"
             INSERT OR REPLACE INTO messages (
-                id, chat_id, account_id, username, text, name, date,
+                id, chat_id, account_id, username, text, caption, name, date,
                 is_read, sender_is_you, msg_type
             )
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10);
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11);
             "#,
         )
         .bind(msg.id)
@@ -285,6 +298,7 @@ impl Db {
         .bind(msg.account_id)
         .bind(&msg.username)
         .bind(text)
+        .bind(caption)
         .bind(name)
         .bind(&msg.date)
         .bind(msg.readed)
@@ -446,6 +460,7 @@ impl Db {
                 m.account_id,
                 m.username,
                 m.text,
+                m.caption,
                 m.name,
                 m.date,
                 m.is_read,
@@ -493,7 +508,7 @@ impl Db {
                     .map(|row| ReceivedMessage {
                         id: row.id,
                         username: row.username,
-                        t: row_to_message_type(row.msg_type, row.text, row.name),
+                        t: row_to_message_type(row.msg_type, row.text, row.name, row.caption),
                         date: row.date,
                         chat_id: row.chat_id,
                         readed: row.is_read,
@@ -523,29 +538,42 @@ impl Db {
     }
 }
 
-fn message_to_row(message_type: &MessageType) -> (i64, String, Option<String>) {
+fn message_to_row(message_type: &MessageType) -> (i64, String, Option<String>, Option<String>) {
     match message_type {
-        MessageType::TEXT { text } => (0, text.clone(), None),
-        MessageType::PHOTO { path } => (1, path.clone(), None),
-        MessageType::FILE { path, name } => (2, path.clone(), Some(name.clone())),
-        MessageType::STICKER { path } => (3, path.clone(), None),
-        MessageType::AUDIO { path, name } => (4, path.clone(), Some(name.clone())),
-        MessageType::VOICE { path } => (5, path.clone(), None),
+        MessageType::TEXT { text } => (0, text.clone(), None, None),
+        MessageType::PHOTO { path, caption } => (1, path.clone(), None, caption.clone()),
+        MessageType::FILE {
+            path,
+            name,
+            caption,
+        } => (2, path.clone(), Some(name.clone()), caption.clone()),
+        MessageType::STICKER { path } => (3, path.clone(), None, None),
+        MessageType::AUDIO {
+            path,
+            name,
+            caption,
+        } => (4, path.clone(), Some(name.clone()), caption.clone()),
+        MessageType::VOICE { path } => (5, path.clone(), None, None),
     }
 }
 
-fn row_to_message_type(msg_type: i64, text: String, name: String) -> MessageType {
+fn row_to_message_type(msg_type: i64, text: String, name: String, caption: String) -> MessageType {
     match msg_type {
         0 => MessageType::TEXT { text },
-        1 => MessageType::PHOTO { path: text },
+        1 => MessageType::PHOTO {
+            path: text,
+            caption: Some(caption),
+        },
         2 => MessageType::FILE {
             path: text,
             name: name,
+            caption: Some(caption),
         },
         3 => MessageType::STICKER { path: text },
         4 => MessageType::AUDIO {
             path: text,
             name: name,
+            caption: Some(caption),
         },
         5 => MessageType::VOICE { path: text },
         _ => MessageType::TEXT { text },
@@ -597,6 +625,7 @@ struct MessageRow {
     account_id: i64,
     username: String,
     text: String,
+    caption: String,
     name: String,
     date: String,
     is_read: bool,

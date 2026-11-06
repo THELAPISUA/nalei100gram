@@ -8,6 +8,7 @@ pub struct FileWidget {
     pub file_name: String,
     pub _file_path: String,
     pub outgoing: bool,
+    pub caption: Option<String>,
 }
 
 impl FileWidget {
@@ -47,6 +48,7 @@ impl FileWidget {
         let accent = visuals.hyperlink_color;
         let accent_hover = visuals.widgets.hovered.fg_stroke.color;
         let secondary_color = visuals.weak_text_color();
+        let text_color = visuals.text_color();
 
         let frame_response = egui::Frame::new()
             .fill(bubble_color)
@@ -145,6 +147,18 @@ impl FileWidget {
                     });
 
                     ui.horizontal(|ui| {
+                        if let Some(caption) =
+                            self.caption.as_deref().filter(|c| !c.trim().is_empty())
+                        {
+                            ui.add_space(6.0);
+                            ui.add(
+                                egui::Label::new(
+                                    egui::RichText::new(caption).size(14.0).color(text_color),
+                                )
+                                .wrap(),
+                            );
+                        }
+                        // Message time
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                             ui.label(
                                 egui::RichText::new(&self.time)

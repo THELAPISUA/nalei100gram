@@ -7,7 +7,7 @@ use crate::utils::audio::AudioPlayer;
 use crate::utils::types::{PendingFile, Settings};
 use eframe::egui::{
     self, Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Sense, Stroke,
-    TextEdit, TextWrapMode, vec2,
+    TextEdit, vec2,
 };
 use egui_material_icons::icons::{ICON_SEND, ICON_SETTINGS};
 

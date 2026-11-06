@@ -40,7 +40,16 @@ pub(crate) async fn process_packet_message(
                 }
             }
         }
-        AUDIO { ref path, name: _ } | FILE { ref path, name: _ } => {
+        AUDIO {
+            ref path,
+            name: _,
+            caption: _,
+        }
+        | FILE {
+            ref path,
+            name: _,
+            caption: _,
+        } => {
             let r = account_manager
                 .send_document(packet.account_id, packet.chat_id, &path)
                 .await;
@@ -62,7 +71,10 @@ pub(crate) async fn process_packet_message(
             }
         }
 
-        PHOTO { ref path } => {
+        PHOTO {
+            ref path,
+            caption: None,
+        } => {
             let r = account_manager
                 .send_photo(packet.account_id, packet.chat_id, &path)
                 .await;

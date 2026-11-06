@@ -135,14 +135,18 @@ fn process_message(
             }
         }
 
-        MessageType::PHOTO { ref path } => {
+        MessageType::PHOTO {
+            ref path,
+            ref caption,
+        } => {
             let widget = PhotoWidget {
                 username: msg.username.clone(),
                 texture: get_img(ui.ctx(), &path, photos),
                 time: msg.date.clone(),
                 outgoing: msg.sender_is_you,
+                caption: caption.clone(),
             };
-            widget.show(ui);
+
             if let Some(action) = widget.show(ui) {
                 match action {
                     MessageAction::Open => {
@@ -167,6 +171,7 @@ fn process_message(
                 texture: get_img(ui.ctx(), &path, photos),
                 time: msg.date.clone(),
                 outgoing: msg.sender_is_you,
+                caption: None,
             };
             widget.show(ui);
             if let Some(action) = widget.show(ui) {
@@ -183,13 +188,18 @@ fn process_message(
             }
         }
 
-        MessageType::FILE { ref path, ref name } => {
+        MessageType::FILE {
+            ref path,
+            ref name,
+            ref caption,
+        } => {
             let widget = FileWidget {
                 username: msg.username.clone(),
                 _file_path: path.clone(),
                 time: msg.date.clone(),
                 outgoing: msg.sender_is_you,
                 file_name: name.clone(),
+                caption: caption.clone(),
             };
             if let Some(action) = widget.show(ui) {
                 match action {
@@ -207,7 +217,11 @@ fn process_message(
                 }
             }
         }
-        MessageType::AUDIO { ref path, ref name } => {
+        MessageType::AUDIO {
+            ref path,
+            ref name,
+            ref caption,
+        } => {
             let mut p = player.lock().unwrap();
             p.tick();
             let (position, playing, duration) = match p.get_state(path) {
@@ -228,6 +242,7 @@ fn process_message(
                 duration: format_time(position),
                 progress,
                 playing,
+                caption: caption.clone(),
             };
             if let Some(action) = widget.show(ui) {
                 match action {

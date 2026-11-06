@@ -64,13 +64,16 @@ impl GramApp {
                     "mp3" | "wav" | "ogg" => MessageType::AUDIO {
                         path: file.path.to_string_lossy().to_string(),
                         name: file.name,
+                        caption: None,
                     },
                     "png" | "jpg" | "webp" => MessageType::PHOTO {
                         path: file.path.to_string_lossy().to_string(),
+                        caption: None,
                     },
                     _ => MessageType::FILE {
                         path: file.path.to_string_lossy().to_string(),
                         name: file.name,
+                        caption: None,
                     },
                 };
                 let msg = ReceivedMessage {
@@ -154,10 +157,21 @@ impl GramApp {
         match last_msg_p {
             Some(m) => match m.t {
                 MessageType::TEXT { ref text } => text.clone(),
-                MessageType::PHOTO { path: _ } => String::from("Фото"),
+                MessageType::PHOTO {
+                    path: _,
+                    caption: _,
+                } => String::from("Фото"),
                 MessageType::STICKER { path: _ } => String::from("Стикер"),
-                MessageType::FILE { path: _, name: _ } => String::from("Файл"),
-                MessageType::AUDIO { path: _, name: _ } => String::from("Аудіо"),
+                MessageType::FILE {
+                    path: _,
+                    name: _,
+                    caption: _,
+                } => String::from("Файл"),
+                MessageType::AUDIO {
+                    path: _,
+                    name: _,
+                    caption: _,
+                } => String::from("Аудіо"),
                 MessageType::VOICE { path: _ } => String::from("Голосове"),
                 // _ => String::from("Невідомий формат"),
             },

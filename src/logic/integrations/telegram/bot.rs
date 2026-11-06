@@ -88,7 +88,10 @@ impl AccauntIntegration for TelegramBot {
                                     .with_timezone(Local::now().offset())
                                     .format("%H:%M")
                                     .to_string(),
-                                t: MessageType::PHOTO { path },
+                                t: MessageType::PHOTO {
+                                    path,
+                                    caption: msg.caption().map(|c| c.to_string()),
+                                },
                                 sender_is_you: false,
                                 readed: true,
                                 id: msg.id.0,
@@ -120,7 +123,10 @@ impl AccauntIntegration for TelegramBot {
                                     .with_timezone(Local::now().offset())
                                     .format("%H:%M")
                                     .to_string(),
-                                t: MessageType::PHOTO { path },
+                                t: MessageType::PHOTO {
+                                    path,
+                                    caption: None,
+                                },
                                 sender_is_you: false,
                                 readed: true,
                                 id: msg.id.0,
@@ -154,6 +160,7 @@ impl AccauntIntegration for TelegramBot {
                             t: MessageType::FILE {
                                 path,
                                 name: file_name,
+                                caption: msg.caption().map(|c| c.to_string()),
                             },
                             sender_is_you: false,
                             readed: true,
@@ -186,6 +193,7 @@ impl AccauntIntegration for TelegramBot {
                             t: MessageType::AUDIO {
                                 path,
                                 name: file_name,
+                                caption: msg.caption().map(|c| c.to_string()),
                             },
                             sender_is_you: false,
                             readed: true,

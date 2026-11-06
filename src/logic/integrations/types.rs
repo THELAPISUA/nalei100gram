@@ -1,11 +1,28 @@
 #[derive(Clone)]
 pub enum MessageType {
-    TEXT { text: String },
-    PHOTO { path: String },
-    FILE { path: String, name: String },
-    STICKER { path: String },
-    AUDIO { path: String, name: String },
-    VOICE { path: String },
+    TEXT {
+        text: String,
+    },
+    PHOTO {
+        path: String,
+        caption: Option<String>,
+    },
+    FILE {
+        path: String,
+        name: String,
+        caption: Option<String>,
+    },
+    STICKER {
+        path: String,
+    },
+    AUDIO {
+        path: String,
+        name: String,
+        caption: Option<String>,
+    },
+    VOICE {
+        path: String,
+    },
 }
 #[derive(Clone)]
 pub struct ReceivedMessage {
