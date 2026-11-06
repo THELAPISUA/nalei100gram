@@ -111,6 +111,8 @@ impl Db {
             Err(e) => warn!("Failed to set PRAGMA journal_mode=WAL: {}", e),
         }
 
+        self.ensure_notes_chat().await;
+
         info!("Database successfully initialized and optimized.");
     }
 
@@ -448,30 +450,52 @@ impl Db {
             }
         }
     }
+    pub async fn ensure_notes_chat(&self) {
+        if let Err(e) = sqlx::query(
+            r#"
+        INSERT INTO chats (chat_id, account_id, title)
+        VALUES (?1, ?2, ?3)
+        ON CONFLICT(chat_id, account_id) DO UPDATE SET
+            title = CASE
+                WHEN chats.title IS NULL OR chats.title = ''
+                THEN excluded.title
+                ELSE chats.title
+            END;
+        "#,
+        )
+        .bind(0)
+        .bind(-1)
+        .bind("Нотатки".to_string())
+        .execute(&self.pool)
+        .await
+        {
+            error!("Failed to ensure notes chat: {}", e);
+        }
+    }
 
     pub async fn load_chats(&self) -> Vec<Chat> {
         debug!("Loading all chat histories from database...");
 
         let rows: Vec<MessageRow> = match sqlx::query_as(
             r#"
-            SELECT
-                m.id,
-                m.chat_id,
-                m.account_id,
-                m.username,
-                m.text,
-                m.caption,
-                m.name,
-                m.date,
-                m.is_read,
-                m.sender_is_you,
-                m.msg_type,
-                COALESCE(c.title, '') AS chat_title
-            FROM messages AS m
-            LEFT JOIN chats AS c
-                ON c.chat_id = m.chat_id AND c.account_id = m.account_id
-            ORDER BY m.chat_id ASC, m.id ASC;
-            "#,
+        SELECT
+            m.id,
+            m.chat_id,
+            m.account_id,
+            m.username,
+            m.text,
+            m.caption,
+            m.name,
+            m.date,
+            m.is_read,
+            m.sender_is_you,
+            m.msg_type,
+            COALESCE(c.title, '') AS chat_title
+        FROM messages AS m
+        LEFT JOIN chats AS c
+            ON c.chat_id = m.chat_id AND c.account_id = m.account_id
+        ORDER BY m.chat_id ASC, m.id ASC;
+        "#,
         )
         .fetch_all(&self.pool)
         .await
@@ -490,12 +514,17 @@ impl Db {
             chats.entry(row.chat_id).or_default().push(row);
         }
 
+        // «Нотатки» є завжди, навіть без повідомлень
+        chats.entry(0).or_default();
+
         let mut formatted_chats: Vec<Chat> = chats
             .into_iter()
             .map(|(chat_id, rows)| {
                 let title = rows.first().map(|row| row.chat_title.trim()).unwrap_or("");
 
-                let name = if !title.is_empty() {
+                let name = if chat_id == 0 {
+                    "Нотатки".to_string()
+                } else if !title.is_empty() {
                     title.to_string()
                 } else {
                     format!("Chat {chat_id}")
@@ -526,7 +555,8 @@ impl Db {
             })
             .collect();
 
-        formatted_chats.sort_by_key(|chat| chat.chat_id);
+        // «Нотатки» першими, решта за chat_id
+        formatted_chats.sort_by_key(|chat| (chat.chat_id != 0, chat.chat_id));
 
         info!(
             "Successfully loaded {} messages, structured into {} chat objects.",

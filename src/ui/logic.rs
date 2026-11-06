@@ -76,6 +76,11 @@ impl GramApp {
                         caption: None,
                     },
                 };
+                let curr_id = if self.current_chat == 0 {
+                    -1
+                } else {
+                    self.current_account_id
+                };
                 let msg = ReceivedMessage {
                     date: Local::now().format("%H:%M").to_string(),
                     username: String::from("You"),
@@ -84,7 +89,7 @@ impl GramApp {
                     sender_is_you: true,
                     readed: true,
                     id: self.get_last_id(self.current_chat.clone()) + 1,
-                    account_id: self.current_account_id,
+                    account_id: curr_id,
                 };
                 let is_ok = self.tx.try_send(Send(msg.clone())).is_ok();
                 if is_ok {
@@ -151,7 +156,7 @@ impl GramApp {
         let last_msg_p: Option<&ReceivedMessage> = curr_chat.as_ref().and_then(|messages| {
             messages
                 .iter()
-                .rfind(|a| a.account_id == current_account_id)
+                .rfind(|a| a.account_id == current_account_id || a.chat_id == 0)
         });
 
         match last_msg_p {
@@ -179,6 +184,11 @@ impl GramApp {
         }
     }
     pub(crate) fn send_message_packet(&mut self, msg: String) {
+        let curr_id = if self.current_chat == 0 {
+            -1
+        } else {
+            self.current_account_id
+        };
         let packet = ReceivedMessage {
             date: Local::now().format("%H:%M").to_string(),
             username: String::from("You"),
@@ -187,7 +197,7 @@ impl GramApp {
             sender_is_you: true,
             readed: true,
             id: self.get_last_id(self.current_chat.clone()) + 1,
-            account_id: self.current_account_id,
+            account_id: curr_id,
         };
         if self.tx.try_send(Send(packet.clone())).is_ok() {
             let current_chat = self.current_chat.clone();

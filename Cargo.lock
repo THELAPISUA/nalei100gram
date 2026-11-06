@@ -2912,7 +2912,7 @@ dependencies = [
 
 [[package]]
 name = "nalei100gram"
-version = "0.8.3"
+version = "0.8.4"
 dependencies = [
  "anyhow",
  "arboard",

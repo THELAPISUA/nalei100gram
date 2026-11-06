@@ -15,6 +15,7 @@ use crate::ui::logic::{copy_photo_to_clipboard, copy_text_to_clipboard, delete_m
 use eframe::egui::{self, Align2, Color32, FontId, Pos2, Rect, Sense, vec2};
 
 use egui_material_icons::MaterialIcon;
+use egui_material_icons::icons::ICON_BOOKMARK;
 use image::ImageReader;
 
 use std::collections::HashMap;
@@ -38,7 +39,7 @@ impl GramApp {
                         .find(|chat| chat.chat_id == self.current_chat)
                     {
                         for msg in &chat.messages {
-                            if msg.account_id == self.current_account_id {
+                            if msg.account_id == self.current_account_id || msg.account_id == -1 {
                                 if let Some(action) = process_message(
                                     self.current_account_id,
                                     ui,
@@ -87,8 +88,6 @@ impl GramApp {
                             _ => {}
                         }
                     }
-
-                    preview_files_being_dropped(ui.ctx());
                 });
         });
     }
@@ -473,14 +472,19 @@ pub(crate) fn draw_avatar(
     } else {
         painter.circle_filled(avatar_center, 24.0, avatar_color);
 
-        painter.text(
-            avatar_center,
-            Align2::CENTER_CENTER,
+        let name = if chat_id == 0 {
+            String::from(ICON_BOOKMARK)
+        } else {
             name.chars()
                 .next()
                 .unwrap_or('?')
                 .to_uppercase()
-                .to_string(),
+                .to_string()
+        };
+        painter.text(
+            avatar_center,
+            Align2::CENTER_CENTER,
+            name,
             FontId::proportional(20.0),
             Color32::WHITE,
         );

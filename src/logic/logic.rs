@@ -17,27 +17,29 @@ pub(crate) async fn process_packet_message(
     set_max_vol();
     match packet.t {
         TEXT { ref text } => {
-            let r = account_manager
-                .send_message(packet.account_id, packet.chat_id, &text)
-                .await;
-
-            match r {
-                Ok(m) => {
-                    let chat_id = m.chat.id.0 as i64;
-                    let new_packet = ReceivedMessage {
-                        id: packet.id,
-                        ..packet.clone()
-                    };
-                    db_for_gui.clone().add_message(&new_packet).await;
-                    info!(
-                        "Successful send msg! chat_id:{}, msg:{}",
-                        chat_id,
-                        m.text().unwrap_or("occurred message")
-                    );
+            if packet.chat_id != 0 {
+                let r = account_manager
+                    .send_message(packet.account_id, packet.chat_id, &text)
+                    .await;
+                match r {
+                    Ok(m) => {
+                        db_for_gui.clone().add_message(&packet).await;
+                        info!(
+                            "Successful send msg! chat_id:{}, msg:{}",
+                            packet.chat_id,
+                            m.text().unwrap_or("occurred message")
+                        );
+                    }
+                    Err(e) => {
+                        error!("Failed to send message Error:{}", e);
+                    }
                 }
-                Err(e) => {
-                    error!("Failed to send message Error:{}", e);
-                }
+            } else {
+                let new_packet = ReceivedMessage {
+                    account_id: -1,
+                    ..packet.clone()
+                };
+                db_for_gui.clone().add_message(&new_packet).await;
             }
         }
         AUDIO {
@@ -50,24 +52,30 @@ pub(crate) async fn process_packet_message(
             name: _,
             caption: _,
         } => {
-            let r = account_manager
-                .send_document(packet.account_id, packet.chat_id, &path)
-                .await;
+            if packet.chat_id != 0 {
+                let r = account_manager
+                    .send_document(packet.account_id, packet.chat_id, &path)
+                    .await;
 
-            db_for_gui.clone().add_message(&packet).await;
-
-            match r {
-                Ok(m) => {
-                    let chat_id = m.chat.id.0 as i64;
-                    info!(
-                        "Successful send msg! chat_id:{}, msg:{}",
-                        chat_id,
-                        m.text().unwrap_or("occurred message")
-                    );
+                match r {
+                    Ok(m) => {
+                        db_for_gui.clone().add_message(&packet).await;
+                        info!(
+                            "Successful send msg! chat_id:{}, msg:{}",
+                            packet.chat_id,
+                            m.text().unwrap_or("occurred message")
+                        );
+                    }
+                    Err(e) => {
+                        error!("Failed to send message Error:{}", e);
+                    }
                 }
-                Err(e) => {
-                    error!("Failed to send message Error:{}", e);
-                }
+            } else {
+                let new_packet = ReceivedMessage {
+                    account_id: -1,
+                    ..packet.clone()
+                };
+                db_for_gui.clone().add_message(&new_packet).await;
             }
         }
 
@@ -75,24 +83,30 @@ pub(crate) async fn process_packet_message(
             ref path,
             caption: None,
         } => {
-            let r = account_manager
-                .send_photo(packet.account_id, packet.chat_id, &path)
-                .await;
+            if packet.chat_id != 0 {
+                let r = account_manager
+                    .send_photo(packet.account_id, packet.chat_id, &path)
+                    .await;
 
-            db_for_gui.clone().add_message(&packet).await;
-
-            match r {
-                Ok(m) => {
-                    let chat_id = m.chat.id.0 as i64;
-                    info!(
-                        "Successful send msg! chat_id:{}, msg:{}",
-                        chat_id,
-                        m.text().unwrap_or("occurred message")
-                    );
+                match r {
+                    Ok(m) => {
+                        db_for_gui.clone().add_message(&packet).await;
+                        info!(
+                            "Successful send msg! chat_id:{}, msg:{}",
+                            packet.chat_id,
+                            m.text().unwrap_or("occurred message")
+                        );
+                    }
+                    Err(e) => {
+                        error!("Failed to send message Error:{}", e);
+                    }
                 }
-                Err(e) => {
-                    error!("Failed to send message Error:{}", e);
-                }
+            } else {
+                let new_packet = ReceivedMessage {
+                    account_id: -1,
+                    ..packet.clone()
+                };
+                db_for_gui.clone().add_message(&new_packet).await;
             }
         }
         _ => {}
