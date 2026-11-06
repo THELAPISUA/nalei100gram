@@ -188,7 +188,7 @@ impl GramApp {
 
 pub(crate) fn delete_msg(msg_id: i32, account_id: i64, chat: &mut Chat, tx: &Sender<ActionPacket>) {
     chat.messages
-        .retain(|m| m.id != msg_id && m.account_id == account_id);
+        .retain(|m| !(m.id == msg_id && m.account_id == account_id));
     let _ = tx.try_send(Delete {
         id: msg_id,
         account_id,

@@ -1,5 +1,6 @@
 use async_trait::async_trait;
 
+use chrono::Local;
 use log::{error, info, warn};
 use teloxide::RequestError;
 use teloxide::net::Download;
@@ -32,6 +33,7 @@ impl AccauntIntegration for TelegramBot {
     async fn start(&self, tx: Sender<ReceivedMessage>, id: i64) {
         let bot = self.bot.clone();
         let account_id = id;
+
         tokio::spawn(async move {
             teloxide::repl(bot, move |bot: Bot, msg: Message| {
                 let tx = tx.clone();
@@ -40,12 +42,16 @@ impl AccauntIntegration for TelegramBot {
                     let _ = get_avatar(&bot, &msg).await;
                     if let Some(text) = msg.text() {
                         let m = ReceivedMessage {
-                            username: msg.chat.first_name().unwrap_or("Err").to_string(),
+                            username: get_name(&msg),
                             id: msg.id.0,
                             t: crate::logic::integrations::types::MessageType::TEXT {
                                 text: text.to_string(),
                             },
-                            date: msg.date.format("%H:%M").to_string(),
+                            date: msg
+                                .date
+                                .with_timezone(Local::now().offset())
+                                .format("%H:%M")
+                                .to_string(),
                             chat_id: msg.chat.id.0,
                             readed: true,
                             sender_is_you: false,
@@ -75,9 +81,13 @@ impl AccauntIntegration for TelegramBot {
                             bot.download_file(&file_info.path, &mut destination_file)
                                 .await?;
                             let p = ReceivedMessage {
-                                username: msg.from.unwrap().full_name(),
+                                username: get_name(&msg),
                                 chat_id: msg.chat.id.0,
-                                date: msg.date.format("%H:%M").to_string(),
+                                date: msg
+                                    .date
+                                    .with_timezone(Local::now().offset())
+                                    .format("%H:%M")
+                                    .to_string(),
                                 t: MessageType::PHOTO { path },
                                 sender_is_you: false,
                                 readed: true,
@@ -103,9 +113,13 @@ impl AccauntIntegration for TelegramBot {
                                 .await?;
 
                             let p = ReceivedMessage {
-                                username: msg.from.unwrap().full_name(),
+                                username: get_name(&msg),
                                 chat_id: msg.chat.id.0,
-                                date: msg.date.format("%H:%M").to_string(),
+                                date: msg
+                                    .date
+                                    .with_timezone(Local::now().offset())
+                                    .format("%H:%M")
+                                    .to_string(),
                                 t: MessageType::PHOTO { path },
                                 sender_is_you: false,
                                 readed: true,
@@ -130,9 +144,13 @@ impl AccauntIntegration for TelegramBot {
                         bot.download_file(&file_info.path, &mut destination_file)
                             .await?;
                         let p = ReceivedMessage {
-                            username: msg.from.unwrap().full_name(),
+                            username: get_name(&msg),
                             chat_id: msg.chat.id.0,
-                            date: msg.date.format("%H:%M").to_string(),
+                            date: msg
+                                .date
+                                .with_timezone(Local::now().offset())
+                                .format("%H:%M")
+                                .to_string(),
                             t: MessageType::FILE {
                                 path,
                                 name: file_name,
@@ -158,9 +176,13 @@ impl AccauntIntegration for TelegramBot {
                             .await?;
 
                         let p = ReceivedMessage {
-                            username: msg.from.unwrap().full_name(),
+                            username: get_name(&msg),
                             chat_id: msg.chat.id.0,
-                            date: msg.date.format("%H:%M").to_string(),
+                            date: msg
+                                .date
+                                .with_timezone(Local::now().offset())
+                                .format("%H:%M")
+                                .to_string(),
                             t: MessageType::AUDIO {
                                 path,
                                 name: file_name,
@@ -185,9 +207,13 @@ impl AccauntIntegration for TelegramBot {
                             .await?;
 
                         let p = ReceivedMessage {
-                            username: msg.from.unwrap().full_name(),
+                            username: get_name(&msg),
                             chat_id: msg.chat.id.0,
-                            date: msg.date.format("%H:%M").to_string(),
+                            date: msg
+                                .date
+                                .with_timezone(Local::now().offset())
+                                .format("%H:%M")
+                                .to_string(),
                             t: MessageType::VOICE { path },
                             sender_is_you: false,
                             readed: true,
@@ -371,4 +397,7 @@ fn make_circle(image: &mut image::RgbaImage) {
             }
         }
     }
+}
+fn get_name(msg: &Message) -> String {
+    msg.from.as_ref().map(|u| u.full_name()).unwrap_or_default()
 }

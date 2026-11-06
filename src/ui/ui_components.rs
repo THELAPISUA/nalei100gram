@@ -83,12 +83,6 @@ impl GramApp {
                                 {
                                     delete_msg(id, account_id, chat, &self.tx);
                                 }
-
-                                let _ = self.tx.try_send(ActionPacket::Delete {
-                                    id,
-                                    account_id,
-                                    chat_id,
-                                });
                             }
                             _ => {}
                         }
@@ -326,14 +320,17 @@ pub(crate) fn preview_files_being_dropped(ctx: &egui::Context) {
     use egui::{Align2, Color32, Id, LayerId, Order};
     use std::fmt::Write as _;
 
+    let mut fit_into = true;
+
     if ctx.input(|i| i.raw.hovered_files.is_empty()) {
         return;
     }
 
     let text = ctx.input(|i| {
-        let mut text = "Відпусти файли, щоб надіслати (40Мб max):\n".to_owned();
+        let mut text = "Відпусти файли, щоб надіслати:\n".to_owned();
         for file in &i.raw.hovered_files {
             if let Some(path) = &file.path {
+                fit_into = path.metadata().unwrap().len() / 1024 / 1024 <= 40;
                 write!(text, "\n{}", path.display()).unwrap();
             } else if !file.mime.is_empty() {
                 write!(text, "\n{}", file.mime).unwrap();
@@ -343,18 +340,27 @@ pub(crate) fn preview_files_being_dropped(ctx: &egui::Context) {
         }
         text
     });
-
     let painter = ctx.layer_painter(LayerId::new(Order::Foreground, Id::new("file_drop_target")));
     let rect = ctx.content_rect();
-
-    painter.rect_filled(rect, 0.0, Color32::from_black_alpha(192));
-    painter.text(
-        rect.center(),
-        Align2::CENTER_CENTER,
-        text,
-        egui::FontId::proportional(24.0),
-        Color32::WHITE,
-    );
+    if fit_into {
+        painter.rect_filled(rect, 0.0, Color32::from_black_alpha(192));
+        painter.text(
+            rect.center(),
+            Align2::CENTER_CENTER,
+            text,
+            egui::FontId::proportional(24.0),
+            Color32::WHITE,
+        );
+    } else {
+        painter.rect_filled(rect, 0.0, Color32::from_black_alpha(192));
+        painter.text(
+            rect.center(),
+            Align2::CENTER_CENTER,
+            "Файл завеликий (40Мб max)",
+            egui::FontId::proportional(24.0),
+            Color32::RED,
+        );
+    }
 }
 pub fn get_img(
     ctx: &egui::Context,

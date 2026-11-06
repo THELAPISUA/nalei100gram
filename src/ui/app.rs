@@ -7,7 +7,7 @@ use crate::utils::audio::AudioPlayer;
 use crate::utils::types::{PendingFile, Settings};
 use eframe::egui::{
     self, Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Sense, Stroke,
-    TextEdit, vec2,
+    TextEdit, TextWrapMode, vec2,
 };
 use egui_material_icons::icons::{ICON_SEND, ICON_SETTINGS};
 
@@ -71,6 +71,7 @@ impl eframe::App for GramApp {
 
         egui::Panel::left("my_left_panel")
             .min_size(250.0)
+            .max_size(500.0)
             .show(ui, |ui| {
                 ui.add_space(4.0);
 
@@ -257,7 +258,7 @@ impl eframe::App for GramApp {
             .show(ui, |ui| {
                 ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
                     // Поле вводу в заокругленій рамці
-                    let input_w = ui.available_width() - 52.0;
+                    let input_w = ui.available_width() - 52.0 - 28.0;
                     let text_input_res = Frame::new()
                         .fill(ui.visuals().extreme_bg_color)
                         .stroke(Stroke::new(
@@ -267,7 +268,7 @@ impl eframe::App for GramApp {
                         .corner_radius(CornerRadius::same(20))
                         .inner_margin(Margin::symmetric(14, 9))
                         .show(ui, |ui| {
-                            ui.set_width(input_w - 28.0);
+                            ui.set_width(input_w.max(1.0));
                             ui.add(
                                 TextEdit::singleline(&mut self.input_text)
                                     .frame(Frame::NONE)
