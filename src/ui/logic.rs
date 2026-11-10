@@ -1,7 +1,9 @@
 use crate::{
     logic::integrations::types::{
         ActionPacket::{self, *},
-        Chat, MessageType, ReceivedMessage,
+        Chat,
+        MessageType::{self, TEXT},
+        ReceivedMessage,
     },
     ui::app::GramApp,
     utils::types::PendingFile,
@@ -11,7 +13,7 @@ use chrono::Local;
 use eframe::egui;
 
 use log::info;
-use std::{borrow::Cow, ffi::OsStr};
+use std::{borrow::Cow, ffi::OsStr, path::PathBuf};
 use tokio::sync::mpsc::Sender;
 
 impl GramApp {
@@ -58,46 +60,7 @@ impl GramApp {
     }
     pub(crate) fn sender_docs_messages(&mut self) {
         while let Some(file) = self.pending_files.pop() {
-            //40 мб це ліміт на бота в тг
-            if file.size <= 41943040 {
-                let message_type = match file.extension.as_str() {
-                    "mp3" | "wav" | "ogg" => MessageType::AUDIO {
-                        path: file.path.to_string_lossy().to_string(),
-                        name: file.name,
-                        caption: None,
-                    },
-                    "png" | "jpg" | "webp" => MessageType::PHOTO {
-                        path: file.path.to_string_lossy().to_string(),
-                        caption: None,
-                    },
-                    _ => MessageType::FILE {
-                        path: file.path.to_string_lossy().to_string(),
-                        name: file.name,
-                        caption: None,
-                    },
-                };
-                let curr_id = if self.current_chat == 0 {
-                    -1
-                } else {
-                    self.current_account_id
-                };
-                let msg = ReceivedMessage {
-                    date: Local::now().format("%H:%M").to_string(),
-                    username: String::from("You"),
-                    t: message_type,
-                    chat_id: self.current_chat.clone(),
-                    sender_is_you: true,
-                    readed: true,
-                    id: self.get_last_id(self.current_chat.clone()) + 1,
-                    account_id: curr_id,
-                };
-                let is_ok = self.tx.try_send(Send(msg.clone())).is_ok();
-                if is_ok {
-                    let current_chat = self.current_chat.clone();
-                    let chat = self.get_or_create_chat(current_chat.clone(), String::new());
-                    chat.messages.push(msg);
-                }
-            }
+            self.process_file(file);
         }
     }
     pub(crate) fn cancel_close(&mut self, ctx: &egui::Context) {
@@ -208,9 +171,72 @@ impl GramApp {
             self.input_text.clear();
         }
     }
+    pub fn process_file(&mut self, file: PendingFile) {
+        //40 мб це ліміт на бота в тг
+        if file.size <= 41943040 {
+            let message_type = match file.extension.as_str() {
+                "mp3" | "wav" | "ogg" => MessageType::AUDIO {
+                    path: file.path.to_string_lossy().to_string(),
+                    name: file.name,
+                    caption: None,
+                },
+                "png" | "jpg" | "webp" => MessageType::PHOTO {
+                    path: file.path.to_string_lossy().to_string(),
+                    caption: None,
+                },
+                _ => MessageType::FILE {
+                    path: file.path.to_string_lossy().to_string(),
+                    name: file.name,
+                    caption: None,
+                },
+            };
+            let curr_id = if self.current_chat == 0 {
+                -1
+            } else {
+                self.current_account_id
+            };
+            let msg = ReceivedMessage {
+                date: Local::now().format("%H:%M").to_string(),
+                username: String::from("You"),
+                t: message_type,
+                chat_id: self.current_chat.clone(),
+                sender_is_you: true,
+                readed: true,
+                id: self.get_last_id(self.current_chat.clone()) + 1,
+                account_id: curr_id,
+            };
+            let is_ok = self.tx.try_send(Send(msg.clone())).is_ok();
+            if is_ok {
+                let current_chat = self.current_chat.clone();
+                let chat = self.get_or_create_chat(current_chat.clone(), String::new());
+                chat.messages.push(msg);
+            }
+        }
+    }
+
+    pub fn select_and_send_file(&mut self) {
+        if let Some(mut path) = rfd::FileDialog::new().pick_files() {
+            while let Some(file) = path.pop() {
+                let file = pathbuf_to_pendingfile(file);
+                self.process_file(file);
+            }
+        }
+    }
+}
+pub(crate) fn edit_message(msg_id: i32, account_id: i64, chat: &mut Chat, new_text: String) {
+    let msg = get_mut_message_by_id(msg_id, account_id, chat).unwrap();
+    match &mut msg.t {
+        TEXT { text } => *text = new_text,
+        _ => {}
+    }
 }
 
 pub(crate) fn delete_msg(msg_id: i32, account_id: i64, chat: &mut Chat, tx: &Sender<ActionPacket>) {
+    let mut account_id = account_id;
+    if chat.chat_id == 0 {
+        account_id = -1;
+    }
+
     chat.messages
         .retain(|m| !(m.id == msg_id && m.account_id == account_id));
     let _ = tx.try_send(Delete {
@@ -248,4 +274,34 @@ pub(crate) fn copy_photo_to_clipboard(path: &str) {
 
     let mut clipboard = Clipboard::new().unwrap();
     let _ = clipboard.set_image(image_data);
+}
+pub fn pathbuf_to_pendingfile(f: PathBuf) -> PendingFile {
+    PendingFile {
+        name: f
+            .file_name()
+            .unwrap_or(OsStr::new("File"))
+            .to_string_lossy()
+            .to_string(),
+        path: f.clone(),
+        size: f.metadata().unwrap().len(),
+        extension: f
+            .extension()
+            .unwrap_or(OsStr::new("dat"))
+            .to_string_lossy()
+            .to_string(),
+    }
+}
+pub fn get_message_by_id(id: i32, account_id: i64, chat: &Chat) -> Option<&ReceivedMessage> {
+    chat.messages
+        .iter()
+        .find(|m| m.id == id && (m.account_id == account_id || m.account_id == -1))
+}
+pub fn get_mut_message_by_id(
+    id: i32,
+    account_id: i64,
+    chat: &mut Chat,
+) -> Option<&mut ReceivedMessage> {
+    chat.messages
+        .iter_mut()
+        .find(|m| m.id == id && (m.account_id == account_id || m.account_id == -1))
 }

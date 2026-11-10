@@ -1,4 +1,5 @@
-use crate::ui::app::GramApp;
+use crate::logic::integrations::types::MessageType::TEXT;
+use crate::ui::app::{Action, GramApp};
 
 use crate::logic::integrations::types::{ActionPacket, MessageType, ReceivedMessage};
 
@@ -10,7 +11,9 @@ use crate::ui::widgets::types::{MessageAction, VoiceAction};
 use crate::ui::widgets::voice_widget::VoiceWidget;
 use crate::utils::audio::AudioPlayer;
 
-use crate::ui::logic::{copy_photo_to_clipboard, copy_text_to_clipboard, delete_msg};
+use crate::ui::logic::{
+    copy_photo_to_clipboard, copy_text_to_clipboard, delete_msg, get_message_by_id,
+};
 
 use eframe::egui::{self, Align2, Color32, FontId, Pos2, Rect, Sense, vec2};
 
@@ -65,14 +68,19 @@ impl GramApp {
                                 accaunt_id,
                                 chat_id,
                                 id,
-                                new_text,
+                                new_text: _,
                             } => {
-                                let _ = self.tx.try_send(ActionPacket::Edit {
-                                    accaunt_id,
-                                    chat_id,
-                                    id,
-                                    new_text,
-                                });
+                                if let Some(chat) =
+                                    self.chats.iter_mut().find(|chat| chat.chat_id == chat_id)
+                                {
+                                    let old_text =
+                                        match get_message_by_id(id, accaunt_id, chat).unwrap().t {
+                                            TEXT { ref text } => text.clone(),
+                                            _ => String::new(),
+                                        };
+                                    self.input_text = old_text.clone();
+                                    self.curr_action = Some(Action::Edit { id, old_text });
+                                }
                             }
                             ActionPacket::Delete {
                                 id,
@@ -111,12 +119,12 @@ fn process_message(
 
             if let Some(action) = widget.show(ui) {
                 match action {
-                    MessageAction::_Edit => {
+                    MessageAction::Edit => {
                         return Some(ActionPacket::Edit {
                             accaunt_id: account_id,
                             chat_id: msg.chat_id,
                             id: msg.id,
-                            new_text: "HELLO BRO".to_string(),
+                            new_text: "".to_string(),
                         });
                     }
                     MessageAction::Copy => {
@@ -414,6 +422,7 @@ pub(crate) fn draw_circle_button(
     ui: &mut egui::Ui,
     has_text: bool,
     icon: MaterialIcon,
+    size: f32,
 ) -> egui::Response {
     let (btn_color, icon_color) = {
         let visuals = ui.visuals();
@@ -427,7 +436,7 @@ pub(crate) fn draw_circle_button(
 
     let (rect, response) = ui.allocate_exact_size(vec2(40.0, 40.0), Sense::click());
 
-    ui.painter().circle_filled(rect.center(), 20.0, btn_color);
+    ui.painter().circle_filled(rect.center(), size, btn_color);
 
     ui.painter().text(
         rect.center(),

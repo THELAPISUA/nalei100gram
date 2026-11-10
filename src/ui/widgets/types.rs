@@ -4,7 +4,7 @@ pub enum VoiceAction {
     Seek(f64),
 }
 pub enum MessageAction {
-    _Edit,
+    Edit,
     Copy,
     Delete,
     Open,

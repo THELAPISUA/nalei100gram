@@ -65,14 +65,27 @@ impl Backend {
                         id,
                         new_text,
                     } => {
-                        let r = self
-                            .account_manager
-                            .edit_message_text(accaunt_id, chat_id, id, &new_text)
-                            .await;
-                        if r.is_ok() {
-                            db_for_gui
-                                .edit_message(accaunt_id, chat_id, id, &new_text)
+                        info!("Received edit request for chat {}", chat_id);
+                        if chat_id != 0 {
+                            let r = self
+                                .account_manager
+                                .edit_message_text(accaunt_id, chat_id, id, &new_text)
                                 .await;
+                            match r {
+                                Ok(_) => {
+                                    db_for_gui
+                                        .edit_message(accaunt_id, chat_id, id, &new_text)
+                                        .await;
+                                }
+                                Err(e) => {
+                                    info!(
+                                        "Cannot to edit massage id:{}, chat_id:{}, accaunt_id:{} Error:{}",
+                                        id, chat_id, accaunt_id, e
+                                    )
+                                }
+                            }
+                        } else {
+                            db_for_gui.edit_message(-1, chat_id, id, &new_text).await;
                         }
                     }
                     ActionPacket::Delete {
@@ -80,12 +93,16 @@ impl Backend {
                         chat_id,
                         account_id,
                     } => {
-                        let r = self
-                            .account_manager
-                            .delete_message(account_id, chat_id, id)
-                            .await;
-                        if r.is_ok() {
-                            db_for_gui.delete_message(account_id, chat_id, id).await;
+                        if chat_id != 0 {
+                            let r = self
+                                .account_manager
+                                .delete_message(account_id, chat_id, id)
+                                .await;
+                            if r.is_ok() {
+                                db_for_gui.delete_message(account_id, chat_id, id).await;
+                            }
+                        } else {
+                            db_for_gui.delete_message(-1, chat_id, id).await;
                         }
                     }
                     _ => {}

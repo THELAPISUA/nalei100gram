@@ -98,6 +98,12 @@ impl MessageWidget {
                 action = Some(MessageAction::Copy);
                 ui.close();
             }
+            if self.outgoing {
+                if ui.button("Редагувати").clicked() {
+                    action = Some(MessageAction::Edit);
+                    ui.close();
+                }
+            }
 
             if ui.button("Видалити").clicked() {
                 action = Some(MessageAction::Delete);

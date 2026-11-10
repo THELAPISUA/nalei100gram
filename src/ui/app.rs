@@ -1,4 +1,6 @@
 use crate::logic::integrations::types::{ActionPacket, Chat};
+
+use crate::ui::logic::edit_message;
 use crate::ui::settings_widget::SettingsWidget;
 use crate::ui::ui_components::{
     draw_avatar, draw_circle_button, get_img, preview_files_being_dropped,
@@ -9,13 +11,20 @@ use eframe::egui::{
     self, Align, Align2, Color32, CornerRadius, FontId, Frame, Layout, Margin, Sense, Stroke,
     TextEdit, vec2,
 };
-use egui_material_icons::icons::{ICON_SEND, ICON_SETTINGS};
+use egui_material_icons::icons::{
+    ICON_ATTACH_FILE, ICON_CANCEL, ICON_EDIT, ICON_SEND, ICON_SETTINGS,
+};
 
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
 use tokio::sync::mpsc::{Receiver, Sender};
-
+#[derive(PartialEq, Eq, Clone)]
+pub enum Action {
+    Reply,
+    Edit { id: i32, old_text: String },
+    Answer,
+}
 pub struct GramApp {
     pub(crate) tx: Sender<ActionPacket>,
     pub(crate) rx: Receiver<ActionPacket>,
@@ -28,6 +37,7 @@ pub struct GramApp {
     pub(crate) pending_files: Vec<PendingFile>,
     pub(crate) settings_window: SettingsWidget,
     pub(crate) player: Arc<Mutex<AudioPlayer>>,
+    pub(crate) curr_action: Option<Action>,
 }
 
 impl GramApp {
@@ -51,6 +61,7 @@ impl GramApp {
             current_account_id: accounts.clone().first().unwrap().0,
             accounts,
             player,
+            curr_action: None,
         }
     }
 }
@@ -229,7 +240,7 @@ impl eframe::App for GramApp {
                         ui.label(name);
 
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                            if draw_circle_button(ui, true, ICON_SETTINGS).clicked() {
+                            if draw_circle_button(ui, true, ICON_SETTINGS, 20.0).clicked() {
                                 self.settings_window.open = true;
                             }
                         });
@@ -248,17 +259,41 @@ impl eframe::App for GramApp {
                 ui.heading(name)
             });
         });
+
         //ввод сообщений
         egui::Panel::bottom("input_panel")
             .frame(
                 Frame::new()
                     .fill(ui.visuals().panel_fill)
+                    .stroke(Stroke::NONE)
                     .inner_margin(Margin::symmetric(12, 8)),
             )
             .show(ui, |ui| {
-                ui.with_layout(Layout::left_to_right(Align::Center), |ui| {
+                match self.curr_action.clone() {
+                    Some(a) => match a {
+                        Action::Edit { id: _, old_text } => {
+                            ui.horizontal(|ui| {
+                                ui.label(format!(
+                                    "{} Редагування: {}",
+                                    ICON_EDIT.codepoint, old_text
+                                ));
+                                ui.with_layout(Layout::right_to_left(Align::Center), |ui| {
+                                    if draw_circle_button(ui, true, ICON_CANCEL, 15.0).clicked() {
+                                        self.curr_action = None;
+                                        self.input_text.clear();
+                                    }
+                                });
+                            });
+                        }
+                        _ => {}
+                    },
+                    _ => {}
+                }
+
+                ui.horizontal(|ui| {
                     // Поле вводу в заокругленій рамці
-                    let input_w = ui.available_width() - 52.0 - 28.0;
+                    let input_w = ui.available_width() - 52.0 - 28.0 * 2.0 - 10.0;
+
                     let text_input_res = Frame::new()
                         .fill(ui.visuals().extreme_bg_color)
                         .stroke(Stroke::new(
@@ -277,19 +312,50 @@ impl eframe::App for GramApp {
                             )
                         })
                         .inner;
-
+                    let send_doc = draw_circle_button(ui, true, ICON_ATTACH_FILE, 20.0);
+                    if send_doc.clicked() {
+                        self.select_and_send_file();
+                    }
                     let has_text = !self.input_text.trim().is_empty();
-                    let send_res = draw_circle_button(ui, has_text, ICON_SEND);
+                    let send_res = draw_circle_button(ui, has_text, ICON_SEND, 20.0);
                     let send_clicked = send_res.clicked();
                     let enter_pressed = text_input_res.lost_focus()
                         && ui.input(|i| i.key_pressed(egui::Key::Enter));
 
                     if (send_clicked || enter_pressed) && has_text {
-                        self.send_message_packet(self.input_text.clone());
+                        match self.curr_action.clone() {
+                            Some(a) => match a {
+                                Action::Edit { id, old_text: _ } => {
+                                    let _ = self.tx.try_send(ActionPacket::Edit {
+                                        accaunt_id: self.current_account_id,
+                                        chat_id: self.current_chat,
+                                        id,
+                                        new_text: self.input_text.clone(),
+                                    });
+                                    edit_message(
+                                        id,
+                                        self.current_account_id,
+                                        &mut self
+                                            .chats
+                                            .iter_mut()
+                                            .find(|c| c.chat_id == self.current_chat)
+                                            .unwrap(),
+                                        self.input_text.clone(),
+                                    );
+                                    self.input_text.clear();
+                                    self.curr_action = None;
+                                }
+                                _ => {}
+                            },
+                            _ => {
+                                self.send_message_packet(self.input_text.clone());
+                            }
+                        }
                         text_input_res.request_focus();
                     }
                 });
             });
+
         //рендер откритого чата
         self.render_messages(ui);
 

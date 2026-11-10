@@ -326,6 +326,10 @@ impl Db {
         message_id: i32,
         new_text: &str,
     ) {
+        info!(
+            "Editing DB message: account={}, chat={}, id={}, text={}",
+            account_id, chat_id, message_id, new_text
+        );
         match sqlx::query(
             r#"
             UPDATE messages
