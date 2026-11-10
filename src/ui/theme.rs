@@ -1,5 +1,5 @@
 use eframe::{
-    egui::{self, Color32, Context, FontData},
+    egui::{Color32, Context, FontData, FontFamily, FontPriority, InsertFontFamily},
     epaint::text::FontInsert,
 };
 
@@ -36,20 +36,36 @@ impl Default for AppTheme {
 }
 
 pub fn setup_fonts(ctx: &Context) {
-    let font = FontInsert::new(
+    let iosevka = FontInsert::new(
         "Iosevka",
         FontData::from_static(include_bytes!("../../assets/fonts/IosevkaAile-Bold.ttc")).into(),
         vec![
-            egui::epaint::text::InsertFontFamily {
-                family: egui::FontFamily::Proportional,
-                priority: egui::epaint::text::FontPriority::Highest,
+            InsertFontFamily {
+                family: FontFamily::Proportional,
+                priority: FontPriority::Highest,
             },
-            egui::epaint::text::InsertFontFamily {
-                family: egui::FontFamily::Monospace,
-                priority: egui::epaint::text::FontPriority::Lowest,
+            InsertFontFamily {
+                family: FontFamily::Monospace,
+                priority: FontPriority::Lowest,
             },
         ],
     );
 
-    ctx.add_font(font);
+    let emoji = FontInsert::new(
+        "NotoColorEmoji",
+        FontData::from_static(include_bytes!("../../assets/fonts/Noto-COLRv1.ttf")).into(),
+        vec![
+            InsertFontFamily {
+                family: FontFamily::Proportional,
+                priority: FontPriority::Lowest,
+            },
+            InsertFontFamily {
+                family: FontFamily::Monospace,
+                priority: FontPriority::Lowest,
+            },
+        ],
+    );
+
+    ctx.add_font(iosevka);
+    ctx.add_font(emoji);
 }
