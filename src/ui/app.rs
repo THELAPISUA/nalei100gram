@@ -21,9 +21,9 @@ use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc::{Receiver, Sender};
 #[derive(PartialEq, Eq, Clone)]
 pub enum Action {
-    Reply,
+    _Reply,
     Edit { id: i32, old_text: String },
-    Answer,
+    _Answer,
 }
 pub struct GramApp {
     pub(crate) tx: Sender<ActionPacket>,

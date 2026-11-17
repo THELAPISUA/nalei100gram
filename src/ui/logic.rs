@@ -35,8 +35,13 @@ impl GramApp {
         while let Ok(packet) = self.rx.try_recv() {
             match packet {
                 Send(m) => {
+                    let name = if m.chat_name == "" {
+                        m.username.clone()
+                    } else {
+                        m.chat_name.clone()
+                    };
                     let chat_id = m.chat_id;
-                    let chat = self.get_or_create_chat(chat_id, m.username.clone());
+                    let chat = self.get_or_create_chat(chat_id, name);
 
                     chat.unreaded_count += 1;
                     chat.messages.push(m.clone());
@@ -141,7 +146,11 @@ impl GramApp {
                     caption: _,
                 } => String::from("Аудіо"),
                 MessageType::VOICE { path: _ } => String::from("Голосове"),
-                // _ => String::from("Невідомий формат"),
+                MessageType::VIDEO {
+                    path: _,
+                    name: _,
+                    caption: _,
+                } => String::from("Видео"), // _ => String::from("Невідомий формат"),
             },
             None => String::from("Поки нема повідомлень!"),
         }
@@ -161,6 +170,7 @@ impl GramApp {
             readed: true,
             id: self.get_last_id(self.current_chat.clone()) + 1,
             account_id: curr_id,
+            chat_name: self.get_chat_name(),
         };
         if self.tx.try_send(Send(packet.clone())).is_ok() {
             let current_chat = self.current_chat.clone();
@@ -170,6 +180,14 @@ impl GramApp {
 
             self.input_text.clear();
         }
+    }
+    fn get_chat_name(&self) -> String {
+        self.chats
+            .iter()
+            .find(|c| c.chat_id == self.current_account_id)
+            .unwrap()
+            .name
+            .clone()
     }
     pub fn process_file(&mut self, file: PendingFile) {
         //40 мб це ліміт на бота в тг
@@ -182,6 +200,11 @@ impl GramApp {
                 },
                 "png" | "jpg" | "webp" => MessageType::PHOTO {
                     path: file.path.to_string_lossy().to_string(),
+                    caption: None,
+                },
+                "mp4" | "mkv" => MessageType::VIDEO {
+                    path: file.path.to_string_lossy().to_string(),
+                    name: file.name,
                     caption: None,
                 },
                 _ => MessageType::FILE {
@@ -204,6 +227,7 @@ impl GramApp {
                 readed: true,
                 id: self.get_last_id(self.current_chat.clone()) + 1,
                 account_id: curr_id,
+                chat_name: self.get_chat_name(),
             };
             let is_ok = self.tx.try_send(Send(msg.clone())).is_ok();
             if is_ok {

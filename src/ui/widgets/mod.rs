@@ -3,4 +3,5 @@ pub mod file_widget;
 pub mod message_widget;
 pub mod photo_widget;
 pub mod types;
+pub mod video_widget;
 pub mod voice_widget;

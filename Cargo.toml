@@ -1,6 +1,6 @@
 [package]
 name = "nalei100gram"
-version = "0.8.6"
+version = "0.9.0"
 edition = "2024"
 
 [features]
@@ -19,6 +19,7 @@ sqlx = {version="0.9.0",features=["sqlite","runtime-tokio"]}
 
 teloxide = { version = "0.13", features = ["macros"] }
 tokio = { version = "1", features = ["full"] }
+
 
 image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
 
@@ -40,3 +41,4 @@ serde = { version = "1.0", features = ["derive"] }
 async-trait = "0.1.92"
 anyhow = "1.0.104"
 rfd = "0.18.0"
+ffmpeg-sidecar = "2.1"

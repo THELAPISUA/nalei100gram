@@ -36,7 +36,7 @@ impl FileWidget {
     }
 
     fn bubble(&self, ui: &mut egui::Ui) -> Option<MessageAction> {
-        let click_id = egui::Id::new("file_bubble").with(ui.next_auto_id());
+        let click_id = egui::Id::unique("file_bubble").with(ui.next_auto_id());
         let visuals = ui.visuals().clone();
 
         let bubble_color = if self.outgoing {

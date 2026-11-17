@@ -23,6 +23,11 @@ pub enum MessageType {
     VOICE {
         path: String,
     },
+    VIDEO {
+        path: String,
+        name: String,
+        caption: Option<String>,
+    },
 }
 #[derive(Clone)]
 pub struct ReceivedMessage {
@@ -34,6 +39,7 @@ pub struct ReceivedMessage {
     pub readed: bool,
     pub sender_is_you: bool,
     pub account_id: i64,
+    pub chat_name: String,
 }
 
 #[derive(Clone)]

@@ -547,6 +547,7 @@ impl Db {
                         readed: row.is_read,
                         sender_is_you: row.sender_is_you,
                         account_id: row.account_id,
+                        chat_name: name.clone(),
                     })
                     .collect();
 
@@ -588,6 +589,11 @@ fn message_to_row(message_type: &MessageType) -> (i64, String, Option<String>, O
             caption,
         } => (4, path.clone(), Some(name.clone()), caption.clone()),
         MessageType::VOICE { path } => (5, path.clone(), None, None),
+        MessageType::VIDEO {
+            path,
+            name,
+            caption,
+        } => (6, path.clone(), Some(name.clone()), caption.clone()),
     }
 }
 
@@ -610,6 +616,11 @@ fn row_to_message_type(msg_type: i64, text: String, name: String, caption: Strin
             caption: Some(caption),
         },
         5 => MessageType::VOICE { path: text },
+        6 => MessageType::VIDEO {
+            path: text,
+            name: name,
+            caption: Some(caption),
+        },
         _ => MessageType::TEXT { text },
     }
 }

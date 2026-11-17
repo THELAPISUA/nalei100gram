@@ -115,10 +115,15 @@ impl Backend {
             set_max_vol();
             self.player.lock().unwrap().play_msg(SoundType::Message);
             let t = self.tx_bot.send(ActionPacket::Send(packet.clone())).await;
-
+            let name = if packet.chat_name == "" {
+                packet.username.clone()
+            } else {
+                packet.chat_name.clone()
+            };
             self.database
-                .add_chat(packet.account_id, packet.chat_id, &packet.username)
+                .add_chat(packet.account_id, packet.chat_id, &name)
                 .await;
+
             self.database.add_message(&packet).await;
 
             match t {

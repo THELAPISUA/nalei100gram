@@ -56,6 +56,7 @@ impl AccauntIntegration for TelegramBot {
                             readed: true,
                             sender_is_you: false,
                             account_id,
+                            chat_name: get_chat_name(&msg),
                         };
                         let t = tx.send(m).await;
                         match t {
@@ -96,6 +97,7 @@ impl AccauntIntegration for TelegramBot {
                                 readed: true,
                                 id: msg.id.0,
                                 account_id,
+                                chat_name: get_chat_name(&msg),
                             };
                             let _ = tx.send(p.clone()).await;
                         } else {
@@ -131,6 +133,7 @@ impl AccauntIntegration for TelegramBot {
                                 readed: true,
                                 id: msg.id.0,
                                 account_id,
+                                chat_name: get_chat_name(&msg),
                             };
                             let _ = tx.send(p.clone()).await;
                         } else {
@@ -166,6 +169,7 @@ impl AccauntIntegration for TelegramBot {
                             readed: true,
                             id: msg.id.0,
                             account_id,
+                            chat_name: get_chat_name(&msg),
                         };
                         let _ = tx.send(p.clone()).await;
                     } else if let Some(audio) = msg.audio() {
@@ -199,6 +203,7 @@ impl AccauntIntegration for TelegramBot {
                             readed: true,
                             id: msg.id.0,
                             account_id,
+                            chat_name: get_chat_name(&msg),
                         };
                         let _ = tx.send(p.clone()).await;
                     } else if let Some(voice) = msg.voice() {
@@ -227,6 +232,73 @@ impl AccauntIntegration for TelegramBot {
                             readed: true,
                             id: msg.id.0,
                             account_id,
+                            chat_name: get_chat_name(&msg),
+                        };
+                        let _ = tx.send(p.clone()).await;
+                    } else if let Some(video) = msg.video() {
+                        let file_id = &video.file.id;
+                        info!("Успішно знайдено file_id: {}", file_id);
+
+                        let file_info = bot.get_file(file_id.clone()).await?;
+                        let file_format = format!("{}.dat", file_id);
+                        let file_name = video.file_name.clone().unwrap_or(file_format);
+                        let path = format!("data/temp/{}", file_name);
+
+                        let mut destination_file = File::create(path.clone()).await?;
+
+                        bot.download_file(&file_info.path, &mut destination_file)
+                            .await?;
+
+                        let p = ReceivedMessage {
+                            username: get_name(&msg),
+                            chat_id: msg.chat.id.0,
+                            date: msg
+                                .date
+                                .with_timezone(Local::now().offset())
+                                .format("%H:%M")
+                                .to_string(),
+                            t: MessageType::VIDEO {
+                                path,
+                                name: video.file_name.clone().unwrap_or_default(),
+                                caption: Some(msg.caption().unwrap_or_default().to_string()),
+                            },
+                            sender_is_you: false,
+                            readed: true,
+                            id: msg.id.0,
+                            account_id,
+                            chat_name: get_chat_name(&msg),
+                        };
+                        let _ = tx.send(p.clone()).await;
+                    } else if let Some(video) = msg.video_note() {
+                        let file_id = &video.file.id;
+                        info!("Успішно знайдено file_id: {}", file_id);
+
+                        let file_info = bot.get_file(file_id.clone()).await?;
+                        let path = format!("data/temp/{}.mp4", file_id);
+
+                        let mut destination_file = File::create(path.clone()).await?;
+
+                        bot.download_file(&file_info.path, &mut destination_file)
+                            .await?;
+
+                        let p = ReceivedMessage {
+                            username: get_name(&msg),
+                            chat_id: msg.chat.id.0,
+                            date: msg
+                                .date
+                                .with_timezone(Local::now().offset())
+                                .format("%H:%M")
+                                .to_string(),
+                            t: MessageType::VIDEO {
+                                path,
+                                name: String::default(),
+                                caption: Some(msg.caption().unwrap_or_default().to_string()),
+                            },
+                            sender_is_you: false,
+                            readed: true,
+                            id: msg.id.0,
+                            account_id,
+                            chat_name: get_chat_name(&msg),
                         };
                         let _ = tx.send(p.clone()).await;
                     }
@@ -408,4 +480,7 @@ fn make_circle(image: &mut image::RgbaImage) {
 }
 fn get_name(msg: &Message) -> String {
     msg.from.as_ref().map(|u| u.full_name()).unwrap_or_default()
+}
+fn get_chat_name(msg: &Message) -> String {
+    msg.chat.title().unwrap_or_default().to_string()
 }

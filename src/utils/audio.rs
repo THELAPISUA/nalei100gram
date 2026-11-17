@@ -76,12 +76,14 @@ impl AudioPlayer {
             SoundType::Send => self.sound_send,
             SoundType::Message => self.sound_message,
         };
+        self.player_msg.clear();
 
         let cursor = Cursor::new(bytes);
 
         match Decoder::new(cursor) {
             Ok(source) => {
                 self.player_msg.append(source);
+                self.player_msg.play();
             }
             Err(err) => {
                 error!("Помилка декодування вбудованого аудіо: {:?}", err);

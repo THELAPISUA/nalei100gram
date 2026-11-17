@@ -8,6 +8,7 @@ use crate::ui::widgets::file_widget::FileWidget;
 use crate::ui::widgets::message_widget::MessageWidget;
 use crate::ui::widgets::photo_widget::PhotoWidget;
 use crate::ui::widgets::types::{MessageAction, VoiceAction};
+use crate::ui::widgets::video_widget::VideoWidget;
 use crate::ui::widgets::voice_widget::VoiceWidget;
 use crate::utils::audio::AudioPlayer;
 
@@ -19,6 +20,9 @@ use eframe::egui::{self, Align2, Color32, FontId, Pos2, Rect, Sense, vec2};
 
 use egui_material_icons::MaterialIcon;
 use egui_material_icons::icons::ICON_BOOKMARK;
+use ffmpeg_sidecar::command::FfmpegCommand;
+use ffmpeg_sidecar::event::FfmpegEvent;
+use ffmpeg_sidecar::metadata::FfmpegMetadata;
 use image::ImageReader;
 
 use std::collections::HashMap;
@@ -322,16 +326,37 @@ fn process_message(
             if playing {
                 ui.ctx().request_repaint_after(Duration::from_millis(50));
             }
-        } // _ => {
-          //     let widget = MessageWidget {
-          //         username: msg.username.clone(),
-          //         text: format!("Ошибка рендера неизвестний тип"),
-          //         time: msg.date.clone(),
-          //         outgoing: msg.sender_is_you,
-          //     };
+        }
+        MessageType::VIDEO {
+            ref path,
+            ref name,
+            ref caption,
+        } => {
+            let widget = VideoWidget {
+                username: msg.username.clone(),
+                texture: get_first_frame(ui.ctx(), &path, photos),
+                time: msg.date.clone(),
+                outgoing: msg.sender_is_you,
+                caption: caption.clone(),
+                title: name.clone(),
+            };
 
-          //     widget.show(ui);
-          // }
+            if let Some(action) = widget.show(ui) {
+                match action {
+                    MessageAction::Open => {
+                        let _ = open::that(path);
+                    }
+                    MessageAction::Delete => {
+                        return Some(ActionPacket::Delete {
+                            id: msg.id,
+                            account_id,
+                            chat_id: msg.chat_id,
+                        });
+                    }
+                    _ => return None,
+                }
+            }
+        }
     }
 
     None
@@ -362,7 +387,10 @@ pub(crate) fn preview_files_being_dropped(ctx: &egui::Context) {
         }
         text
     });
-    let painter = ctx.layer_painter(LayerId::new(Order::Foreground, Id::new("file_drop_target")));
+    let painter = ctx.layer_painter(LayerId::new(
+        Order::Foreground,
+        Id::unique("file_drop_target"),
+    ));
     let rect = ctx.content_rect();
     if fit_into {
         painter.rect_filled(rect, 0.0, Color32::from_black_alpha(192));
@@ -383,6 +411,62 @@ pub(crate) fn preview_files_being_dropped(ctx: &egui::Context) {
             Color32::RED,
         );
     }
+}
+
+fn get_video_duration(path: &str) -> Result<f64, Box<dyn std::error::Error>> {
+    let mut metadata = FfmpegMetadata::new();
+
+    let iter = FfmpegCommand::new().input(path).spawn()?.iter()?;
+
+    for event in iter {
+        metadata.handle_event(&Some(event))?;
+
+        if metadata.is_completed() {
+            break;
+        }
+    }
+
+    metadata
+        .duration()
+        .ok_or_else(|| "Duration unavailable".into())
+}
+pub fn get_first_frame(
+    ctx: &egui::Context,
+    p: &String,
+    photos: &mut HashMap<String, egui::TextureHandle>,
+) -> egui::TextureHandle {
+    if let Some(existing) = photos.get(p) {
+        return existing.clone();
+    }
+
+    let timestamp = get_video_duration(p).unwrap_or(0.1) * 0.3;
+    let timestamp = format!("{:.3}", timestamp);
+
+    let iter = FfmpegCommand::new()
+        .input(p)
+        .args(["-ss", &timestamp, "-frames:v", "1"])
+        .rawvideo()
+        .spawn()
+        .unwrap()
+        .iter()
+        .unwrap();
+
+    for event in iter {
+        if let FfmpegEvent::OutputFrame(frame) = event {
+            let image = egui::ColorImage::from_rgb(
+                [frame.width as usize, frame.height as usize],
+                &frame.data,
+            );
+
+            let texture = ctx.load_texture(p, image, egui::TextureOptions::LINEAR);
+
+            photos.insert(p.clone(), texture.clone());
+
+            return texture;
+        }
+    }
+
+    panic!("Не вдалося отримати перший кадр із відео: {}", p);
 }
 pub fn get_img(
     ctx: &egui::Context,

@@ -36,7 +36,7 @@ impl SettingsWidget {
             open: false,
             active_tab: SettingsTab::General,
             theme: AppTheme::Dark,
-            selected_theme: 0,
+            selected_theme: settings.selected_theme,
             settings,
         }
     }
@@ -116,10 +116,8 @@ impl SettingsWidget {
         let previous_theme = self.theme;
 
         for (index, (name, _theme)) in THEMES.iter().enumerate() {
-            if ui
-                .radio_value(&mut self.selected_theme, index, *name)
-                .changed()
-            {
+            let radio_buttons_response = ui.radio_value(&mut self.selected_theme, index, *name);
+            if radio_buttons_response.changed() {
                 let theme = &THEMES[self.selected_theme].1;
                 apply_theme(ctx, theme);
                 self.settings.selected_theme = self.selected_theme;

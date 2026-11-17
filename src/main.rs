@@ -42,6 +42,7 @@ fn main() {
     std::panic::set_hook(Box::new(|info| {
         log::error!("PANIC: {info}");
     }));
+    let _ = ffmpeg_sidecar::download::auto_download();
 
     info!("App started!");
 
