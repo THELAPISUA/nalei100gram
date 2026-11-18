@@ -5,57 +5,55 @@ on:
   push:
     tags:
       - 'build'
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   build-linux:
-    name: Build Linux x86_64
+    name: Build Linux
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install dependencies
+      - name: Install system dependencies
         run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-         build-essential \
-         pkg-config \
-         libasound2-dev \
-         libpulse-dev \
-         libxkbcommon-dev \
-         libwayland-dev \
-         libx11-dev \
-         libxdo-dev \
-         libdbus-1-dev \
-         libfontconfig1-dev \
-         libgtk-3-dev \
-         libayatana-appindicator3-dev \
-         librsvg2-dev
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            pkg-config \
+            libasound2-dev \
+            libpulse-dev \
+            libxkbcommon-dev \
+            libwayland-dev \
+            libx11-dev \
+            libxdo-dev \
+            libdbus-1-dev \
+            libfontconfig1-dev \
+            libgtk-3-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache
+      - name: Rust cache
         uses: Swatinem/rust-cache@v2
 
       - name: Build
-        run: cargo build --release
+        run: cargo build --release --features linux-tray
 
       - name: Package
         run: |
           mkdir -p release
           cp target/release/nalei100gram release/
-
           if [ -d assets ]; then
             cp -r assets release/
           fi
-
-          tar -czf Nalei100Gram-linux-x86_64.tar.gz \
-            -C release .
+          tar -czf Nalei100Gram-linux-x86_64.tar.gz -C release .
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -64,7 +62,7 @@ jobs:
           path: Nalei100Gram-linux-x86_64.tar.gz
 
   build-windows:
-    name: Build Windows x86_64
+    name: Build Windows
     runs-on: windows-latest
 
     steps:
@@ -74,26 +72,21 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Cache
+      - name: Rust cache
         uses: Swatinem/rust-cache@v2
 
       - name: Build
-        run: cargo build --release
+        run: cargo build --release --features windows-tray
 
       - name: Package
         shell: pwsh
         run: |
-          New-Item -ItemType Directory -Force release
-
+          New-Item -ItemType Directory -Force -Path release
           Copy-Item target/release/nalei100gram.exe release/
-
           if (Test-Path assets) {
             Copy-Item assets release/ -Recurse
           }
-
-          Compress-Archive `
-            -Path release/* `
-            -DestinationPath Nalei100Gram-windows-x86_64.zip
+          Compress-Archive -Path release/* -DestinationPath Nalei100Gram-windows-x86_64.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -102,7 +95,7 @@ jobs:
           path: Nalei100Gram-windows-x86_64.zip
 
   release:
-    name: Publish GitHub Release
+    name: Publish Release
     needs:
       - build-linux
       - build-windows
@@ -116,7 +109,7 @@ jobs:
           path: release-assets
           merge-multiple: true
 
-      - name: Create GitHub Release
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           name: Nalei100Gram Build
