@@ -4,6 +4,8 @@ use crate::logic::integrations::types::ActionPacket;
 use crate::logic::{db::Db, integrations::types::ReceivedMessage};
 
 use crate::logic::logic::process_packet_message;
+#[cfg(not(debug_assertions))]
+use crate::utils::audio::set_max_vol;
 use crate::utils::audio::{AudioPlayer, SoundType};
 
 use log::info;

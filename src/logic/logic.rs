@@ -3,8 +3,9 @@ use std::sync::{Arc, Mutex};
 use crate::logic::db::Db;
 use crate::logic::integrations::manager::manager::AccountManager;
 use crate::logic::integrations::types::{MessageType::*, ReceivedMessage};
+#[cfg(not(debug_assertions))]
+use crate::utils::audio::set_max_vol;
 use crate::utils::audio::{AudioPlayer, SoundType};
-
 use log::{error, info};
 
 pub(crate) async fn process_packet_message(

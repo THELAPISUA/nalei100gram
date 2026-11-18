@@ -1,3 +1,4 @@
+use eframe::egui;
 use log::info;
 
 use tray_icon::{
@@ -36,7 +37,6 @@ pub fn init_tray(ctx: eframe::egui::Context) -> TrayIcon {
     let hide_id = hide.id().as_ref().to_owned();
     let exit_id = exit.id().as_ref().to_owned();
 
-    menu.append(&open).unwrap();
     menu.append(&hide).unwrap();
     menu.append(&exit).unwrap();
 
@@ -110,7 +110,7 @@ fn handle_command(ctx: &eframe::egui::Context, command: TrayCommand) {
         TrayCommand::Exit => {
             info!("Exiting application");
 
-            ctx.send_viewport_cmd(ViewportCommand::Visible(false));
+            ctx.send_viewport_cmd(egui::ViewportCommand::Close);
         }
     }
 

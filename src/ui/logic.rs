@@ -77,11 +77,8 @@ impl GramApp {
         });
 
         if close_requested {
-            #[cfg(target_os = "windows")]
-            {
-                ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
-                ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
-            }
+            ctx.send_viewport_cmd(egui::ViewportCommand::CancelClose);
+            ctx.send_viewport_cmd(egui::ViewportCommand::Visible(false));
         }
     }
     pub(crate) fn collect_dropped_files(&mut self, ctx: &egui::Context) {

@@ -1,6 +1,6 @@
 [package]
 name = "nalei100gram"
-version = "0.9.0"
+version = "0.9.1-b"
 edition = "2024"
 
 [features]

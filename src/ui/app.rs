@@ -12,10 +12,11 @@ use eframe::egui::{
     TextEdit, vec2,
 };
 use egui_material_icons::icons::{
-    ICON_ATTACH_FILE, ICON_CANCEL, ICON_EDIT, ICON_SEND, ICON_SETTINGS,
+    ICON_ATTACH_FILE, ICON_CANCEL, ICON_EDIT, ICON_EMOJI_EMOTIONS, ICON_SEND, ICON_SETTINGS,
 };
 
 use std::collections::HashMap;
+
 use std::sync::{Arc, Mutex};
 
 use tokio::sync::mpsc::{Receiver, Sender};
@@ -291,6 +292,58 @@ impl eframe::App for GramApp {
                 }
 
                 ui.horizontal(|ui| {
+                    let response = ui.button(ICON_EMOJI_EMOTIONS);
+
+                    egui::Popup::from_toggle_button_response(&response)
+                        .close_behavior(egui::PopupCloseBehavior::CloseOnClickOutside)
+                        .show(|ui| {
+                            let cols = 7;
+                            let start_code: u32 = 9728;
+                            let end_code: u32 = 129791;
+                            let total_symbols = (end_code - start_code) as usize;
+                            let total_rows = total_symbols.div_ceil(cols);
+
+                            let row_height = 24.0;
+                            let spacing_y = 4.0;
+
+                            egui::ScrollArea::vertical()
+                                .id_salt("unicode_symbols_scroll")
+                                .show_rows(ui, row_height, total_rows, |ui, row_range| {
+                                    egui::Grid::new("symbol_grid_7xN")
+                                        .num_columns(cols)
+                                        .min_col_width(32.0)
+                                        .spacing([4.0, spacing_y])
+                                        .striped(true)
+                                        .show(ui, |ui| {
+                                            for row_idx in row_range {
+                                                for col_idx in 0..cols {
+                                                    let offset = (row_idx * cols + col_idx) as u32;
+                                                    let code = start_code + offset;
+
+                                                    if code < end_code {
+                                                        let ch =
+                                                            char::from_u32(code).unwrap_or(' ');
+
+                                                        if ui
+                                                            .add_sized(
+                                                                [28.0, row_height],
+                                                                egui::Button::new(ch.to_string()),
+                                                            )
+                                                            .clicked()
+                                                        {
+                                                            self.input_text.push(ch);
+                                                        }
+                                                    }
+                                                }
+                                                ui.end_row();
+                                            }
+                                        });
+                                });
+
+                            ui.set_min_width(150.0);
+                            ui.set_max_height(400.0);
+                        });
+
                     // Поле вводу в заокругленій рамці
                     let input_w = ui.available_width() - 52.0 - 28.0 * 2.0 - 10.0;
 
