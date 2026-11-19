@@ -25,17 +25,26 @@ jobs:
           sudo apt-get install -y \
             build-essential \
             pkg-config \
+            libssl-dev \
+            libsqlite3-dev \
             libasound2-dev \
             libpulse-dev \
             libxkbcommon-dev \
+            libxkbcommon-x11-dev \
             libwayland-dev \
             libx11-dev \
             libxdo-dev \
+            libxrandr-dev \
+            libxcursor-dev \
+            libxi-dev \
+            libxinerama-dev \
             libdbus-1-dev \
             libfontconfig1-dev \
             libgtk-3-dev \
             libayatana-appindicator3-dev \
-            librsvg2-dev
+            librsvg2-dev \
+            libgl1-mesa-dev \
+            libegl1-mesa-dev
 
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
@@ -44,7 +53,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Build
-        run: cargo build --release --features linux-tray
+        run: cargo build --locked --release --features linux-tray
 
       - name: Package
         run: |
@@ -76,7 +85,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Build
-        run: cargo build --release --features windows-tray
+        run: cargo build --locked --release --features windows-tray
 
       - name: Package
         shell: pwsh
@@ -112,7 +121,7 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          name: Nalei100Gram Build
+          name: Nalei100Gram 0.9.1-b
           tag_name: build
           prerelease: true
           generate_release_notes: true
